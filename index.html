@@ -1,0 +1,4352 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
+        <title>GDG Flight Simulator</title>
+        <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+        <link
+            href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --ui-scale: 1;
+            }
+
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: #000;
+                font-family: "Roboto Mono", monospace;
+                color: #e0e0e0;
+                cursor: none;
+                touch-action: none;
+            }
+            #cesiumContainer {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            /* ===== HUD ===== */
+            #hud {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 100;
+            }
+
+            /* Top bar */
+            #hud-top {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 8px 20px;
+                background: linear-gradient(
+                    180deg,
+                    rgba(0, 0, 0, 0.5) 0%,
+                    transparent 100%
+                );
+                transform: scale(var(--ui-scale));
+                transform-origin: top center;
+            }
+            .hud-title {
+                font-family: "Orbitron", sans-serif;
+                font-size: 14px;
+                color: #66fcf1;
+                letter-spacing: 4px;
+            }
+
+            /* Heading compass tape */
+            #compass-tape-container {
+                position: absolute;
+                top: 35px;
+                left: 50%;
+                transform: translateX(-50%) scale(var(--ui-scale));
+                transform-origin: top center;
+                width: 320px;
+                height: 40px;
+                overflow: hidden;
+                border: 1px solid rgba(102, 252, 241, 0.3);
+                background: rgba(0, 0, 0, 0.4);
+            }
+            #compass-tape {
+                position: absolute;
+                top: 0;
+                height: 100%;
+                white-space: nowrap;
+                transition: left 0.08s linear;
+            }
+            .compass-tick {
+                display: inline-block;
+                width: 32px;
+                text-align: center;
+                font-size: 10px;
+                color: rgba(102, 252, 241, 0.7);
+                font-family: "Orbitron", sans-serif;
+                border-left: 1px solid rgba(102, 252, 241, 0.2);
+                height: 100%;
+                line-height: 38px;
+            }
+            .compass-tick.major {
+                color: #66fcf1;
+                font-size: 12px;
+                border-left: 2px solid rgba(102, 252, 241, 0.5);
+            }
+            #compass-pointer {
+                position: absolute;
+                top: -6px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 0;
+                border-left: 6px solid transparent;
+                border-right: 6px solid transparent;
+                border-top: 8px solid #66fcf1;
+            }
+            #compass-hdg-readout {
+                position: absolute;
+                bottom: -20px;
+                left: 50%;
+                transform: translateX(-50%) scale(var(--ui-scale));
+                transform-origin: top center;
+                font-family: "Orbitron", sans-serif;
+                font-size: 16px;
+                color: #fff;
+                text-shadow: 0 0 10px rgba(102, 252, 241, 0.6);
+            }
+
+            /* Speed & Alt tapes */
+            .tape-box {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%) scale(var(--ui-scale));
+                width: 90px;
+                text-align: center;
+            }
+            #speed-tape {
+                left: 25px;
+                transform-origin: center left;
+            }
+            #alt-tape {
+                right: 25px;
+                transform-origin: center right;
+            }
+            .tape-label {
+                font-size: 9px;
+                color: #66fcf1;
+                margin-bottom: 2px;
+                letter-spacing: 2px;
+            }
+            .tape-value {
+                font-family: "Orbitron", sans-serif;
+                font-size: 30px;
+                color: #fff;
+                text-shadow: 0 0 12px rgba(102, 252, 241, 0.6);
+                line-height: 1;
+            }
+            .tape-unit {
+                font-size: 9px;
+                color: #666;
+                margin-top: 2px;
+            }
+            .tape-sub {
+                font-size: 11px;
+                color: #888;
+                margin-top: 6px;
+            }
+
+            /* Artificial Horizon */
+            #artificial-horizon {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(calc(0.6 * var(--ui-scale)));
+                width: 280px;
+                height: 280px;
+            }
+            #ah-container {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                overflow: hidden;
+                position: relative;
+                border: 2px solid rgba(102, 252, 241, 0.25);
+                box-shadow: 0 0 20px rgba(102, 252, 241, 0.1);
+            }
+            #ah-pitch-roll {
+                position: absolute;
+                width: 600px;
+                height: 1200px;
+                left: 50%;
+                top: 50%;
+                transform-origin: center center;
+            }
+            #ah-sky {
+                width: 100%;
+                height: 50%;
+                background: linear-gradient(180deg, #0a2a5e 0%, #2a6dbd 100%);
+            }
+            #ah-ground {
+                width: 100%;
+                height: 50%;
+                background: linear-gradient(180deg, #7a4a1a 0%, #4a2a0a 100%);
+            }
+            #ah-horizon-line {
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 2px;
+                background: #fff;
+            }
+            .pitch-mark {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                height: 1px;
+                background: rgba(255, 255, 255, 0.5);
+            }
+            .pitch-mark-label {
+                position: absolute;
+                color: rgba(255, 255, 255, 0.5);
+                font-size: 8px;
+                font-family: "Roboto Mono", monospace;
+            }
+            /* Wings reference */
+            #ah-wings {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 10;
+            }
+
+            /* Flight Path Vector (velocity vector) */
+            #fpv {
+                position: absolute;
+                z-index: 110;
+                width: 24px;
+                height: 24px;
+                pointer-events: none;
+                transform: scale(var(--ui-scale));
+                transition:
+                    top 0.1s linear,
+                    left 0.1s linear;
+            }
+
+            /* Throttle bar */
+            #throttle-display {
+                position: absolute;
+                bottom: 90px;
+                left: 25px;
+                width: 18px;
+                height: 140px;
+                border: 1px solid rgba(102, 252, 241, 0.3);
+                background: rgba(0, 0, 0, 0.4);
+                transform: scale(var(--ui-scale));
+                transform-origin: bottom left;
+            }
+            #throttle-fill {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(180deg, #66fcf1, #1a6b66);
+                transition: height 0.08s;
+            }
+            #throttle-label {
+                position: absolute;
+                bottom: -16px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 8px;
+                color: #66fcf1;
+                white-space: nowrap;
+            }
+            #throttle-pct {
+                position: absolute;
+                top: -16px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 10px;
+                color: #fff;
+                white-space: nowrap;
+                font-family: "Orbitron", sans-serif;
+            }
+
+            /* VSI, G-force */
+            .info-box {
+                position: absolute;
+                text-align: center;
+                width: 70px;
+                transform: scale(var(--ui-scale));
+            }
+            #vsi-display {
+                bottom: 90px;
+                right: 25px;
+                transform-origin: bottom right;
+            }
+            #gforce-display {
+                bottom: 90px;
+                right: 110px;
+                transform-origin: bottom right;
+            }
+            #agl-display {
+                bottom: 200px;
+                right: 25px;
+                transform-origin: bottom right;
+            }
+
+            /* Status indicators */
+            #status-indicators {
+                position: absolute;
+                bottom: 90px;
+                left: 55px;
+                font-size: 10px;
+                transform: scale(var(--ui-scale));
+                transform-origin: bottom left;
+            }
+            .status-item {
+                margin-bottom: 3px;
+                padding: 2px 8px;
+                border-left: 3px solid #333;
+            }
+            .status-item.active {
+                border-color: #66fcf1;
+                color: #66fcf1;
+            }
+            .status-item.warning {
+                border-color: #fce38a;
+                color: #fce38a;
+            }
+            .status-item.danger {
+                border-color: #f38181;
+                color: #f38181;
+            }
+
+            /* Stall warning */
+            #stall-warning {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, calc(170px * var(--ui-scale))) scale(var(--ui-scale));
+                font-family: "Orbitron", sans-serif;
+                font-size: 22px;
+                color: #f38181;
+                text-shadow: 0 0 20px rgba(243, 129, 129, 0.8);
+                display: none;
+                animation: blink 0.4s infinite;
+            }
+            /* GPWS warning */
+            #gpws-warning {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, calc(200px * var(--ui-scale))) scale(var(--ui-scale));
+                font-family: "Orbitron", sans-serif;
+                font-size: 18px;
+                color: #fce38a;
+                text-shadow: 0 0 15px rgba(252, 227, 138, 0.8);
+                display: none;
+                animation: blink 0.6s infinite;
+            }
+            @keyframes blink {
+                50% {
+                    opacity: 0;
+                }
+            }
+
+            /* Landing score */
+            #landing-score {
+                position: absolute;
+                top: 40%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(var(--ui-scale));
+                font-family: "Orbitron", sans-serif;
+                text-align: center;
+                display: none;
+                z-index: 120;
+            }
+            #landing-score .grade {
+                font-size: 48px;
+                margin-bottom: 8px;
+            }
+            #landing-score .details {
+                font-size: 12px;
+                color: #aaa;
+            }
+
+            /* Speed lines canvas */
+            #speed-lines {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 95;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+
+            /* Minimap */
+            #minimap {
+                position: absolute;
+                bottom: 90px;
+                left: 50%;
+                transform: translateX(-50%) scale(var(--ui-scale));
+                transform-origin: bottom center;
+                width: 100px;
+                height: 100px;
+                border: 1px solid rgba(102, 252, 241, 0.25);
+                border-radius: 50%;
+                background: rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+            }
+            .compass-letter {
+                position: absolute;
+                font-size: 7px;
+                color: rgba(102, 252, 241, 0.5);
+                font-family: "Orbitron", sans-serif;
+            }
+            #minimap-arrow {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-bottom: 10px solid #66fcf1;
+            }
+            /* Trail dots on minimap */
+            .trail-dot {
+                position: absolute;
+                width: 2px;
+                height: 2px;
+                background: rgba(102, 252, 241, 0.4);
+                border-radius: 50%;
+            }
+
+            /* Bottom bar */
+            #hud-bottom {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+                flex-wrap: wrap;
+                padding: 8px 20px;
+                background: linear-gradient(
+                    0deg,
+                    rgba(0, 0, 0, 0.5) 0%,
+                    transparent 100%
+                );
+                font-size: 9px;
+                color: #666;
+                transform: scale(var(--ui-scale));
+                transform-origin: bottom center;
+            }
+            .control-hint {
+                display: flex;
+                align-items: center;
+                gap: 3px;
+            }
+            .key-badge {
+                background: rgba(102, 252, 241, 0.15);
+                border: 1px solid rgba(102, 252, 241, 0.3);
+                padding: 1px 5px;
+                border-radius: 2px;
+                color: #66fcf1;
+                font-size: 8px;
+            }
+
+            /* ===== MEMORY PROFILER ===== */
+            #mem-profiler {
+                position: absolute;
+                top: 70px;
+                left: 25px;
+                width: 180px;
+                background: rgba(0, 0, 0, 0.7);
+                border: 1px solid rgba(102, 252, 241, 0.3);
+                padding: 10px;
+                font-size: 9px;
+                pointer-events: none;
+                display: none;
+                transform: scale(var(--ui-scale));
+                transform-origin: top left;
+            }
+            .prof-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+            .prof-bar-bg {
+                width: 100%;
+                height: 4px;
+                background: #222;
+                margin-top: 2px;
+            }
+            #heap-bar {
+                height: 100%;
+                width: 0%;
+                background: #66fcf1;
+                transition: width 0.3s;
+            }
+            #sse-bar {
+                height: 100%;
+                width: 0%;
+                background: #fce38a;
+                transition: width 0.1s;
+            }
+            .prof-label {
+                color: #888;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            .prof-val {
+                color: #66fcf1;
+                font-family: "Orbitron";
+            }
+
+            /* FPS/Pos */
+            #debug-info {
+                position: absolute;
+                top: 35px;
+                left: 25px;
+                font-size: 9px;
+                color: #555;
+                line-height: 1.6;
+                transform: scale(var(--ui-scale));
+                transform-origin: top left;
+            }
+
+            /* Camera mode indicator */
+            #camera-mode {
+                position: absolute;
+                top: 8px;
+                right: 20px;
+                font-size: 10px;
+                color: #45a29e;
+                font-family: "Orbitron", sans-serif;
+                transform: scale(var(--ui-scale));
+                transform-origin: top right;
+            }
+
+            /* ===== START SCREEN ===== */
+            #start-screen {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: radial-gradient(
+                    circle at center,
+                    #0f172a 0%,
+                    #000 100%
+                );
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 200;
+                pointer-events: all;
+                cursor: default;
+            }
+            #start-screen::before {
+                content: " ";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background:
+                    linear-gradient(
+                        rgba(18, 16, 16, 0) 50%,
+                        rgba(0, 0, 0, 0.25) 50%
+                    ),
+                    linear-gradient(
+                        90deg,
+                        rgba(255, 0, 0, 0.06),
+                        rgba(0, 255, 0, 0.02),
+                        rgba(0, 0, 255, 0.06)
+                    );
+                background-size:
+                    100% 2px,
+                    3px 100%;
+                pointer-events: none;
+            }
+            #start-screen h1 {
+                font-family: "Orbitron", sans-serif;
+                font-size: 58px;
+                color: #66fcf1;
+                margin-bottom: 2px;
+                letter-spacing: 12px;
+                text-shadow: 0 0 30px rgba(102, 252, 241, 0.6);
+                text-align: center;
+            }
+            #start-screen .workshop-tag {
+                background: #66fcf1;
+                color: #000;
+                font-weight: 900;
+                padding: 2px 10px;
+                font-size: 14px;
+                letter-spacing: 4px;
+                margin-bottom: 15px;
+                font-family: "Orbitron";
+            }
+            #start-screen .subtitle {
+                font-size: 14px;
+                color: #45a29e;
+                margin-bottom: 5px;
+                letter-spacing: 3px;
+                text-transform: uppercase;
+            }
+            #start-screen .event-date {
+                font-size: 16px;
+                color: #fff;
+                margin-bottom: 35px;
+                letter-spacing: 5px;
+                font-family: "Orbitron";
+                border-top: 1px solid #45a29e;
+                padding-top: 10px;
+            }
+
+            /* AI Preset Buttons */
+            .preset-container {
+                display: flex;
+                gap: 5px;
+                margin-top: 8px;
+                flex-wrap: wrap;
+            }
+            .preset-btn {
+                flex: 1;
+                font-size: 8px;
+                padding: 4px;
+                background: #1a2a3a;
+                color: #66fcf1;
+                border: 1px solid #333;
+                cursor: pointer;
+                font-family: "Roboto Mono";
+                transition: all 0.2s;
+            }
+            .preset-btn:hover {
+                background: #45a29e;
+                color: #000;
+            }
+
+            /* Notification Toast */
+            #memory-toast {
+                position: absolute;
+                top: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(243, 129, 129, 0.9);
+                color: #000;
+                padding: 5px 15px;
+                font-family: "Orbitron";
+                font-size: 10px;
+                font-weight: bold;
+                border-radius: 4px;
+                display: none;
+                z-index: 1000;
+                box-shadow: 0 0 20px rgba(243, 129, 129, 0.4);
+            }
+            .location-btn {
+                width: 340px;
+                padding: 14px 20px;
+                background: rgba(31, 40, 51, 0.7);
+                border: 1px solid #2a3a4a;
+                color: #66fcf1;
+                font-family: "Roboto Mono", monospace;
+                font-size: 12px;
+                cursor: pointer;
+                margin-bottom: 6px;
+                text-align: left;
+                transition: all 0.2s;
+                pointer-events: all;
+                position: relative;
+                overflow: hidden;
+            }
+            .location-btn::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(102, 252, 241, 0.05),
+                    transparent
+                );
+                transition: left 0.4s;
+            }
+            .location-btn:hover::before {
+                left: 100%;
+            }
+            .location-btn:hover {
+                border-color: #45a29e;
+                background: rgba(69, 162, 158, 0.15);
+                box-shadow: 0 0 20px rgba(102, 252, 241, 0.15);
+            }
+            .location-btn .loc-name {
+                font-family: "Orbitron", sans-serif;
+                font-size: 13px;
+                display: block;
+                margin-bottom: 3px;
+            }
+            .location-btn .loc-desc {
+                font-size: 9px;
+                color: #666;
+            }
+            #start-screen .controls-preview {
+                margin-top: 25px;
+                font-size: 10px;
+                color: #444;
+                text-align: center;
+                line-height: 2;
+            }
+            #start-screen .controls-preview span {
+                color: #45a29e;
+            }
+            .loading-text {
+                font-size: 11px;
+                color: #45a29e;
+                margin-bottom: 20px;
+                animation: pulse 1.5s infinite;
+            }
+            @keyframes pulse {
+                50% {
+                    opacity: 0.5;
+                }
+            }
+
+            /* ===== PAUSE ===== */
+            #pause-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 200;
+                pointer-events: all;
+            }
+            #pause-overlay h2 {
+                font-family: "Orbitron", sans-serif;
+                font-size: 36px;
+                color: #66fcf1;
+                margin-bottom: 15px;
+            }
+            #pause-overlay .resume-hint {
+                font-size: 13px;
+                color: #888;
+            }
+
+            /* ===== CRASH ===== */
+            #crash-screen {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(60, 0, 0, 0.85);
+                display: none;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 200;
+                pointer-events: all;
+                cursor: default;
+            }
+            #crash-screen h2 {
+                font-family: "Orbitron", sans-serif;
+                font-size: 42px;
+                color: #f38181;
+                margin-bottom: 15px;
+                text-shadow: 0 0 30px rgba(243, 129, 129, 0.5);
+            }
+            .restart-btn {
+                padding: 12px 30px;
+                background: rgba(243, 129, 129, 0.15);
+                border: 1px solid #f38181;
+                color: #f38181;
+                font-family: "Roboto Mono", monospace;
+                font-size: 13px;
+                cursor: pointer;
+                pointer-events: all;
+                transition: all 0.2s;
+            }
+            .restart-btn:hover {
+                background: rgba(243, 129, 129, 0.3);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="cesiumContainer"></div>
+        <canvas id="speed-lines"></canvas>
+
+        <!-- HUD -->
+        <div id="hud" style="display: none">
+            <div id="hud-top">
+                <span class="hud-title">INFINITE FLIGHT</span>
+            </div>
+
+            <!-- Camera mode -->
+            <div id="camera-mode">COCKPIT</div>
+            <div
+                id="dummy-indicator"
+                style="
+                    position: absolute;
+                    top: 8px;
+                    left: 20px;
+                    font-size: 10px;
+                    color: #fce38a;
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                    display: none;
+                "
+            >
+                DUMMY MODE
+            </div>
+
+            <!-- Compass tape -->
+            <div id="compass-tape-container">
+                <div id="compass-tape"></div>
+                <div id="compass-pointer"></div>
+            </div>
+            <div id="compass-hdg-readout">360</div>
+
+            <!-- Speed tape -->
+            <div class="tape-box" id="speed-tape">
+                <div class="tape-label">KIAS</div>
+                <div class="tape-value" id="speed-val">0</div>
+                <div class="tape-unit">knots</div>
+                <div class="tape-sub" id="mach-val">M 0.00</div>
+            </div>
+
+            <!-- Altitude tape -->
+            <div class="tape-box" id="alt-tape">
+                <div class="tape-label">ALT MSL</div>
+                <div class="tape-value" id="alt-val">0</div>
+                <div class="tape-unit">feet</div>
+                <div class="tape-sub" id="alt-agl">AGL ---</div>
+            </div>
+
+            <!-- Artificial Horizon -->
+            <div id="artificial-horizon">
+                <div id="ah-container">
+                    <div id="ah-pitch-roll">
+                        <div id="ah-sky"></div>
+                        <div id="ah-ground"></div>
+                        <div id="ah-horizon-line"></div>
+                    </div>
+                </div>
+                <div id="ah-wings">
+                    <svg width="160" height="30" viewBox="0 0 160 30">
+                        <line
+                            x1="0"
+                            y1="15"
+                            x2="60"
+                            y2="15"
+                            stroke="#66fcf1"
+                            stroke-width="2.5"
+                        />
+                        <line
+                            x1="100"
+                            y1="15"
+                            x2="160"
+                            y2="15"
+                            stroke="#66fcf1"
+                            stroke-width="2.5"
+                        />
+                        <circle
+                            cx="80"
+                            cy="15"
+                            r="4"
+                            fill="none"
+                            stroke="#66fcf1"
+                            stroke-width="2"
+                        />
+                        <line
+                            x1="60"
+                            y1="15"
+                            x2="60"
+                            y2="22"
+                            stroke="#66fcf1"
+                            stroke-width="2"
+                        />
+                        <line
+                            x1="100"
+                            y1="15"
+                            x2="100"
+                            y2="22"
+                            stroke="#66fcf1"
+                            stroke-width="2"
+                        />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Flight Path Vector -->
+            <div id="fpv">
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="5"
+                        fill="none"
+                        stroke="#0f0"
+                        stroke-width="1.5"
+                    />
+                    <line
+                        x1="0"
+                        y1="12"
+                        x2="6"
+                        y2="12"
+                        stroke="#0f0"
+                        stroke-width="1.5"
+                    />
+                    <line
+                        x1="18"
+                        y1="12"
+                        x2="24"
+                        y2="12"
+                        stroke="#0f0"
+                        stroke-width="1.5"
+                    />
+                    <line
+                        x1="12"
+                        y1="6"
+                        x2="12"
+                        y2="0"
+                        stroke="#0f0"
+                        stroke-width="1.5"
+                    />
+                </svg>
+            </div>
+
+            <!-- Warnings -->
+            <div id="stall-warning">STALL</div>
+            <div id="gpws-warning">TERRAIN - PULL UP</div>
+
+            <!-- Landing score -->
+            <div id="landing-score">
+                <div class="grade" id="landing-grade"></div>
+                <div class="details" id="landing-details"></div>
+            </div>
+
+            <!-- Throttle -->
+            <div id="throttle-display">
+                <div id="throttle-pct">0%</div>
+                <div id="throttle-fill" style="height: 0%"></div>
+                <div id="throttle-label">THR</div>
+            </div>
+
+            <!-- Info boxes -->
+            <div class="info-box" id="vsi-display">
+                <div class="tape-label">V/S</div>
+                <div class="tape-value" id="vsi-val" style="font-size: 16px">
+                    0
+                </div>
+                <div class="tape-unit">ft/min</div>
+            </div>
+            <div class="info-box" id="gforce-display">
+                <div class="tape-label">G</div>
+                <div class="tape-value" id="gforce-val" style="font-size: 16px">
+                    1.0
+                </div>
+            </div>
+            <div class="info-box" id="agl-display">
+                <div class="tape-label">RAD ALT</div>
+                <div class="tape-value" id="agl-val" style="font-size: 16px">
+                    ---
+                </div>
+                <div class="tape-unit">ft AGL</div>
+            </div>
+
+            <!-- Status -->
+            <div id="status-indicators">
+                <div class="status-item active" id="gear-status">GEAR DN</div>
+                <div class="status-item" id="flaps-status">FLAPS 0</div>
+                <div class="status-item" id="brake-status">BRK OFF</div>
+                <div class="status-item" id="spoiler-status">SPD BRK</div>
+            </div>
+
+            <!-- Cyber Radio HUD -->
+            <div
+                id="radio-controls"
+                style="
+                    position: absolute;
+                    top: 25px;
+                    right: 25px;
+                    pointer-events: auto;
+                    background: linear-gradient(135deg, #1c1c28, #2a2a35);
+                    padding: 12px;
+                    border-radius: 6px;
+                    border: 2px solid #555;
+                    border-top: 2px solid #777;
+                    border-left: 2px solid #777;
+                    width: 200px;
+                    box-shadow:
+                        inset 0 0 10px rgba(0, 0, 0, 0.8),
+                        2px 2px 5px rgba(0, 0, 0, 0.5);
+                    transform: scale(var(--ui-scale));
+                    transform-origin: top right;
+                "
+            >
+                <div
+                    style="
+                        font-size: 10px;
+                        color: #aaa;
+                        margin-bottom: 6px;
+                        font-family: &quot;Orbitron&quot;;
+                        font-weight: bold;
+                        text-shadow: -1px -1px 0 #000;
+                    "
+                >
+                    COM RADIO
+                </div>
+                <div
+                    style="
+                        background: #0a0e05;
+                        border: 2px solid #111;
+                        border-bottom: 2px solid #333;
+                        border-right: 2px solid #333;
+                        padding: 6px;
+                        margin-bottom: 10px;
+                        border-radius: 4px;
+                        box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.9);
+                    "
+                >
+                    <div
+                        style="
+                            font-size: 8px;
+                            color: #4a5c39;
+                            font-family: &quot;Orbitron&quot;;
+                            margin-bottom: 2px;
+                        "
+                    >
+                        FREQ
+                        <span
+                            id="radio-status"
+                            style="float: right; color: #4a5c39"
+                            >STBY</span
+                        >
+                    </div>
+                    <div
+                        style="
+                            font-size: 18px;
+                            color: #8bc34a;
+                            font-family: &quot;Roboto Mono&quot;, monospace;
+                            font-weight: bold;
+                            letter-spacing: 2px;
+                            text-shadow: 0 0 5px rgba(139, 195, 74, 0.6);
+                        "
+                    >
+                        42.1 QKSD
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button
+                        onclick="toggleRadio()"
+                        id="radio-btn"
+                        style="
+                            flex: 1;
+                            background: linear-gradient(180deg, #444, #222);
+                            color: #ddd;
+                            border: 1px solid #111;
+                            border-top: 1px solid #666;
+                            padding: 8px;
+                            cursor: pointer;
+                            font-family: &quot;Orbitron&quot;;
+                            font-size: 10px;
+                            font-weight: bold;
+                            border-radius: 3px;
+                            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+                            transition: all 0.1s;
+                        "
+                    >
+                        TUNE IN
+                    </button>
+                    <button
+                        onclick="triggerLocate()"
+                        id="locate-btn"
+                        style="
+                            flex: 1;
+                            background: linear-gradient(180deg, #113355, #001122);
+                            color: #66fcf1;
+                            border: 1px solid #111;
+                            border-top: 1px solid #336699;
+                            padding: 8px;
+                            cursor: pointer;
+                            font-family: &quot;Orbitron&quot;;
+                            font-size: 10px;
+                            font-weight: bold;
+                            border-radius: 3px;
+                            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+                            transition: all 0.1s;
+                        "
+                    >
+                        WHERE AM I?
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Terraformer HUD -->
+            <div
+                id="ai-controls"
+                style="
+                    position: absolute;
+                    bottom: 200px;
+                    left: 25px;
+                    pointer-events: auto;
+                    background: rgba(0, 0, 0, 0.6);
+                    padding: 15px;
+                    border-radius: 8px;
+                    border: 1px solid #45a29e;
+                    width: 200px;
+                "
+            >
+                <div
+                    style="
+                        font-size: 10px;
+                        color: #66fcf1;
+                        margin-bottom: 8px;
+                        font-family: &quot;Orbitron&quot;;
+                    "
+                >
+                    AI TERRAFORMER
+                </div>
+                <input
+                    type="text"
+                    id="ai-prompt"
+                    placeholder="e.g. Cyberpunk city"
+                    style="
+                        width: 100%;
+                        background: #111;
+                        border: 1px solid #333;
+                        color: #fff;
+                        font-family: &quot;Roboto Mono&quot;;
+                        font-size: 11px;
+                        padding: 5px;
+                        box-sizing: border-box;
+                        margin-bottom: 8px;
+                    "
+                />
+                <div
+                    style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 8px;
+                        font-size: 8px;
+                        color: #aaa;
+                        font-family: &quot;Roboto Mono&quot;;
+                    "
+                >
+                    <div
+                        style="
+                            width: 31%;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 2px;
+                        "
+                    >
+                        <label>BLDGS</label>
+                        <input
+                            type="number"
+                            id="terra-bldgs"
+                            value="50"
+                            style="
+                                width: 100%;
+                                background: #111;
+                                border: 1px solid #333;
+                                color: #fff;
+                                padding: 3px;
+                                font-size: 9px;
+                                text-align: right;
+                                box-sizing: border-box;
+                            "
+                        />
+                    </div>
+                    <div
+                        style="
+                            width: 31%;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 2px;
+                        "
+                    >
+                        <label>RADIUS (m)</label>
+                        <input
+                            type="number"
+                            id="terra-radius"
+                            value="2000"
+                            style="
+                                width: 100%;
+                                background: #111;
+                                border: 1px solid #333;
+                                color: #fff;
+                                padding: 3px;
+                                font-size: 9px;
+                                text-align: right;
+                                box-sizing: border-box;
+                            "
+                        />
+                    </div>
+                    <div
+                        style="
+                            width: 31%;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 2px;
+                        "
+                    >
+                        <label>DIST (km)</label>
+                        <input
+                            type="number"
+                            id="terra-dist"
+                            value="10"
+                            style="
+                                width: 100%;
+                                background: #111;
+                                border: 1px solid #333;
+                                color: #fff;
+                                padding: 3px;
+                                font-size: 9px;
+                                text-align: right;
+                                box-sizing: border-box;
+                            "
+                        />
+                    </div>
+                </div>
+                <button
+                    onclick="triggerTerraform()"
+                    id="terra-btn"
+                    style="
+                        width: 100%;
+                        background: #45a29e;
+                        color: #000;
+                        border: none;
+                        padding: 8px;
+                        cursor: pointer;
+                        font-family: &quot;Orbitron&quot;;
+                        font-size: 10px;
+                        font-weight: bold;
+                    "
+                >
+                    TRANSFORM AREA
+                </button>
+                <div class="preset-container">
+                    <button
+                        class="preset-btn"
+                        onclick="document.getElementById('ai-prompt').value='Cyberpunk City'; spawnProceduralCity('cyberpunk')"
+                    >
+                        CYBERPUNK
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick="document.getElementById('ai-prompt').value='Mars Colony'; spawnProceduralCity('mars')"
+                    >
+                        MARS
+                    </button>
+                    <button
+                        class="preset-btn"
+                        onclick="document.getElementById('ai-prompt').value='Lost Atlantis'; spawnProceduralCity('atlantis')"
+                    >
+                        ATLANTIS
+                    </button>
+                </div>
+                <div
+                    id="terra-status"
+                    style="
+                        font-size: 8px;
+                        color: #888;
+                        margin-top: 5px;
+                        display: none;
+                    "
+                >
+                    PROCESSING...
+                </div>
+            </div>
+
+            <!-- Memory Eviction Notification -->
+            <div id="memory-toast">
+                INFINITE LOOP: EVICTING OLD PATCH TO SAVE HEAP
+            </div>
+
+            <!-- Hyper Drive Overlay -->
+            <div
+                id="hyper-overlay"
+                style="
+                    display: none;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: 90;
+                "
+            >
+                <div
+                    style="
+                        position: absolute;
+                        top: 15%;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        font-family: &quot;Orbitron&quot;, sans-serif;
+                        font-size: 52px;
+                        color: #ff00ff;
+                        text-shadow:
+                            0 0 20px #ff00ff,
+                            0 0 40px #ff00ff;
+                        letter-spacing: 20px;
+                        font-weight: 900;
+                        animation: blink 0.15s infinite;
+                    "
+                >
+                    HYPERDRIVE
+                </div>
+
+                <!-- Target Reticle 1 -->
+                <div
+                    style="
+                        position: absolute;
+                        top: 35%;
+                        left: 25%;
+                        width: 180px;
+                        height: 180px;
+                        border: 2px solid #00ffff;
+                        box-shadow: 0 0 15px #00ffff;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    "
+                >
+                    <div
+                        style="
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-top: 4px solid #00ffff;
+                            border-left: 4px solid #00ffff;
+                            top: -6px;
+                            left: -6px;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-bottom: 4px solid #00ffff;
+                            border-right: 4px solid #00ffff;
+                            bottom: -6px;
+                            right: -6px;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-top: 4px solid #00ffff;
+                            border-right: 4px solid #00ffff;
+                            top: -6px;
+                            right: -6px;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-bottom: 4px solid #00ffff;
+                            border-left: 4px solid #00ffff;
+                            bottom: -6px;
+                            left: -6px;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            color: #00ffff;
+                            font-family: &quot;Roboto Mono&quot;;
+                            font-size: 12px;
+                            position: absolute;
+                            bottom: -25px;
+                            letter-spacing: 2px;
+                        "
+                    >
+                        TRGT LOCK [0xA4F]
+                    </div>
+                    <div
+                        style="
+                            position: absolute;
+                            width: 100%;
+                            height: 1px;
+                            background: rgba(0, 255, 255, 0.5);
+                        "
+                    ></div>
+                    <div
+                        style="
+                            position: absolute;
+                            width: 1px;
+                            height: 100%;
+                            background: rgba(0, 255, 255, 0.5);
+                        "
+                    ></div>
+                </div>
+
+                <!-- Target Reticle 2 -->
+                <div
+                    style="
+                        position: absolute;
+                        top: 40%;
+                        right: 20%;
+                        width: 250px;
+                        height: 250px;
+                        border: 2px dashed #ff00ff;
+                        border-radius: 50%;
+                        box-shadow: 0 0 15px rgba(255, 0, 255, 0.6);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        animation: spin 8s linear infinite;
+                    "
+                >
+                    <div
+                        style="
+                            width: 15px;
+                            height: 15px;
+                            background: #ff00ff;
+                            border-radius: 50%;
+                            box-shadow: 0 0 15px #ff00ff;
+                            position: absolute;
+                            top: 10px;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            width: 15px;
+                            height: 15px;
+                            background: #ff00ff;
+                            border-radius: 50%;
+                            box-shadow: 0 0 15px #ff00ff;
+                            position: absolute;
+                            bottom: 10px;
+                        "
+                    ></div>
+                </div>
+                <div
+                    style="
+                        position: absolute;
+                        top: 40%;
+                        right: 20%;
+                        transform: translate(50px, 130px);
+                        color: #ff00ff;
+                        font-family: &quot;Roboto Mono&quot;;
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-shadow: 0 0 5px #ff00ff;
+                    "
+                >
+                    SCANNING SECTOR 7G...<br />ANOMALY DETECTED
+                </div>
+
+                <!-- Speed/Heat warnings -->
+                <div
+                    style="
+                        position: absolute;
+                        bottom: 180px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        color: #ffff00;
+                        font-family: &quot;Orbitron&quot;;
+                        font-size: 26px;
+                        text-shadow: 0 0 15px #ffff00;
+                        letter-spacing: 4px;
+                        border: 2px solid #ffff00;
+                        padding: 10px 30px;
+                        background: rgba(255, 255, 0, 0.1);
+                    "
+                >
+                    WARNING: HULL TEMP CRITICAL
+                </div>
+
+                <style>
+                    @keyframes spin {
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+                </style>
+            </div>
+
+            <!-- Minimap -->
+            <div id="minimap">
+                <div
+                    class="compass-letter"
+                    style="top: 3px; left: 50%; transform: translateX(-50%)"
+                >
+                    N
+                </div>
+                <div
+                    class="compass-letter"
+                    style="bottom: 3px; left: 50%; transform: translateX(-50%)"
+                >
+                    S
+                </div>
+                <div
+                    class="compass-letter"
+                    style="top: 50%; left: 5px; transform: translateY(-50%)"
+                >
+                    W
+                </div>
+                <div
+                    class="compass-letter"
+                    style="top: 50%; right: 5px; transform: translateY(-50%)"
+                >
+                    E
+                </div>
+                <div id="minimap-trail"></div>
+                <div id="minimap-arrow"></div>
+            </div>
+
+            <!-- Debug -->
+            <div id="debug-info">
+                <span id="fps-val">60</span> FPS |
+                <span id="pos-val">0.0000, 0.0000</span><br />
+                <span style="color: #66fcf1">V8 HEAP:</span>
+                <span id="mem-val">---</span> MB
+            </div>
+
+            <!-- Memory Profiler -->
+            <div id="mem-profiler" style="display: block">
+                <div class="prof-row">
+                    <span class="prof-label">JS Heap Usage</span>
+                    <span class="prof-val" id="prof-heap-text">0 MB</span>
+                </div>
+                <div class="prof-bar-bg"><div id="heap-bar"></div></div>
+
+                <div class="prof-row" style="margin-top: 8px">
+                    <span class="prof-label">Tileset SSE</span>
+                    <span class="prof-val" id="prof-sse-text">32</span>
+                </div>
+                <div class="prof-bar-bg"><div id="sse-bar"></div></div>
+
+                <div class="prof-row" style="margin-top: 8px">
+                    <span class="prof-label">AI Patch Queue</span>
+                    <span class="prof-val" id="prof-patches-text">0/3</span>
+                </div>
+                <div style="display: flex; gap: 2px; margin-top: 2px">
+                    <div
+                        id="p-slot-0"
+                        style="flex: 1; height: 4px; background: #222"
+                    ></div>
+                    <div
+                        id="p-slot-1"
+                        style="flex: 1; height: 4px; background: #222"
+                    ></div>
+                    <div
+                        id="p-slot-2"
+                        style="flex: 1; height: 4px; background: #222"
+                    ></div>
+                </div>
+            </div>
+
+            <!-- Controls help -->
+            <div id="hud-bottom">
+                <div class="control-hint">
+                    <span class="key-badge">W/S</span> Pitch
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">A/D</span> Roll
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">Q/E</span> Yaw
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">+/-</span> Throttle
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">G</span> Gear
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">F</span> Flaps
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">B</span> Brake
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">P</span> Pause
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">V</span> View
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">H</span> Hyper
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">M</span> Hover
+                </div>
+                <div class="control-hint">
+                    <span class="key-badge">R</span> Reset
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: scale(var(--ui-scale)); transform-origin: center;">
+            <div class="workshop-tag">BUILD WITH AI</div>
+            <h1>INFINITE FLIGHT</h1>
+            <div class="subtitle">GOOGLE DEVELOPER GROUP // SUNNYVALE</div>
+            <div class="event-date">APRIL 02, 2026</div>
+            <div class="loading-text" id="loading-text">
+                LOADING 3D WORLD...
+            </div>
+
+            <style>
+                .radar-map-wrapper {
+                    position: relative;
+                    width: 660px;
+                    height: 380px;
+                    margin-top: 10px;
+                    border: 1px solid rgba(102, 252, 241, 0.3);
+                    border-radius: 8px;
+                    box-shadow: inset 0 0 40px rgba(102, 252, 241, 0.1), 0 0 20px rgba(0, 0, 0, 0.5);
+                    background: rgba(10, 14, 23, 0.8);
+                    overflow: hidden;
+                    pointer-events: auto;
+                    cursor: grab;
+                }
+
+                .radar-map-wrapper:active {
+                    cursor: grabbing;
+                }
+
+                .radar-map-wrapper::before {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background: radial-gradient(circle at center, rgba(102, 252, 241, 0.15) 0%, transparent 70%);
+                    pointer-events: none;
+                    z-index: 1;
+                }
+
+                .radar-map {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    top: 0;
+                    left: 0;
+                    transform-origin: top left;
+                }
+
+                .radar-grid {
+                    position: absolute;
+                    width: 400%;
+                    height: 400%;
+                    top: -150%;
+                    left: -150%;
+                    background: repeating-linear-gradient(rgba(102, 252, 241, 0.05) 0, rgba(102, 252, 241, 0.05) 1px, transparent 1px, transparent 40px),
+                                repeating-linear-gradient(90deg, rgba(102, 252, 241, 0.05) 0, rgba(102, 252, 241, 0.05) 1px, transparent 1px, transparent 40px);
+                    pointer-events: none;
+                }
+
+                /* Abstract polygon representing North America */
+                .radar-continent {
+                    position: absolute;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M2,35 Q10,20 30,18 T60,20 T95,15 Q90,30 90,50 T65,80 T40,95 Q30,70 15,55 T2,35' fill='none' stroke='rgba(102, 252, 241, 0.15)' stroke-width='0.5' stroke-dasharray='1,2'/%3E%3C/svg%3E");
+                    background-size: 100% 100%;
+                    opacity: 0.8;
+                    pointer-events: none;
+                }
+
+                .map-pin {
+                    position: absolute;
+                    width: 12px;
+                    height: 12px;
+                    background: #66fcf1;
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    cursor: pointer;
+                    transition: background 0.2s, box-shadow 0.2s, z-index 0.2s; /* Don't transition transform here so panning is smooth */
+                    box-shadow: 0 0 15px #66fcf1, 0 0 30px #66fcf1;
+                    z-index: 10;
+                }
+
+                .map-pin::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 100%;
+                    height: 100%;
+                    background: transparent;
+                    border: 1px solid #66fcf1;
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: radar-ping 2s infinite;
+                }
+
+                @keyframes radar-ping {
+                    0% { width: 100%; height: 100%; opacity: 1; }
+                    100% { width: 400%; height: 400%; opacity: 0; }
+                }
+
+                .map-pin:hover {
+                    background: #fff;
+                    box-shadow: 0 0 20px #fff, 0 0 40px #fff;
+                    z-index: 20;
+                }
+
+                .map-pin .pin-label {
+                    position: absolute;
+                    top: 18px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #66fcf1;
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 11px;
+                    font-weight: 700;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    opacity: 0.8;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+                    transition: all 0.2s;
+                }
+
+                .map-pin:hover .pin-label {
+                    opacity: 1;
+                    color: #fff;
+                    top: 22px;
+                    font-size: 13px;
+                    text-shadow: 0 0 10px #66fcf1;
+                }
+
+                .pin-desc {
+                    position: absolute;
+                    top: 38px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #aaa;
+                    font-family: 'Roboto Mono', monospace;
+                    font-size: 9px;
+                    white-space: nowrap;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.2s;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+                }
+
+                .map-pin:hover .pin-desc {
+                    opacity: 1;
+                }
+
+                .map-controls {
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    z-index: 30;
+                }
+
+                .map-btn {
+                    background: rgba(31, 40, 51, 0.8);
+                    border: 1px solid rgba(102, 252, 241, 0.5);
+                    color: #66fcf1;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 4px;
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 16px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                }
+
+                .map-btn:hover {
+                    background: rgba(102, 252, 241, 0.2);
+                    color: #fff;
+                    box-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+                }
+            </style>
+
+            <div class="radar-map-wrapper" id="map-wrapper">
+                <div class="radar-map" id="radar-map">
+                    <div class="radar-grid"></div>
+                    <div class="radar-continent"></div>
+                    <!-- X = (lon - (-126)) / 60 * 100; Y = (50 - lat) / 35 * 100 -->
+                    <div class="map-pin" style="left: 6.6%; top: 36.1%;" onclick="startFlight('sunnyvale')" title="Sunnyvale, CA">
+                        <div class="pin-label">SUNNYVALE</div>
+                        <div class="pin-desc">Googleplex Corridor</div>
+                    </div>
+                    <div class="map-pin" style="left: 5.9%; top: 34.8%;" onclick="startFlight('sf')" title="San Francisco">
+                        <div class="pin-label">SF</div>
+                        <div class="pin-desc">Golden Gate Bridge</div>
+                    </div>
+                    <div class="map-pin" style="left: 12.7%; top: 45.3%;" onclick="startFlight('la')" title="Los Angeles">
+                        <div class="pin-label">LA</div>
+                        <div class="pin-desc">Studio City Hills</div>
+                    </div>
+                    <div class="map-pin" style="left: 18.1%; top: 39.5%;" onclick="startFlight('vegas')" title="Las Vegas">
+                        <div class="pin-label">VEGAS</div>
+                        <div class="pin-desc">The Strip</div>
+                    </div>
+                    <div class="map-pin" style="left: 23.1%; top: 39.8%;" onclick="startFlight('grand_canyon')" title="Grand Canyon">
+                        <div class="pin-label">GRAND CANYON</div>
+                        <div class="pin-desc">Canyon Run</div>
+                    </div>
+                    <div class="map-pin" style="left: 44.7%; top: 87.4%;" onclick="startFlight('mexico_city')" title="Mexico City">
+                        <div class="pin-label">MEXICO CITY</div>
+                        <div class="pin-desc">Paseo de la Reforma</div>
+                    </div>
+                    <div class="map-pin" style="left: 86.7%; top: 26.5%;" onclick="startFlight('nyc')" title="New York City">
+                        <div class="pin-label">NYC</div>
+                        <div class="pin-desc">Manhattan Skyline</div>
+                    </div>
+                    <div class="map-pin" style="left: 91.6%; top: 21.8%;" onclick="startFlight('boston')" title="Boston">
+                        <div class="pin-label">BOSTON</div>
+                        <div class="pin-desc">Charles River</div>
+                    </div>
+                </div>
+                <div class="map-controls">
+                    <button class="map-btn" onclick="zoomMap(1.5)">+</button>
+                    <button class="map-btn" onclick="zoomMap(0.666)">-</button>
+                    <button class="map-btn" onclick="resetMap()">⟲</button>
+                </div>
+            </div>
+
+            <script>
+                const mapWrapper = document.getElementById('map-wrapper');
+                const radarMap = document.getElementById('radar-map');
+                
+                let mapScale = 1;
+                let mapPanX = 0;
+                let mapPanY = 0;
+                let isDraggingMap = false;
+                let startDragX = 0;
+                let startDragY = 0;
+
+                function updateMapTransform() {
+                    radarMap.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapScale})`;
+                    // Inverse scale pins so they don't get huge
+                    document.querySelectorAll('.map-pin').forEach(pin => {
+                        pin.style.transform = `translate(-50%, -50%) scale(${1 / mapScale})`;
+                        if (pin.matches(':hover')) {
+                            pin.style.transform = `translate(-50%, -50%) scale(${1.5 / mapScale})`;
+                        }
+                    });
+                }
+
+                function zoomMap(factor, e = null) {
+                    const oldScale = mapScale;
+                    mapScale *= factor;
+                    mapScale = Math.max(1, Math.min(mapScale, 5)); // Limit zoom between 1x and 5x
+                    
+                    const actualFactor = mapScale / oldScale;
+
+                    if (e) {
+                        const rect = mapWrapper.getBoundingClientRect();
+                        const mouseX = e.clientX - rect.left;
+                        const mouseY = e.clientY - rect.top;
+
+                        mapPanX = mouseX - (mouseX - mapPanX) * actualFactor;
+                        mapPanY = mouseY - (mouseY - mapPanY) * actualFactor;
+                    } else {
+                        // Zoom to center if no event provided (e.g. buttons)
+                        const rect = mapWrapper.getBoundingClientRect();
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        mapPanX = centerX - (centerX - mapPanX) * actualFactor;
+                        mapPanY = centerY - (centerY - mapPanY) * actualFactor;
+                    }
+                    
+                    // Adjust pan to zoom towards center
+                    if (mapScale === 1) {
+                        mapPanX = 0;
+                        mapPanY = 0;
+                    }
+                    
+                    updateMapTransform();
+                }
+
+                function resetMap() {
+                    mapScale = 1;
+                    mapPanX = 0;
+                    mapPanY = 0;
+                    updateMapTransform();
+                }
+
+                mapWrapper.addEventListener('mousedown', (e) => {
+                    // Don't drag if clicking a pin or button
+                    if (e.target.closest('.map-pin') || e.target.closest('.map-btn')) return;
+                    isDraggingMap = true;
+                    startDragX = e.clientX - mapPanX;
+                    startDragY = e.clientY - mapPanY;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDraggingMap) return;
+                    mapPanX = e.clientX - startDragX;
+                    mapPanY = e.clientY - startDragY;
+                    updateMapTransform();
+                });
+
+                window.addEventListener('mouseup', () => {
+                    isDraggingMap = false;
+                });
+
+                mapWrapper.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (e.deltaY < 0) {
+                        zoomMap(1.1, e);
+                    } else {
+                        zoomMap(0.9, e);
+                    }
+                }, { passive: false });
+
+                // Fix hover scaling for pins when zoomed
+                document.querySelectorAll('.map-pin').forEach(pin => {
+                    pin.addEventListener('mouseenter', () => {
+                        pin.style.transform = `translate(-50%, -50%) scale(${1.5 / mapScale})`;
+                    });
+                    pin.addEventListener('mouseleave', () => {
+                        pin.style.transform = `translate(-50%, -50%) scale(${1 / mapScale})`;
+                    });
+                });
+            </script>
+
+            <label
+                style="
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 20px;
+                    cursor: pointer;
+                    pointer-events: all;
+                    color: #45a29e;
+                    font-size: 12px;
+                "
+            >
+                <input
+                    type="checkbox"
+                    id="dummy-mode"
+                    style="
+                        accent-color: #66fcf1;
+                        width: 16px;
+                        height: 16px;
+                        cursor: pointer;
+                    "
+                />
+                DUMMY MODE
+                <span style="color: #666; font-size: 10px"
+                    >(can't crash - minimum altitude enforced)</span
+                >
+            </label>
+
+            <div class="controls-preview">
+                <span>W/S</span> Pitch &nbsp; <span>A/D</span> Roll &nbsp;
+                <span>Q/E</span> Yaw &nbsp; <span>+/-</span> Throttle<br />
+                <span>G</span> Gear &nbsp; <span>F</span> Flaps &nbsp;
+                <span>B</span> Brake &nbsp; <span>V</span> Camera &nbsp;
+                <span>M</span> Hover &nbsp; <span>R</span> Reset Flight
+            </div>
+            </div>
+        </div>
+
+        <!-- Pause -->
+        <div id="pause-overlay">
+            <h2>PAUSED</h2>
+            <div class="resume-hint">
+                Press <span style="color: #66fcf1">P</span> to resume
+            </div>
+        </div>
+
+        <!-- Crash -->
+        <div id="crash-screen">
+            <h2>CRASH</h2>
+            <div
+                style="color: #aaa; margin-bottom: 20px; font-size: 13px"
+                id="crash-info"
+            ></div>
+            <button class="restart-btn" onclick="showStartScreen()">
+                FLY AGAIN
+            </button>
+        </div>
+
+        <script>
+            // ================================================================
+            // UI SCALING (Responsive to Browser Zoom & Screen Size)
+            // ================================================================
+            function updateUIScale() {
+                let scale = window.innerWidth / 1920;
+                if (scale < 0.4) scale = 0.4;
+                if (scale > 5.0) scale = 5.0;
+                document.documentElement.style.setProperty("--ui-scale", scale);
+            }
+            window.addEventListener("resize", updateUIScale);
+            updateUIScale();
+
+            // ================================================================
+            // GDG FLIGHT SIMULATOR v3.0 - Full Physics + 3D Aircraft + GPWS
+            // ================================================================
+
+            const GOOGLE_API_KEY = "{{ google_maps_api_key }}";
+
+            let viewer, tileset;
+
+            // ---- Aircraft State ----
+            const ac = {
+                lon: 0,
+                lat: 0,
+                alt: 300,
+                speed: 60,
+                vz: 0,
+                heading: 0,
+                pitch: 0,
+                roll: 0,
+                throttle: 0.5,
+                flaps: 0,
+                gearDown: true,
+                brakeOn: false,
+                spoilers: false,
+                pitchRate: 0,
+                rollRate: 0,
+                yawRate: 0,
+                isStalling: false,
+                gForce: 1.0,
+                groundLevel: 0,
+                agl: 300,
+                onGround: false,
+                // Physics constants
+                mass: 2800,
+                wingArea: 16,
+                maxThrust: 14000,
+                dragCoeff: 0.028,
+                liftCoeffBase: 0.4,
+                maxSpeed: 160,
+                stallSpeed: 25,
+                hyperDrive: false,
+                droneMode: false,
+            };
+
+            // ---- Sim State ----
+            const keys = {};
+            let paused = false,
+                crashed = false,
+                simStarted = false;
+            let cameraMode = 0; // 0=cockpit, 1=chase, 2=external, 3=flyby
+            let lastFrameTime = null;
+            let flightTime = 0;
+            let dummyMode = false;
+
+            // ---- Chase Camera Smoothing ----
+            let smoothCamLon = 0,
+                smoothCamLat = 0,
+                smoothCamAlt = 0;
+
+            // ---- Aircraft 3D Entity ----
+            let aircraftEntity = null;
+            let trailPositions = [];
+            let trailEntity = null;
+
+            // ---- Minimap Trail ----
+            let minimapTrail = [];
+
+            // ---- GPWS State ----
+            let gpwsActive = false;
+            let gpwsLastCallout = 0;
+
+            // ---- Landing ----
+            let landingVS = 0;
+            let justLanded = false;
+            let landingScoreTimeout = null;
+
+            // ---- Speed Lines Canvas ----
+            let speedLinesCtx = null;
+
+            // ---- Locations ----
+            const LOCATIONS = {
+                sunnyvale: {
+                    lon: -122.02985,
+                    lat: 37.37656,
+                    alt: 300,
+                    heading: 315,
+                    tod: 14,
+                },
+                sf: {
+                    lon: -122.4786,
+                    lat: 37.8199,
+                    alt: 500,
+                    heading: 180,
+                    tod: 10,
+                },
+                nyc: {
+                    lon: -74.006,
+                    lat: 40.7128,
+                    alt: 600,
+                    heading: 45,
+                    tod: 12,
+                },
+                vegas: {
+                    lon: -115.1398,
+                    lat: 36.1699,
+                    alt: 450,
+                    heading: 0,
+                    tod: 21,
+                },
+                grand_canyon: {
+                    lon: -112.1129,
+                    lat: 36.0544,
+                    alt: 800,
+                    heading: 90,
+                    tod: 9,
+                },
+                la: {
+                    lon: -118.3965,
+                    lat: 34.1489,
+                    alt: 500,
+                    heading: 120,
+                    tod: 16,
+                },
+                boston: {
+                    lon: -71.07,
+                    lat: 42.355,
+                    alt: 400,
+                    heading: 45,
+                    tod: 11,
+                },
+                mexico_city: {
+                    lon: -99.167,
+                    lat: 19.427,
+                    alt: 600,
+                    heading: 200,
+                    tod: 14,
+                },
+            };
+
+            // ================================================================
+            // COMPASS TAPE - Build once
+            // ================================================================
+            function buildCompassTape() {
+                const tape = document.getElementById("compass-tape");
+                // Build 720 degrees worth of ticks (wrapping)
+                const labels = {
+                    0: "N",
+                    45: "NE",
+                    90: "E",
+                    135: "SE",
+                    180: "S",
+                    225: "SW",
+                    270: "W",
+                    315: "NW",
+                };
+                let html = "";
+                for (let deg = -180; deg <= 540; deg += 10) {
+                    const normDeg = ((deg % 360) + 360) % 360;
+                    const isMajor = normDeg % 30 === 0;
+                    const label = labels[normDeg] || (isMajor ? normDeg : "|");
+                    html += `<span class="compass-tick${isMajor ? " major" : ""}">${label}</span>`;
+                }
+                tape.innerHTML = html;
+            }
+
+            function updateCompassTape(headingDeg) {
+                const tape = document.getElementById("compass-tape");
+                // Each tick = 32px, 10 degrees. Container = 320px, center = 160px
+                const pixPerDeg = 32 / 10;
+                const offset = -(headingDeg + 180) * pixPerDeg + 160;
+                tape.style.left = offset + "px";
+                document.getElementById("compass-hdg-readout").textContent =
+                    String(
+                        Math.round(((headingDeg % 360) + 360) % 360) || 360,
+                    ).padStart(3, "0");
+            }
+
+            // ================================================================
+            // PITCH LADDER - Build dynamically in AH
+            // ================================================================
+            function buildPitchLadder() {
+                const pr = document.getElementById("ah-pitch-roll");
+                const pixPerDeg = 4;
+                for (let deg = -60; deg <= 60; deg += 5) {
+                    if (deg === 0) continue;
+                    const y =
+                        50 -
+                        ((deg * pixPerDeg) / (pr.offsetHeight || 1200)) * 100;
+                    const w = Math.abs(deg) % 10 === 0 ? 80 : 40;
+                    const mark = document.createElement("div");
+                    mark.className = "pitch-mark";
+                    mark.style.width = w + "px";
+                    mark.style.top = `calc(50% - ${deg * pixPerDeg}px)`;
+                    if (Math.abs(deg) % 10 === 0) {
+                        // Dashed for negative
+                        if (deg < 0)
+                            mark.style.borderTop =
+                                "1px dashed rgba(255,255,255,0.4)";
+                        const lbl = document.createElement("div");
+                        lbl.className = "pitch-mark-label";
+                        lbl.style.top = `calc(50% - ${deg * pixPerDeg + 6}px)`;
+                        lbl.style.left = `calc(50% + ${w / 2 + 8}px)`;
+                        lbl.textContent = deg;
+                        pr.appendChild(lbl);
+                    }
+                    pr.appendChild(mark);
+                }
+            }
+
+            // ================================================================
+            // INIT
+            // ================================================================
+            async function initViewer() {
+                viewer = new Cesium.Viewer("cesiumContainer", {
+                    baseLayerPicker: false,
+                    geocoder: false,
+                    homeButton: false,
+                    infoBox: false,
+                    navigationHelpButton: false,
+                    sceneModePicker: false,
+                    timeline: false,
+                    animation: false,
+                    globe: false,
+                    shadows: true,
+                    terrainShadows: Cesium.ShadowMode.RECEIVE_ONLY,
+                    selectionIndicator: false,
+                    fullscreenButton: false,
+                    creditContainer: document.createElement("div"),
+                });
+
+                const ssc = viewer.scene.screenSpaceCameraController;
+                ssc.enableRotate = false;
+                ssc.enableTranslate = false;
+                ssc.enableZoom = false;
+                ssc.enableTilt = false;
+                ssc.enableLook = false;
+
+                try {
+                    tileset = await Cesium.Cesium3DTileset.fromUrl(
+                        "https://tile.googleapis.com/v1/3dtiles/root.json?key=" +
+                            GOOGLE_API_KEY,
+                        {
+                            maximumScreenSpaceError: 32,
+                            maximumMemoryUsage: 256,
+                            dynamicScreenSpaceError: true,
+                            preferLeaves: true,
+                        },
+                    );
+                    viewer.scene.primitives.add(tileset);
+
+                    // Add Global Landmarks (POIs) for screenshots
+                    const landmarks = [
+                        {
+                            name: "DOWNTOWN SUNNYVALE",
+                            lon: -122.03,
+                            lat: 37.377,
+                            alt: 80,
+                        },
+                        {
+                            name: "GOOGLEPLEX HQ",
+                            lon: -122.0841,
+                            lat: 37.422,
+                            alt: 100,
+                        },
+                        {
+                            name: "GOLDEN GATE",
+                            lon: -122.4783,
+                            lat: 37.8199,
+                            alt: 250,
+                        },
+                        {
+                            name: "CENTRAL PARK",
+                            lon: -73.9654,
+                            lat: 40.7829,
+                            alt: 300,
+                        },
+                        {
+                            name: "THE STRIP",
+                            lon: -115.1728,
+                            lat: 36.1146,
+                            alt: 200,
+                        },
+                        {
+                            name: "US-101 NORTH",
+                            lon: -122.0298,
+                            lat: 37.385,
+                            alt: 80,
+                        },
+                    ];
+
+                    landmarks.forEach((lm) => {
+                        viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(
+                                lm.lon,
+                                lm.lat,
+                                lm.alt,
+                            ),
+                            label: {
+                                text: "📍 " + lm.name,
+                                font: "bold 16px Orbitron, sans-serif",
+                                fillColor:
+                                    Cesium.Color.fromCssColorString("#66fcf1"),
+                                outlineColor: Cesium.Color.BLACK,
+                                outlineWidth: 3,
+                                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                                pixelOffset: new Cesium.Cartesian2(0, -10),
+                                distanceDisplayCondition:
+                                    new Cesium.DistanceDisplayCondition(
+                                        50,
+                                        15000,
+                                    ),
+                                scaleByDistance: new Cesium.NearFarScalar(
+                                    500,
+                                    1.0,
+                                    15000,
+                                    0.4,
+                                ),
+                            },
+                        });
+                    });
+
+                    document.getElementById("loading-text").textContent =
+                        "WORLD LOADED - SELECT LOCATION";
+                    document.getElementById("loading-text").style.color =
+                        "#66fcf1";
+                } catch (e) {
+                    console.error("Failed to load 3D tiles:", e);
+                    document.getElementById("loading-text").textContent =
+                        "TILES FAILED - CAN STILL FLY";
+                    document.getElementById("loading-text").style.color =
+                        "#f38181";
+                }
+
+                viewer.camera.setView({
+                    destination: Cesium.Cartesian3.fromDegrees(
+                        -122.02985,
+                        37.37656,
+                        3000,
+                    ),
+                    orientation: {
+                        heading: 0,
+                        pitch: Cesium.Math.toRadians(-25),
+                        roll: 0,
+                    },
+                });
+
+                // Speed lines canvas
+                const slCanvas = document.getElementById("speed-lines");
+                slCanvas.width = window.innerWidth;
+                slCanvas.height = window.innerHeight;
+                speedLinesCtx = slCanvas.getContext("2d");
+
+                buildCompassTape();
+                buildPitchLadder();
+            }
+
+            // ================================================================
+            // AIRCRAFT 3D ENTITY (visible in chase/external view)
+            // ================================================================
+            function createAircraftEntity() {
+                if (aircraftEntity) viewer.entities.remove(aircraftEntity);
+                if (trailEntity) viewer.entities.remove(trailEntity);
+
+                // Aircraft body using a model-like composite of primitives
+                aircraftEntity = viewer.entities.add({
+                    name: "GDG Aircraft",
+                    position: Cesium.Cartesian3.fromDegrees(
+                        ac.lon,
+                        ac.lat,
+                        ac.alt,
+                    ),
+                    orientation: Cesium.Transforms.headingPitchRollQuaternion(
+                        Cesium.Cartesian3.fromDegrees(ac.lon, ac.lat, ac.alt),
+                        new Cesium.HeadingPitchRoll(
+                            ac.heading,
+                            ac.pitch,
+                            ac.roll,
+                        ),
+                    ),
+                    // Fuselage
+                    ellipsoid: {
+                        radii: new Cesium.Cartesian3(2.5, 2.5, 10),
+                        material: Cesium.Color.fromCssColorString("#ddd"),
+                        outline: true,
+                        outlineColor:
+                            Cesium.Color.fromCssColorString(
+                                "#66fcf1",
+                            ).withAlpha(0.5),
+                    },
+                    label: {
+                        text: "GDG-1",
+                        font: "bold 11px Orbitron, sans-serif",
+                        fillColor: Cesium.Color.CYAN,
+                        outlineColor: Cesium.Color.BLACK,
+                        outlineWidth: 2,
+                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                        pixelOffset: new Cesium.Cartesian2(0, -20),
+                        distanceDisplayCondition:
+                            new Cesium.DistanceDisplayCondition(20, 5000),
+                    },
+                });
+
+                // Wing entities
+                viewer.entities.add({
+                    name: "Left Wing",
+                    position: Cesium.Cartesian3.fromDegrees(
+                        ac.lon,
+                        ac.lat,
+                        ac.alt,
+                    ),
+                    orientation: aircraftEntity.orientation,
+                    box: {
+                        dimensions: new Cesium.Cartesian3(18, 1.5, 3),
+                        material:
+                            Cesium.Color.fromCssColorString("#ccc").withAlpha(
+                                0.9,
+                            ),
+                    },
+                });
+
+                // Contrail
+                trailPositions = [];
+                trailEntity = viewer.entities.add({
+                    name: "Contrail",
+                    polyline: {
+                        positions: new Cesium.CallbackProperty(() => {
+                            return trailPositions.length > 1
+                                ? trailPositions
+                                : undefined;
+                        }, false),
+                        width: 3,
+                        material: new Cesium.PolylineGlowMaterialProperty({
+                            glowPower: 0.3,
+                            color: Cesium.Color.WHITE.withAlpha(0.4),
+                        }),
+                    },
+                });
+            }
+
+            function updateAircraftEntity() {
+                if (!aircraftEntity) return;
+                const pos = Cesium.Cartesian3.fromDegrees(
+                    ac.lon,
+                    ac.lat,
+                    ac.alt,
+                );
+                const hpr = new Cesium.HeadingPitchRoll(
+                    ac.heading,
+                    ac.pitch,
+                    ac.roll,
+                );
+                const orientation =
+                    Cesium.Transforms.headingPitchRollQuaternion(pos, hpr);
+
+                aircraftEntity.position = pos;
+                aircraftEntity.orientation = orientation;
+
+                // Update wing entities (they share the same position/orientation)
+                const wingEntities = viewer.entities.values.filter(
+                    (e) => e.name === "Left Wing",
+                );
+                wingEntities.forEach((w) => {
+                    w.position = pos;
+                    w.orientation = orientation;
+                });
+
+                // Contrail - add position every few frames
+                if (ac.alt > 100 && ac.speed > 30) {
+                    trailPositions.push(pos.clone());
+                    if (trailPositions.length > 500) trailPositions.shift();
+                }
+
+                // Show/hide aircraft based on camera mode
+                const showAircraft = cameraMode > 0;
+                aircraftEntity.show = showAircraft;
+                wingEntities.forEach((w) => (w.show = showAircraft));
+            }
+
+            // ================================================================
+            // START / RESET
+            // ================================================================
+            function showStartScreen() {
+                crashed = false;
+                paused = false;
+                simStarted = false;
+                document.getElementById("start-screen").style.display = "flex";
+                document.getElementById("hud").style.display = "none";
+                document.getElementById("pause-overlay").style.display = "none";
+                document.getElementById("crash-screen").style.display = "none";
+                document.getElementById("speed-lines").style.opacity = 0;
+                document.getElementById("loading-text").textContent =
+                    "SELECT A LOCATION";
+                document.getElementById("loading-text").style.color = "#66fcf1";
+                document.body.style.cursor = "default";
+                preloading = false;
+                document
+                    .querySelectorAll(".location-btn")
+                    .forEach((b) => (b.style.pointerEvents = "all"));
+            }
+
+            let preloading = false;
+
+            function startFlight(locationKey) {
+                if (preloading) return;
+                const loc = LOCATIONS[locationKey];
+
+                // Show preload UI
+                preloading = true;
+                const loadingEl = document.getElementById("loading-text");
+                loadingEl.textContent = "LOADING TERRAIN...";
+                loadingEl.style.color = "#fce38a";
+                // Disable buttons during preload
+                document
+                    .querySelectorAll(".location-btn")
+                    .forEach((b) => (b.style.pointerEvents = "none"));
+
+                // Fly camera to the start position so tiles begin loading
+                setTimeOfDay(loc.tod);
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(
+                        loc.lon,
+                        loc.lat,
+                        loc.alt + 200,
+                    ),
+                    orientation: {
+                        heading: Cesium.Math.toRadians(loc.heading),
+                        pitch: Cesium.Math.toRadians(-20),
+                        roll: 0,
+                    },
+                    duration: 0.5,
+                });
+
+                // Wait for tiles to finish loading (or timeout after 10s)
+                const startTime = Date.now();
+                const maxWait = 10000;
+                let dotCount = 0;
+
+                const checkTiles = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    dotCount = (dotCount + 1) % 4;
+                    const dots = ".".repeat(dotCount + 1);
+                    const pct = tileset
+                        ? Math.round(
+                              (1 -
+                                  tileset.tilesLoaded /
+                                      Math.max(
+                                          tileset._statistics
+                                              ?.numberOfTilesTotal || 1,
+                                          1,
+                                      )) *
+                                  100,
+                          )
+                        : 0;
+                    loadingEl.textContent = `LOADING TERRAIN${dots}`;
+
+                    const tilesReady = tileset && tileset.tilesLoaded;
+                    const timedOut = elapsed > maxWait;
+
+                    if (tilesReady || timedOut) {
+                        clearInterval(checkTiles);
+                        loadingEl.textContent =
+                            timedOut && !tilesReady
+                                ? "PARTIAL LOAD - LAUNCHING"
+                                : "TERRAIN READY";
+                        loadingEl.style.color = "#66fcf1";
+
+                        // Brief pause so user sees "ready", then launch
+                        setTimeout(() => launchFlight(loc), 300);
+                    }
+                }, 250);
+            }
+
+            function launchFlight(loc) {
+                preloading = false;
+                document
+                    .querySelectorAll(".location-btn")
+                    .forEach((b) => (b.style.pointerEvents = "all"));
+
+                Object.assign(ac, {
+                    lon: loc.lon,
+                    lat: loc.lat,
+                    alt: loc.alt,
+                    heading: Cesium.Math.toRadians(loc.heading),
+                    pitch: 0,
+                    roll: 0,
+                    speed: 60,
+                    vz: 0,
+                    throttle: 0.5,
+                    flaps: 0,
+                    gearDown: true,
+                    brakeOn: false,
+                    spoilers: false,
+                    pitchRate: 0,
+                    rollRate: 0,
+                    yawRate: 0,
+                    isStalling: false,
+                    gForce: 1.0,
+                    onGround: false,
+                });
+
+                dummyMode = document.getElementById("dummy-mode").checked;
+                document.getElementById("dummy-indicator").style.display =
+                    dummyMode ? "block" : "none";
+                smoothCamLon = ac.lon;
+                smoothCamLat = ac.lat;
+                smoothCamAlt = ac.alt + 15;
+                trailPositions = [];
+                minimapTrail = [];
+                flightTime = 0;
+                justLanded = false;
+                gpwsActive = false;
+
+                createAircraftEntity();
+
+                cameraMode = 0;
+                crashed = false;
+                paused = false;
+                simStarted = true;
+                lastFrameTime = null;
+
+                document.getElementById("start-screen").style.display = "none";
+                document.getElementById("hud").style.display = "block";
+                document.getElementById("crash-screen").style.display = "none";
+                document.getElementById("landing-score").style.display = "none";
+                document.body.style.cursor = "none";
+
+                initAudio();
+                requestAnimationFrame(simLoop);
+            }
+
+            function resetFlight() {
+                // Quick reset to same altitude/position but level
+                ac.pitch = 0;
+                ac.roll = 0;
+                ac.vz = 0;
+                ac.speed = 60;
+                ac.throttle = 0.5;
+                ac.gearDown = true;
+                ac.flaps = 0;
+                ac.brakeOn = false;
+                ac.spoilers = false;
+                ac.pitchRate = 0;
+                ac.rollRate = 0;
+                ac.yawRate = 0;
+                ac.isStalling = false;
+                ac.droneMode = false;
+                ac.alt = Math.max(ac.alt, ac.groundLevel + 300);
+                smoothCamLon = ac.lon;
+                smoothCamLat = ac.lat;
+                smoothCamAlt = ac.alt + 15;
+                trailPositions = [];
+                document.getElementById("landing-score").style.display = "none";
+            }
+
+            function setTimeOfDay(hour) {
+                const date = new Date();
+                date.setHours(Math.floor(hour));
+                date.setMinutes(Math.floor((hour % 1) * 60));
+                if (viewer)
+                    viewer.clock.currentTime = Cesium.JulianDate.fromDate(date);
+            }
+
+            // ================================================================
+            // INPUT
+            // ================================================================
+            document.addEventListener("keydown", (e) => {
+                const k = e.key.toLowerCase();
+
+                keys[e.key] = true;
+                keys[e.code] = true;
+
+                if (
+                    [
+                        "arrowup",
+                        "arrowdown",
+                        "arrowleft",
+                        "arrowright",
+                        " ",
+                    ].includes(k)
+                )
+                    e.preventDefault();
+                // Prevent Ctrl shortcuts while flying
+                if (simStarted && !paused && e.ctrlKey) e.preventDefault();
+
+                if (!simStarted) return;
+
+                if (k === "p") {
+                    paused = !paused;
+                    document.getElementById("pause-overlay").style.display =
+                        paused ? "flex" : "none";
+                    if (!paused) {
+                        lastFrameTime = null;
+                        requestAnimationFrame(simLoop);
+                    }
+                }
+                if (k === "g") ac.gearDown = !ac.gearDown;
+                if (k === "f") ac.flaps = (ac.flaps + 1) % 4;
+                if (k === "b") ac.brakeOn = !ac.brakeOn;
+                if (k === "x") ac.spoilers = !ac.spoilers;
+                if (k === "v") {
+                    cameraMode = (cameraMode + 1) % 5;
+                    document.getElementById("camera-mode").textContent = [
+                        "COCKPIT",
+                        "CHASE",
+                        "EXTERNAL",
+                        "FLYBY",
+                        "BELLY CAM",
+                    ][cameraMode];
+                }
+                if (k === "h") {
+                    ac.hyperDrive = !ac.hyperDrive;
+                    ac.maxSpeed = ac.hyperDrive ? 1500 : 160;
+                    ac.maxThrust = ac.hyperDrive ? 150000 : 14000;
+                    document.getElementById("hyper-overlay").style.display =
+                        ac.hyperDrive ? "block" : "none";
+
+                    // Add a speed boost instantly
+                    if (ac.hyperDrive) {
+                        ac.speed = Math.max(ac.speed, 800);
+                        ac.throttle = 1.0;
+                    }
+                }
+                if (k === "m") {
+                    ac.droneMode = !ac.droneMode;
+                    if (ac.droneMode) {
+                        ac.speed = 0;
+                        ac.vz = 0;
+                        ac.throttle = 0;
+                        ac.pitchRate = 0;
+                        ac.rollRate = 0;
+                        ac.yawRate = 0;
+                    } else {
+                        ac.speed = Math.max(60, ac.speed);
+                        ac.throttle = 0.5;
+                    }
+                }
+                if (k === "r") resetFlight();
+            });
+
+            document.addEventListener("keyup", (e) => {
+                keys[e.key] = false;
+                keys[e.code] = false;
+            });
+
+            // Cursor auto-hide logic
+            let cursorTimeout = null;
+            document.addEventListener("mousemove", () => {
+                if (!simStarted || paused || crashed) {
+                    document.body.style.cursor = "default";
+                    return;
+                }
+
+                // Show cursor when moving
+                document.body.style.cursor = "default";
+
+                // Hide after 2 seconds of inactivity
+                if (cursorTimeout) clearTimeout(cursorTimeout);
+                cursorTimeout = setTimeout(() => {
+                    if (simStarted && !paused && !crashed) {
+                        document.body.style.cursor = "none";
+                    }
+                }, 2000);
+            });
+
+            // ================================================================
+            // FLIGHT PHYSICS
+            // ================================================================
+            function updatePhysics(dt) {
+                if (dt > 0.08) dt = 0.08;
+
+                // ---- Control Input ----
+                const pitchIn =
+                    (keys["s"] || keys["S"] || keys["ArrowDown"] ? 1 : 0) -
+                    (keys["w"] || keys["W"] || keys["ArrowUp"] ? 1 : 0);
+                const rollIn =
+                    (keys["d"] || keys["D"] || keys["ArrowRight"] ? 1 : 0) -
+                    (keys["a"] || keys["A"] || keys["ArrowLeft"] ? 1 : 0);
+                const yawIn =
+                    (keys["e"] || keys["E"] ? 1 : 0) -
+                    (keys["q"] || keys["Q"] ? 1 : 0);
+
+                if (ac.droneMode) {
+                    ac.speed = 0;
+                    ac.vz = 0;
+                    ac.pitchRate = 0;
+                    ac.rollRate = 0;
+                    ac.yawRate = 0;
+                    ac.pitch += pitchIn * 1.5 * dt;
+                    ac.roll += rollIn * 1.5 * dt;
+                    ac.heading += yawIn * 1.5 * dt;
+
+                    ac.pitch = Math.max(
+                        -Math.PI / 2.5,
+                        Math.min(Math.PI / 2.5, ac.pitch),
+                    );
+                    while (ac.heading < 0) ac.heading += 2 * Math.PI;
+                    while (ac.heading >= 2 * Math.PI) ac.heading -= 2 * Math.PI;
+
+                    const gh = getGroundHeight();
+                    ac.groundLevel = gh;
+                    ac.agl = ac.alt - gh;
+
+                    updateGPWS();
+                    flightTime += dt;
+                    return;
+                }
+
+                // Throttle: +/- keys, Shift/Ctrl, or =/- keys
+                if (
+                    keys["Shift"] ||
+                    keys["ShiftLeft"] ||
+                    keys["ShiftRight"] ||
+                    keys["+"] ||
+                    keys["="]
+                ) {
+                    ac.throttle = Math.min(1, ac.throttle + dt * 0.5);
+                }
+                if (
+                    keys["Control"] ||
+                    keys["ControlLeft"] ||
+                    keys["ControlRight"] ||
+                    keys["-"] ||
+                    keys["_"]
+                ) {
+                    ac.throttle = Math.max(0, ac.throttle - dt * 0.5);
+                }
+
+                // ---- Rate control ----
+                const speedFactor = Math.max(0.3, ac.speed / 60); // Controls are more responsive at speed
+                const pitchAuth = 2.2 * speedFactor;
+                const rollAuth = 3.5 * speedFactor;
+                const yawAuth = 1.2;
+                const damp = 3.5;
+
+                ac.pitchRate +=
+                    (pitchIn * pitchAuth - ac.pitchRate * damp) * dt;
+                ac.rollRate += (rollIn * rollAuth - ac.rollRate * damp) * dt;
+                ac.yawRate += (yawIn * yawAuth - ac.yawRate * damp) * dt;
+
+                // Auto-coordination: banking causes yaw
+                ac.yawRate += Math.sin(ac.roll) * 0.6 * dt;
+
+                // ---- Velocity-Linked Degradation (VRAM Protection) ----
+                const turnSpeed =
+                    Math.abs(ac.pitchRate) +
+                    Math.abs(ac.rollRate) +
+                    Math.abs(ac.yawRate);
+                if (tileset) {
+                    // Normal error is 32. If we are whipping the camera, spike it to 128 to dump VRAM
+                    const targetSSE = turnSpeed > 0.8 ? 128 : 32;
+                    // Smoothly lerp the error threshold back down to avoid sudden stalling
+                    tileset.maximumScreenSpaceError +=
+                        (targetSSE - tileset.maximumScreenSpaceError) *
+                        (dt * 2.0);
+                }
+
+                // ---- Attitude update ----
+                ac.pitch += ac.pitchRate * dt;
+                ac.roll += ac.rollRate * dt;
+                ac.heading += ac.yawRate * dt;
+
+                ac.pitch = Math.max(
+                    -Math.PI / 2.5,
+                    Math.min(Math.PI / 2.5, ac.pitch),
+                );
+                while (ac.heading < 0) ac.heading += 2 * Math.PI;
+                while (ac.heading >= 2 * Math.PI) ac.heading -= 2 * Math.PI;
+
+                // Coordinated turn from bank
+                const turnRate =
+                    (9.81 * Math.tan(ac.roll)) / Math.max(ac.speed, 15);
+                ac.heading += turnRate * dt;
+
+                // ---- Turbulence (subtle) ----
+                const turbulence = 0.08;
+                ac.pitch += (Math.random() - 0.5) * turbulence * dt;
+                ac.roll += (Math.random() - 0.5) * turbulence * dt;
+
+                // ---- Aerodynamics ----
+                const rho = 1.225 * Math.exp(-ac.alt / 10000); // Density decreases with altitude
+                const v = ac.speed;
+                const qS = 0.5 * rho * v * v * ac.wingArea;
+
+                // Lift
+                const flapLift = [0, 0.15, 0.3, 0.5][ac.flaps];
+                const aoa = ac.pitch;
+                const cl = ac.liftCoeffBase + flapLift + aoa * 3.0;
+                const lift = qS * Math.max(cl, 0);
+
+                // Drag
+                const flapDrag = [0, 0.005, 0.015, 0.04][ac.flaps];
+                const gearDrag = ac.gearDown ? 0.015 : 0;
+                const brakeDrag = ac.brakeOn ? 0.08 : 0;
+                const spoilerDrag = ac.spoilers ? 0.04 : 0;
+                const cd =
+                    ac.dragCoeff +
+                    flapDrag +
+                    gearDrag +
+                    brakeDrag +
+                    spoilerDrag +
+                    Math.abs(aoa) * 0.05;
+                const drag = qS * cd;
+
+                // Thrust
+                const thrust = ac.throttle * ac.maxThrust;
+
+                // ---- Forces ----
+                const weight = ac.mass * 9.81;
+                const netForward =
+                    thrust * Math.cos(ac.pitch) -
+                    drag -
+                    weight * Math.sin(ac.pitch);
+                ac.speed += (netForward / ac.mass) * dt;
+                ac.speed = Math.max(0, Math.min(ac.maxSpeed, ac.speed));
+
+                const vertLift =
+                    lift * Math.cos(ac.roll) * (ac.spoilers ? 0.7 : 1.0);
+                const netVertical =
+                    vertLift - weight + thrust * Math.sin(ac.pitch);
+                ac.vz += (netVertical / ac.mass) * dt;
+                ac.vz = Math.max(-100, Math.min(100, ac.vz));
+
+                ac.gForce = vertLift / weight;
+                ac.gForce = Math.max(-2, Math.min(6, ac.gForce));
+
+                // ---- Stall ----
+                ac.isStalling =
+                    ac.speed < ac.stallSpeed && ac.alt > ac.groundLevel + 5;
+                if (ac.isStalling && !dummyMode) {
+                    ac.pitch -= 0.4 * dt;
+                    ac.vz -= 6 * dt;
+                    ac.roll += (Math.random() - 0.5) * 3 * dt;
+                }
+
+                // ---- Position ----
+                const mPerDegLat = 111320;
+                const mPerDegLon =
+                    111320 * Math.cos(Cesium.Math.toRadians(ac.lat));
+                ac.lat += (ac.speed * Math.cos(ac.heading) * dt) / mPerDegLat;
+                ac.lon += (ac.speed * Math.sin(ac.heading) * dt) / mPerDegLon;
+                ac.alt += ac.vz * dt;
+
+                // ---- Ground ----
+                const gh = getGroundHeight();
+                ac.groundLevel = gh;
+                ac.agl = ac.alt - gh;
+                ac.onGround = false;
+
+                const minAlt = gh + (dummyMode ? 20 : 2.5);
+
+                if (ac.alt <= minAlt) {
+                    landingVS = ac.vz;
+                    if (
+                        !dummyMode &&
+                        (ac.vz < -10 ||
+                            ac.speed > 80 ||
+                            Math.abs(ac.roll) > 0.35 ||
+                            (!ac.gearDown && ac.speed > 5))
+                    ) {
+                        triggerCrash();
+                        return;
+                    }
+                    // Clamp to min altitude
+                    ac.alt = minAlt;
+                    ac.onGround = !dummyMode;
+
+                    if (dummyMode) {
+                        // Bounce back up gently
+                        if (ac.vz < 0) ac.vz = Math.abs(ac.vz) * 0.3;
+                        ac.pitch = Math.max(0.05, ac.pitch); // nudge nose up
+                    } else {
+                        // Landing score
+                        if (!justLanded && Math.abs(landingVS) > 0.5) {
+                            showLandingScore(landingVS);
+                            justLanded = true;
+                        }
+                        ac.vz = 0;
+                        ac.pitch = Math.max(-0.02, Math.min(0.15, ac.pitch));
+                        ac.roll *= 1 - 4 * dt;
+                        const friction = ac.brakeOn ? 0.7 : 0.08;
+                        ac.speed *= 1 - friction * dt;
+                        if (ac.speed < 0.5) ac.speed = 0;
+                    }
+                } else {
+                    justLanded = false;
+                }
+
+                // ---- GPWS ----
+                updateGPWS();
+
+                flightTime += dt;
+            }
+
+            function getGroundHeight() {
+                if (!viewer) return 0;
+                try {
+                    const cart = Cesium.Cartographic.fromDegrees(
+                        ac.lon,
+                        ac.lat,
+                    );
+                    const h = viewer.scene.sampleHeight(cart);
+                    if (h !== undefined && h !== null && !isNaN(h) && h > -100)
+                        return h;
+                } catch (e) {}
+                return 0;
+            }
+
+            // ================================================================
+            // GPWS - Ground Proximity Warning System
+            // ================================================================
+            function updateGPWS() {
+                const aglFt = ac.agl * 3.28084;
+                const vsFpm = ac.vz * 196.85;
+                const now = performance.now();
+
+                // "TERRAIN PULL UP" - dangerously close to ground with descent
+                if (aglFt < 200 && vsFpm < -500 && !ac.onGround) {
+                    gpwsActive = true;
+                    document.getElementById("gpws-warning").style.display =
+                        "block";
+                    document.getElementById("gpws-warning").textContent =
+                        "TERRAIN - PULL UP";
+                }
+                // "TOO LOW GEAR" - low altitude, no gear
+                else if (
+                    aglFt < 300 &&
+                    !ac.gearDown &&
+                    ac.speed < 80 &&
+                    !ac.onGround
+                ) {
+                    gpwsActive = true;
+                    document.getElementById("gpws-warning").style.display =
+                        "block";
+                    document.getElementById("gpws-warning").textContent =
+                        "TOO LOW - GEAR";
+                    document.getElementById("gpws-warning").style.color =
+                        "#fce38a";
+                }
+                // Callouts
+                else if (
+                    aglFt < 500 &&
+                    aglFt > 0 &&
+                    vsFpm < -100 &&
+                    !ac.onGround
+                ) {
+                    const callouts = [
+                        500, 400, 300, 200, 100, 50, 40, 30, 20, 10,
+                    ];
+                    for (const alt of callouts) {
+                        if (
+                            aglFt <= alt + 15 &&
+                            aglFt >= alt - 15 &&
+                            now - gpwsLastCallout > 1500
+                        ) {
+                            document.getElementById(
+                                "gpws-warning",
+                            ).style.display = "block";
+                            document.getElementById(
+                                "gpws-warning",
+                            ).textContent = alt + "";
+                            document.getElementById(
+                                "gpws-warning",
+                            ).style.color = "#66fcf1";
+                            document.getElementById(
+                                "gpws-warning",
+                            ).style.animation = "none";
+                            gpwsLastCallout = now;
+                            setTimeout(() => {
+                                document.getElementById(
+                                    "gpws-warning",
+                                ).style.display = "none";
+                                document.getElementById(
+                                    "gpws-warning",
+                                ).style.animation = "blink 0.6s infinite";
+                            }, 800);
+                            break;
+                        }
+                    }
+                    gpwsActive = false;
+                } else {
+                    gpwsActive = false;
+                    document.getElementById("gpws-warning").style.display =
+                        "none";
+                    document.getElementById("gpws-warning").style.color =
+                        "#fce38a";
+                }
+            }
+
+            // ================================================================
+            // LANDING SCORE
+            // ================================================================
+            function showLandingScore(vs) {
+                const vsFpm = Math.abs(vs * 196.85);
+                let grade, color;
+                if (vsFpm < 60) {
+                    grade = "BUTTER";
+                    color = "#66fcf1";
+                } else if (vsFpm < 120) {
+                    grade = "SMOOTH";
+                    color = "#66fcf1";
+                } else if (vsFpm < 200) {
+                    grade = "GOOD";
+                    color = "#7fff7f";
+                } else if (vsFpm < 400) {
+                    grade = "FIRM";
+                    color = "#fce38a";
+                } else if (vsFpm < 600) {
+                    grade = "HARD";
+                    color = "#f38181";
+                } else {
+                    grade = "VERY HARD";
+                    color = "#f38181";
+                }
+
+                const el = document.getElementById("landing-score");
+                document.getElementById("landing-grade").textContent = grade;
+                document.getElementById("landing-grade").style.color = color;
+                document.getElementById("landing-details").textContent =
+                    `${Math.round(vsFpm)} ft/min | ${Math.round(ac.speed * 1.944)} kts`;
+                el.style.display = "block";
+
+                if (landingScoreTimeout) clearTimeout(landingScoreTimeout);
+                landingScoreTimeout = setTimeout(() => {
+                    el.style.display = "none";
+                }, 4000);
+            }
+
+            // ================================================================
+            // CRASH
+            // ================================================================
+            function triggerCrash() {
+                crashed = true;
+                simStarted = false;
+                document.getElementById("crash-info").textContent =
+                    `Impact: ${Math.round(Math.abs(ac.vz) * 196.85)} ft/min | ` +
+                    `${Math.round(ac.speed * 1.944)} kts | ` +
+                    `Bank: ${Math.round(Cesium.Math.toDegrees(ac.roll))}deg`;
+                document.getElementById("crash-screen").style.display = "flex";
+                document.body.style.cursor = "default";
+
+                // Screen shake
+                if (viewer) {
+                    const origPos = viewer.camera.position.clone();
+                    let n = 0;
+                    const iv = setInterval(() => {
+                        if (n++ > 15) {
+                            clearInterval(iv);
+                            return;
+                        }
+                        viewer.camera.position = Cesium.Cartesian3.add(
+                            origPos,
+                            new Cesium.Cartesian3(
+                                (Math.random() - 0.5) * 30,
+                                (Math.random() - 0.5) * 30,
+                                (Math.random() - 0.5) * 30,
+                            ),
+                            new Cesium.Cartesian3(),
+                        );
+                    }, 40);
+                }
+            }
+
+            // ================================================================
+            // CAMERA
+            // ================================================================
+            function updateCamera(dt) {
+                const pos = Cesium.Cartesian3.fromDegrees(
+                    ac.lon,
+                    ac.lat,
+                    ac.alt,
+                );
+
+                if (cameraMode === 0) {
+                    // Cockpit
+                    viewer.camera.setView({
+                        destination: pos,
+                        orientation: {
+                            heading: ac.heading,
+                            pitch: ac.pitch,
+                            roll: ac.roll,
+                        },
+                    });
+                } else if (cameraMode === 1) {
+                    // Chase cam with smooth lerp
+                    const chaseDist = 55;
+                    const chaseHeight = 18;
+                    const lerp = 1 - Math.pow(0.02, dt);
+
+                    const targetLon =
+                        ac.lon -
+                        (chaseDist * Math.sin(ac.heading)) /
+                            (111320 * Math.cos(Cesium.Math.toRadians(ac.lat)));
+                    const targetLat =
+                        ac.lat - (chaseDist * Math.cos(ac.heading)) / 111320;
+                    const targetAlt = ac.alt + chaseHeight;
+
+                    smoothCamLon += (targetLon - smoothCamLon) * lerp;
+                    smoothCamLat += (targetLat - smoothCamLat) * lerp;
+                    smoothCamAlt += (targetAlt - smoothCamAlt) * lerp;
+
+                    viewer.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(
+                            smoothCamLon,
+                            smoothCamLat,
+                            smoothCamAlt,
+                        ),
+                        orientation: {
+                            heading: ac.heading,
+                            pitch: Cesium.Math.toRadians(-8),
+                            roll: ac.roll * 0.3, // Slight roll follow
+                        },
+                    });
+                } else if (cameraMode === 2) {
+                    // External orbit
+                    const orbitDist = 100;
+                    const t = Date.now() / 6000;
+                    const orbitPos = Cesium.Cartesian3.fromDegrees(
+                        ac.lon +
+                            (orbitDist * Math.sin(t)) /
+                                (111320 *
+                                    Math.cos(Cesium.Math.toRadians(ac.lat))),
+                        ac.lat + (orbitDist * Math.cos(t)) / 111320,
+                        ac.alt + 30,
+                    );
+                    viewer.camera.setView({ destination: orbitPos });
+                    viewer.camera.lookAt(
+                        pos,
+                        new Cesium.HeadingPitchRange(
+                            0,
+                            Cesium.Math.toRadians(-12),
+                            orbitDist,
+                        ),
+                    );
+                    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                } else if (cameraMode === 3) {
+                    // Flyby - fixed point watching aircraft pass
+                    if (!updateCamera._flybyPos || flightTime % 10 < dt) {
+                        updateCamera._flybyPos = Cesium.Cartesian3.fromDegrees(
+                            ac.lon + (Math.random() - 0.5) * 0.002,
+                            ac.lat + (Math.random() - 0.5) * 0.002,
+                            ac.alt + (Math.random() - 0.5) * 50,
+                        );
+                    }
+                    viewer.camera.setView({
+                        destination: updateCamera._flybyPos,
+                    });
+                    viewer.camera.lookAt(
+                        pos,
+                        new Cesium.HeadingPitchRange(
+                            0,
+                            Cesium.Math.toRadians(-5),
+                            80,
+                        ),
+                    );
+                    viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+                } else {
+                    // Belly Cam - Straight down
+                    const bellyPos = Cesium.Cartesian3.fromDegrees(
+                        ac.lon,
+                        ac.lat,
+                        ac.alt - 5,
+                    );
+                    viewer.camera.setView({
+                        destination: bellyPos,
+                        orientation: {
+                            heading: ac.heading,
+                            pitch: Cesium.Math.toRadians(-90), // Looking straight down
+                            roll: ac.roll,
+                        },
+                    });
+                }
+            }
+
+            // ================================================================
+            // SPEED LINES EFFECT
+            // ================================================================
+            function updateSpeedLines() {
+                const canvas = document.getElementById("speed-lines");
+                const ctx = speedLinesCtx;
+                if (!ctx) return;
+
+                const speedRatio = ac.speed / ac.maxSpeed;
+                canvas.style.opacity =
+                    speedRatio > 0.6 ? (speedRatio - 0.6) * 2.5 : 0;
+                if (speedRatio <= 0.6) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = `rgba(255,255,255,${(speedRatio - 0.6) * 0.3})`;
+                ctx.lineWidth = 1;
+
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                const numLines = Math.floor((speedRatio - 0.6) * 60);
+
+                for (let i = 0; i < numLines; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const innerR = 100 + Math.random() * 200;
+                    const outerR = innerR + 50 + Math.random() * 150;
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        cx + Math.cos(angle) * innerR,
+                        cy + Math.sin(angle) * innerR,
+                    );
+                    ctx.lineTo(
+                        cx + Math.cos(angle) * outerR,
+                        cy + Math.sin(angle) * outerR,
+                    );
+                    ctx.stroke();
+                }
+            }
+
+            // ================================================================
+            // HUD UPDATE
+            // ================================================================
+            function updateHUD() {
+                // Speed
+                const kts = Math.round(ac.speed * 1.944);
+                const speedEl = document.getElementById("speed-val");
+                speedEl.textContent = kts;
+                speedEl.style.color =
+                    kts < 50 ? "#f38181" : kts > 280 ? "#fce38a" : "#fff";
+
+                // Mach
+                const mach = ac.speed / 343;
+                document.getElementById("mach-val").textContent =
+                    "M " + mach.toFixed(2);
+
+                // Altitude
+                const altFt = Math.round(ac.alt * 3.28084);
+                document.getElementById("alt-val").textContent =
+                    altFt.toLocaleString();
+
+                // AGL
+                const aglFt = Math.round(ac.agl * 3.28084);
+                const aglEl = document.getElementById("agl-val");
+                aglEl.textContent = aglFt;
+                aglEl.style.color =
+                    aglFt < 100 ? "#f38181" : aglFt < 500 ? "#fce38a" : "#fff";
+                document.getElementById("alt-agl").textContent = "AGL " + aglFt;
+
+                // Heading compass
+                const hdgDeg = Cesium.Math.toDegrees(ac.heading);
+                updateCompassTape(hdgDeg);
+
+                // VSI
+                const vsFpm = Math.round(ac.vz * 196.85);
+                const vsiEl = document.getElementById("vsi-val");
+                vsiEl.textContent = (vsFpm >= 0 ? "+" : "") + vsFpm;
+                vsiEl.style.color =
+                    vsFpm < -1000
+                        ? "#f38181"
+                        : vsFpm > 500
+                          ? "#66fcf1"
+                          : "#fff";
+
+                // Throttle
+                document.getElementById("throttle-fill").style.height =
+                    ac.throttle * 100 + "%";
+                document.getElementById("throttle-pct").textContent =
+                    Math.round(ac.throttle * 100) + "%";
+
+                // G-force
+                const gEl = document.getElementById("gforce-val");
+                gEl.textContent = ac.gForce.toFixed(1);
+                gEl.style.color =
+                    ac.gForce > 3.5 || ac.gForce < 0
+                        ? "#f38181"
+                        : ac.gForce > 2
+                          ? "#fce38a"
+                          : "#fff";
+
+                // Artificial horizon
+                const ahPR = document.getElementById("ah-pitch-roll");
+                const pitchPx = Cesium.Math.toDegrees(ac.pitch) * 4; // 4px per degree
+                const rollDeg = Cesium.Math.toDegrees(ac.roll);
+                ahPR.style.transform = `translate(-50%, -50%) rotate(${-rollDeg}deg) translateY(${pitchPx}px)`;
+
+                // Flight path vector
+                const fpv = document.getElementById("fpv");
+                const vvAngle = Math.atan2(ac.vz, Math.max(ac.speed, 1));
+                const fpvY =
+                    window.innerHeight / 2 - Cesium.Math.toDegrees(vvAngle) * 8;
+                const fpvX = window.innerWidth / 2;
+                fpv.style.left = fpvX - 12 + "px";
+                fpv.style.top =
+                    Math.max(
+                        100,
+                        Math.min(window.innerHeight - 100, fpvY - 12),
+                    ) + "px";
+                fpv.style.display = cameraMode === 0 ? "block" : "none";
+
+                // Stall
+                document.getElementById("stall-warning").style.display =
+                    ac.isStalling ? "block" : "none";
+
+                // Status
+                const gearEl = document.getElementById("gear-status");
+                gearEl.textContent = ac.gearDown ? "GEAR DN" : "GEAR UP";
+                gearEl.className =
+                    "status-item " +
+                    (ac.gearDown ? "active" : ac.agl < 300 ? "danger" : "");
+
+                const flapNames = [
+                    "FLAPS 0",
+                    "FLAPS 10",
+                    "FLAPS 20",
+                    "FLAPS 40",
+                ];
+                const flapsEl = document.getElementById("flaps-status");
+                flapsEl.textContent = flapNames[ac.flaps];
+                flapsEl.className =
+                    "status-item " + (ac.flaps > 0 ? "warning" : "");
+
+                const brakeEl = document.getElementById("brake-status");
+                brakeEl.textContent = ac.brakeOn ? "BRK ON" : "BRK OFF";
+                brakeEl.className =
+                    "status-item " + (ac.brakeOn ? "warning" : "");
+
+                const spoilerEl = document.getElementById("spoiler-status");
+                spoilerEl.textContent = ac.spoilers ? "SPLR ON" : "SPLR OFF";
+                spoilerEl.className =
+                    "status-item " + (ac.spoilers ? "warning" : "");
+
+                // Minimap arrow
+                document.getElementById("minimap-arrow").style.transform =
+                    `translate(-50%, -50%) rotate(${Cesium.Math.toDegrees(ac.heading)}deg)`;
+
+                // Minimap trail
+                minimapTrail.push({ lon: ac.lon, lat: ac.lat });
+                if (minimapTrail.length > 80) minimapTrail.shift();
+                const trailContainer = document.getElementById("minimap-trail");
+                // Update every 20 frames for perf
+                if (updateHUD._trailFrame === undefined)
+                    updateHUD._trailFrame = 0;
+                if (updateHUD._trailFrame++ % 20 === 0) {
+                    trailContainer.innerHTML = "";
+                    const cx = 50,
+                        cy = 50;
+                    minimapTrail.forEach((p, i) => {
+                        const dx =
+                            (p.lon - ac.lon) *
+                            111320 *
+                            Math.cos(Cesium.Math.toRadians(ac.lat));
+                        const dy = (p.lat - ac.lat) * 111320;
+                        const px = cx + dx * 0.15;
+                        const py = cy - dy * 0.15;
+                        if (Math.abs(px - 50) < 48 && Math.abs(py - 50) < 48) {
+                            const dot = document.createElement("div");
+                            dot.className = "trail-dot";
+                            dot.style.left = px + "px";
+                            dot.style.top = py + "px";
+                            dot.style.opacity = i / minimapTrail.length;
+                            trailContainer.appendChild(dot);
+                        }
+                    });
+                }
+
+                // FPS & Memory
+                if (!updateHUD._lt) updateHUD._lt = performance.now();
+                if (!updateHUD._fc) updateHUD._fc = 0;
+                updateHUD._fc++;
+                const now = performance.now();
+                if (now - updateHUD._lt > 500) {
+                    document.getElementById("fps-val").textContent = Math.round(
+                        updateHUD._fc / ((now - updateHUD._lt) / 1000),
+                    );
+                    updateHUD._fc = 0;
+                    updateHUD._lt = now;
+
+                    if (performance.memory) {
+                        const memMB = Math.round(
+                            performance.memory.usedJSHeapSize / (1024 * 1024),
+                        );
+                        const memLimit = 2048; // Logic warning threshold
+                        const memEl = document.getElementById("mem-val");
+                        memEl.textContent = memMB;
+
+                        // Profiler Update
+                        document.getElementById("prof-heap-text").textContent =
+                            memMB + " MB";
+                        const heapPct = Math.min(100, (memMB / memLimit) * 100);
+                        const hBar = document.getElementById("heap-bar");
+                        hBar.style.width = heapPct + "%";
+                        hBar.style.background =
+                            memMB > 1500
+                                ? "#f38181"
+                                : memMB > 1000
+                                  ? "#fce38a"
+                                  : "#66fcf1";
+
+                        memEl.style.color =
+                            memMB > 1500
+                                ? "#f38181"
+                                : memMB > 1000
+                                  ? "#fce38a"
+                                  : "#66fcf1";
+                    }
+
+                    // SSE Profiler Update
+                    if (tileset) {
+                        const currentSSE = Math.round(
+                            tileset.maximumScreenSpaceError,
+                        );
+                        document.getElementById("prof-sse-text").textContent =
+                            currentSSE;
+                        // SSE bar: 32 is 0% (baseline), 128 is 100%
+                        const ssePct = Math.min(
+                            100,
+                            Math.max(0, ((currentSSE - 32) / (128 - 32)) * 100),
+                        );
+                        document.getElementById("sse-bar").style.width =
+                            ssePct + "%";
+                    }
+
+                    // Patch Queue Update
+                    document.getElementById("prof-patches-text").textContent =
+                        `${terraformedPatches.length}/${MAX_PATCHES}`;
+                    for (let i = 0; i < 3; i++) {
+                        document.getElementById(
+                            `p-slot-${i}`,
+                        ).style.background =
+                            i < terraformedPatches.length ? "#66fcf1" : "#222";
+                    }
+                }
+
+                // Position
+                document.getElementById("pos-val").textContent =
+                    ac.lat.toFixed(4) + ", " + ac.lon.toFixed(4);
+            }
+
+            // ================================================================
+            // AI TERRAFORMING 3D BRIDGE & PROCEDURAL GENERATION
+            // ================================================================
+            let terraformedPatches = [];
+            const MAX_PATCHES = 3;
+
+            async function spawnProceduralCity(theme) {
+                const btn = document.getElementById("terra-btn");
+                const status = document.getElementById("terra-status");
+                btn.disabled = true;
+                status.style.display = "block";
+                status.textContent = "GENERATING PROCEDURAL CITY...";
+
+                // Read parameters from UI
+                const bldgsInput = document.getElementById("terra-bldgs");
+                const radiusInput = document.getElementById("terra-radius");
+                const distInput = document.getElementById("terra-dist");
+                const userBldgs = bldgsInput
+                    ? parseInt(bldgsInput.value) || 50
+                    : 50;
+                const userRadius = radiusInput
+                    ? parseInt(radiusInput.value) || 2000
+                    : 2000;
+                const userDistKm = distInput
+                    ? parseFloat(distInput.value) || 10
+                    : 10;
+
+                // Spawn ahead of the plane for a cinematic skyline approach
+                const mPerDegLat = 111320;
+                const mPerDegLon =
+                    111320 * Math.cos(Cesium.Math.toRadians(ac.lat));
+                // Push the city further ahead and spread it out much more
+                const distMeters = userDistKm * 1000;
+                const centerLon =
+                    ac.lon + (distMeters * Math.sin(ac.heading)) / mPerDegLon;
+                const centerLat =
+                    ac.lat + (distMeters * Math.cos(ac.heading)) / mPerDegLat;
+
+                // Fallback to aircraft ground height to prevent floating in space
+                let ground = getGroundHeight();
+                if (ground === undefined || isNaN(ground)) ground = 0;
+
+                let cityEntities = [];
+                
+                // AI_WIRING_POINT: Service 1 (Vision) - Dynamic Textures
+                let sharedBuildingMaterial;
+                try {
+                    const textureRes = await fetch(`/texture?prompt=${theme}`);
+                    const textureData = await textureRes.json();
+                    sharedBuildingMaterial = new Cesium.ImageMaterialProperty({
+                        image: "data:image/svg+xml;base64," + textureData.image,
+                        repeat: new Cesium.Cartesian2(1, 1),
+                    });
+                } catch (e) {
+                    console.error("Failed to fetch dynamic texture:", e);
+                    sharedBuildingMaterial = new Cesium.ImageMaterialProperty({
+                        image: "assets/cyberpunk_texture.png",
+                        repeat: new Cesium.Cartesian2(1, 1),
+                    });
+                }
+
+                // Suspend events to prevent the browser from freezing while adding hundreds of entities
+                viewer.entities.suspendEvents();
+
+                if (theme === "cyberpunk") {
+                    setTimeOfDay(2); // Set time to 2 AM for nighttime neon effect
+                    const numBuildings = userBldgs; // Use UI value
+                    const maxRadius = userRadius; // Super dense downtown cluster
+
+                    for (let i = 0; i < numBuildings; i++) {
+                        // Uniform spread across the radius to prevent them being "too close"
+                        const radius = Math.sqrt(Math.random()) * maxRadius;
+                        const theta = Math.random() * 2 * Math.PI;
+                        
+                        const dx = radius * Math.sin(theta);
+                        const dy = radius * Math.cos(theta);
+                        
+                        const bLon = centerLon + dx / mPerDegLon;
+                        const bLat = centerLat + dy / mPerDegLat;
+
+                        let totalHeight = 300 + Math.random() * 800;
+                        if (Math.random() > 0.8)
+                            totalHeight += 1000 + Math.random() * 1500; // Mega-skyscrapers
+
+                        let baseW = 100 + Math.random() * 200;
+                        let baseD = 100 + Math.random() * 200;
+
+                        // Neon color tint
+                        const neonColors = [
+                            "#ff00ff",
+                            "#00ffff",
+                            "#ffff00",
+                            "#ff00aa",
+                            "#00ffaa",
+                            "#ffffff",
+                            "#ff5555",
+                        ];
+                        
+                        let tintHex = neonColors[Math.floor(Math.random() * neonColors.length)];
+                        const tint = Cesium.Color.fromCssColorString(tintHex);
+
+                        const buildingMaterial = sharedBuildingMaterial;
+
+                        const shapeType = Math.random();
+                        let currentZ = ground;
+
+                        if (shapeType < 0.15) {
+                            // Spherical Dome / Glowing Orb
+                            const orbRadius = baseW * 0.8;
+                            let orbConfig = {
+                                name: "Procedural Orb",
+                                position: Cesium.Cartesian3.fromDegrees(bLon, bLat, ground + orbRadius),
+                                ellipsoid: {
+                                    radii: new Cesium.Cartesian3(orbRadius, orbRadius, orbRadius),
+                                    material: buildingMaterial,
+                                }
+                            };
+                            cityEntities.push(viewer.entities.add(orbConfig));
+                            currentZ = ground + orbRadius * 2;
+                        } else if (shapeType < 0.30) {
+                            // Massive Arch
+                            let archHeight = totalHeight * 1.2;
+                            let archW = baseW * 1.5;
+
+                            let archPositions = [];
+                            for (let t = -1; t <= 1.05; t += 0.05) {
+                                let clampedT = Math.min(t, 1);
+                                let xOffset = clampedT * archW * 1.5;
+                                let zOffset = Math.max(0, (1 - Math.pow(clampedT, 2)) * archHeight);
+                                let aLon = bLon + (xOffset * Math.cos(theta)) / mPerDegLon;
+                                let aLat = bLat + (xOffset * Math.sin(theta)) / mPerDegLat;
+                                archPositions.push(Cesium.Cartesian3.fromDegrees(aLon, aLat, ground + zOffset));
+                            }
+
+                            let thicknessX = archW * 0.08 + 5;
+                            let thicknessY = archW * 0.2 + 10;
+
+                            let archConfig = {
+                                name: "Procedural Arch",
+                                polylineVolume: {
+                                    positions: archPositions,
+                                    shape: [
+                                        new Cesium.Cartesian2(-thicknessX, -thicknessY),
+                                        new Cesium.Cartesian2(thicknessX, -thicknessY),
+                                        new Cesium.Cartesian2(thicknessX, thicknessY),
+                                        new Cesium.Cartesian2(-thicknessX, thicknessY),
+                                    ],
+                                    material: buildingMaterial,
+                                    cornerType: Cesium.CornerType.BEVELED,
+                                },
+                            };
+                            cityEntities.push(viewer.entities.add(archConfig));
+                            currentZ = ground + archHeight;
+                        } else {
+                            // Stacked Skyscraper
+                            const numStacks = 3 + Math.floor(Math.random() * 3); // 3 to 5 stacks
+                            let currentW = baseW;
+                            let currentD = baseD;
+                            
+                            // 30% chance the entire building is cylindrical
+                            const isCylindrical = Math.random() > 0.7;
+                            
+                            // Define greeble material outside loop to reuse instance
+                            const greebleMaterial = Cesium.Color.fromCssColorString("#1a1a1a");
+
+                            for (let s = 0; s < numStacks; s++) {
+                                const stackHeight = (totalHeight / numStacks) * (0.5 + Math.random());
+                                
+                                // Use the same building material for all stacks
+                                const stackMaterial = buildingMaterial;
+                                
+                                let stackConfig = {
+                                    name: "Procedural Stack",
+                                    position: Cesium.Cartesian3.fromDegrees(
+                                        bLon,
+                                        bLat,
+                                        currentZ + stackHeight / 2,
+                                    ),
+                                };
+                                
+                                if (isCylindrical) {
+                                    stackConfig.cylinder = {
+                                        length: stackHeight,
+                                        topRadius: currentW * 0.45,
+                                        bottomRadius: currentW * 0.5,
+                                        material: stackMaterial,
+                                    };
+                                } else {
+                                    stackConfig.box = {
+                                        dimensions: new Cesium.Cartesian3(currentW, currentD, stackHeight),
+                                        material: stackMaterial,
+                                    };
+                                }
+                                
+                                cityEntities.push(viewer.entities.add(stackConfig));
+                                
+                                // Add Greebles (small attached geometry) to the sides
+                                if (!isCylindrical && Math.random() > 0.3) {
+                                    const numGreebles = 1 + Math.floor(Math.random() * 3);
+                                    for (let g = 0; g < numGreebles; g++) {
+                                        const greebleW = 10 + Math.random() * 20;
+                                        const greebleD = 10 + Math.random() * 20;
+                                        const greebleH = 20 + Math.random() * 50;
+                                        
+                                        // Randomly attach to X or Y faces
+                                        let offsetX = 0;
+                                        let offsetY = 0;
+                                        if (Math.random() > 0.5) {
+                                            offsetX = (Math.random() > 0.5 ? 1 : -1) * (currentW / 2 + greebleW / 2);
+                                            offsetY = (Math.random() - 0.5) * currentD;
+                                        } else {
+                                            offsetY = (Math.random() > 0.5 ? 1 : -1) * (currentD / 2 + greebleD / 2);
+                                            offsetX = (Math.random() - 0.5) * currentW;
+                                        }
+                                        const offsetZ = (Math.random() - 0.5) * stackHeight * 0.8;
+                                        
+                                        const gLon = bLon + offsetX / mPerDegLon;
+                                        const gLat = bLat + offsetY / mPerDegLat;
+                                        
+                                        let greebleConfig = {
+                                            position: Cesium.Cartesian3.fromDegrees(
+                                                gLon, gLat, currentZ + stackHeight / 2 + offsetZ
+                                            ),
+                                            box: {
+                                                dimensions: new Cesium.Cartesian3(greebleW, greebleD, greebleH),
+                                                material: greebleMaterial, 
+                                            }
+                                        };
+                                        cityEntities.push(viewer.entities.add(greebleConfig));
+                                    }
+                                }
+                                
+                                currentZ += stackHeight;
+                                currentW *= (0.6 + Math.random() * 0.3); // Tapering width
+                                currentD *= (0.6 + Math.random() * 0.3); // Tapering depth
+                            }
+                        }
+
+                        // Add Antenna / Alien Dish on top
+                        if (shapeType >= 0.30 && Math.random() > 0.4) {
+                            const antennaHeight = 50 + Math.random() * 250;
+                            let antennaConfig = {
+                                name: "Antenna",
+                                position: Cesium.Cartesian3.fromDegrees(
+                                    bLon,
+                                    bLat,
+                                    currentZ + antennaHeight / 2,
+                                ),
+                                cylinder: {
+                                    length: antennaHeight,
+                                    topRadius: 1,
+                                    bottomRadius: 4,
+                                    material: Cesium.Color.RED,
+                                },
+                            };
+                            cityEntities.push(
+                                viewer.entities.add(antennaConfig),
+                            );
+
+                            // 50% chance to add an alien-looking dish to the antenna
+                            if (Math.random() > 0.5) {
+                                let dishRadius = 20 + Math.random() * 40;
+                                let dishConfig = {
+                                    name: "Alien Dish",
+                                    position: Cesium.Cartesian3.fromDegrees(
+                                        bLon,
+                                        bLat,
+                                        currentZ + antennaHeight * (0.2 + Math.random() * 0.6),
+                                    ),
+                                    ellipsoid: {
+                                        radii: new Cesium.Cartesian3(dishRadius, dishRadius, dishRadius * 0.1),
+                                        material: Cesium.Color.DARK_GRAY,
+                                    },
+                                };
+                                cityEntities.push(viewer.entities.add(dishConfig));
+                            }
+
+                            // Add an aviation warning light (glowing sphere) on top of the antenna
+                            let lightConfig = {
+                                name: "Warning Light",
+                                position: Cesium.Cartesian3.fromDegrees(
+                                    bLon,
+                                    bLat,
+                                    currentZ + antennaHeight,
+                                ),
+                                ellipsoid: {
+                                    radii: new Cesium.Cartesian3(5, 5, 5),
+                                    material: Cesium.Color.RED.withAlpha(0.9),
+                                },
+                            };
+                            cityEntities.push(viewer.entities.add(lightConfig));
+                        }
+                    }
+                } else {
+                    // Calculate grid size to roughly match userBldgs, accounting for the 60% spawn chance
+                    const gridSize = Math.max(
+                        2,
+                        Math.floor(Math.sqrt(userBldgs * 2)),
+                    );
+                    const spacingLat = 500 / mPerDegLat; // Increased spacing
+                    const spacingLon = 500 / mPerDegLon;
+
+                    for (let x = -gridSize / 2; x < gridSize / 2; x++) {
+                        for (let y = -gridSize / 2; y < gridSize / 2; y++) {
+                            if (Math.random() > 0.4) continue; // fewer buildings
+
+                            const bLon =
+                                centerLon +
+                                x * spacingLon +
+                                (Math.random() - 0.5) * spacingLon * 0.6;
+                            const bLat =
+                                centerLat +
+                                y * spacingLat +
+                                (Math.random() - 0.5) * spacingLat * 0.6;
+
+                            let height = 200 + Math.random() * 400; // Taller buildings
+
+                            let entityConfig = {
+                                name: "Procedural Entity",
+                                position: Cesium.Cartesian3.fromDegrees(
+                                    bLon,
+                                    bLat,
+                                    ground + height / 2,
+                                ),
+                            };
+
+                            if (theme === "mars") {
+                                // Solid rust-colored hab-blocks and spherical domes
+                                const colors = [
+                                    "#8c3b21",
+                                    "#bd5a31",
+                                    "#5e2513",
+                                    "#a84a24",
+                                ];
+                                const mColor = Cesium.Color.fromCssColorString(
+                                    colors[
+                                        Math.floor(
+                                            Math.random() * colors.length,
+                                        )
+                                    ],
+                                );
+
+                                if (Math.random() > 0.5) {
+                                    // Block
+                                    entityConfig.box = {
+                                        dimensions: new Cesium.Cartesian3(
+                                            60 + Math.random() * 60,
+                                            60 + Math.random() * 60,
+                                            height / 2,
+                                        ),
+                                        material: sharedBuildingMaterial,
+                                    };
+                                    entityConfig.position =
+                                        Cesium.Cartesian3.fromDegrees(
+                                            bLon,
+                                            bLat,
+                                            ground + height / 4,
+                                        );
+                                } else {
+                                    // Dome
+                                    const radius = 40 + Math.random() * 50;
+                                    entityConfig.ellipsoid = {
+                                        radii: new Cesium.Cartesian3(
+                                            radius,
+                                            radius,
+                                            radius * 0.6,
+                                        ),
+                                        material: sharedBuildingMaterial,
+                                        outline: true,
+                                        outlineColor:
+                                            Cesium.Color.fromCssColorString(
+                                                "#381308",
+                                            ),
+                                    };
+                                    entityConfig.position =
+                                        Cesium.Cartesian3.fromDegrees(
+                                            bLon,
+                                            bLat,
+                                            ground,
+                                        ); // Rest on ground
+                                }
+                            } else {
+                                // Atlantis: Glowing crystalline spikes
+                                const colors = [
+                                    "#0f5e9c",
+                                    "#2389da",
+                                    "#1ca3ec",
+                                ];
+                                const mColor = Cesium.Color.fromCssColorString(
+                                    colors[
+                                        Math.floor(
+                                            Math.random() * colors.length,
+                                        )
+                                    ],
+                                );
+
+                                entityConfig.cylinder = {
+                                    length: height,
+                                    topRadius: 0, // Pointy crystal tip
+                                    bottomRadius: 30 + Math.random() * 30,
+                                    material: sharedBuildingMaterial,
+                                    outline: true,
+                                    outlineColor:
+                                        Cesium.Color.fromCssColorString(
+                                            "#74ccf4",
+                                        ),
+                                };
+                            }
+
+                            const entity = viewer.entities.add(entityConfig);
+                            cityEntities.push(entity);
+                        }
+                    }
+                }
+
+                // Entity Lifecycle Management
+                terraformedPatches.push(cityEntities);
+                if (terraformedPatches.length > MAX_PATCHES) {
+                    const oldestPatch = terraformedPatches.shift();
+
+                    if (Array.isArray(oldestPatch)) {
+                        oldestPatch.forEach((b) => viewer.entities.remove(b));
+                    } else {
+                        viewer.entities.remove(oldestPatch);
+                        if (
+                            oldestPatch.rectangle &&
+                            oldestPatch.rectangle.material
+                        ) {
+                            oldestPatch.rectangle.material.image = null;
+                        }
+                    }
+
+                    const toast = document.getElementById("memory-toast");
+                    toast.style.display = "block";
+                    setTimeout(() => {
+                        toast.style.display = "none";
+                    }, 2000);
+                }
+                
+                // Resume events to render all changes at once
+                viewer.entities.resumeEvents();
+
+                status.textContent = "TRANSFORMATION COMPLETE";
+                setTimeout(() => {
+                    status.style.display = "none";
+                }, 3000);
+                btn.disabled = false;
+            }
+
+            async function triggerTerraform() {
+                let prompt = document.getElementById("ai-prompt").value;
+                if (!prompt) {
+                    alert("Enter a prompt (e.g. 'Cyberpunk base')");
+                    return;
+                }
+
+                // If it's nighttime in the sim, adjust prompt and material
+                const date = Cesium.JulianDate.toGregorianDate(viewer.clock.currentTime);
+                const isNight = date.hour < 6 || date.hour > 19;
+                
+                if (isNight) {
+                    prompt += " at night, nighttime, cinematic lighting, glowing neon details";
+                }
+
+                const btn = document.getElementById("terra-btn");
+                const status = document.getElementById("terra-status");
+
+                btn.disabled = true;
+                status.style.display = "block";
+                status.textContent = "REACHING VERTEX AI...";
+
+                try {
+                    const response = await fetch("/terraform", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            lat: ac.lat,
+                            lon: ac.lon,
+                            prompt: prompt,
+                        }),
+                    });
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+
+                    // Project the AI image onto the ground in 3D
+                    const newEntity = viewer.entities.add({
+                        name: "Terraformed Patch: " + prompt,
+                        rectangle: {
+                            coordinates: Cesium.Rectangle.fromDegrees(
+                                data.bounds[1],
+                                data.bounds[0], // minLon, minLat
+                                data.bounds[3],
+                                data.bounds[2], // maxLon, maxLat
+                            ),
+                            material: new Cesium.ImageMaterialProperty({
+                                image: "data:image/png;base64," + data.image,
+                                transparent: true,
+                                // Tint the image darker blue-grey if it's night
+                                color: isNight ? Cesium.Color.fromCssColorString("#777799") : Cesium.Color.WHITE,
+                            }),
+                            height: getGroundHeight() + 1.0, // Just above ground to avoid z-fighting
+                            outline: true,
+                            outlineColor:
+                                Cesium.Color.fromCssColorString(
+                                    "#66fcf1",
+                                ).withAlpha(0.3),
+                        },
+                    });
+
+                    // Entity Lifecycle Management
+                    terraformedPatches.push(newEntity);
+                    if (terraformedPatches.length > MAX_PATCHES) {
+                        const oldestPatch = terraformedPatches.shift();
+
+                        if (Array.isArray(oldestPatch)) {
+                            oldestPatch.forEach((b) =>
+                                viewer.entities.remove(b),
+                            );
+                        } else {
+                            viewer.entities.remove(oldestPatch);
+                            // Hint GC that the heavy image data is gone
+                            if (
+                                oldestPatch.rectangle &&
+                                oldestPatch.rectangle.material
+                            ) {
+                                oldestPatch.rectangle.material.image = null;
+                            }
+                        }
+
+                        // Visual notification of memory management
+                        const toast = document.getElementById("memory-toast");
+                        toast.style.display = "block";
+                        setTimeout(() => {
+                            toast.style.display = "none";
+                        }, 2000);
+                    }
+
+                    status.textContent = "TRANSFORMATION COMPLETE";
+
+                    // PLAY AI PILOT VOICE
+                    if (data.audio) {
+                        playAIPilotVoice(data.audio);
+                    }
+
+                    setTimeout(() => {
+                        status.style.display = "none";
+                    }, 3000);
+                } catch (e) {
+                    console.error(e);
+                    status.textContent = "ERROR: " + e.message;
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+
+            // ================================================================
+            // MAIN LOOP
+            // ================================================================
+            function simLoop(timestamp) {
+                if (!simStarted || crashed) return;
+                if (paused) return;
+
+                if (!lastFrameTime) lastFrameTime = timestamp;
+                const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05);
+                lastFrameTime = timestamp;
+
+                updatePhysics(dt);
+                updateAircraftEntity();
+                updateCamera(dt);
+                updateHUD();
+                updateSpeedLines();
+                updateAudio();
+
+                requestAnimationFrame(simLoop);
+            }
+
+            // ================================================================
+            // AUDIO
+            // ================================================================
+            let audioCtx,
+                engineOsc,
+                engineGain,
+                windNoise,
+                windGain,
+                stallOsc,
+                stallGain;
+            let gpwsOsc, gpwsGain;
+            let audioInited = false;
+            let radioAudio = null;
+            let radioPlaying = false;
+
+            async function triggerLocate() {
+                const btn = document.getElementById("locate-btn");
+                const originalText = btn.textContent;
+                btn.textContent = "SCANNING...";
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch("/locate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            lat: ac.lat,
+                            lon: ac.lon,
+                        }),
+                    });
+
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+
+                    if (data.audio) {
+                        playAIPilotVoice(data.audio);
+                    }
+                    
+                    // Show the text briefly on the radio status
+                    const status = document.getElementById("radio-status");
+                    const oldStatus = status.textContent;
+                    status.textContent = "RX: " + data.text.substring(0, 15) + "...";
+                    setTimeout(() => {
+                        status.textContent = oldStatus;
+                    }, 5000);
+
+                } catch (e) {
+                    console.error("Locate error:", e);
+                    btn.textContent = "ERROR";
+                } finally {
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 2000);
+                }
+            }
+
+            function toggleRadio() {
+                if (!radioAudio) {
+                    // Free synthwave/vaporwave radio stream (Nightwave Plaza)
+                    radioAudio = new Audio("https://radio.plaza.one/mp3");
+                    radioAudio.crossOrigin = "anonymous";
+                    radioAudio.volume = 0.4;
+                }
+
+                const btn = document.getElementById("radio-btn");
+                const status = document.getElementById("radio-status");
+
+                if (radioPlaying) {
+                    radioAudio.pause();
+                    radioPlaying = false;
+                    btn.textContent = "TUNE IN";
+                    btn.style.background =
+                        "linear-gradient(180deg, #444, #222)";
+                    btn.style.boxShadow = "0 2px 2px rgba(0,0,0,0.5)";
+                    btn.style.transform = "translateY(0)";
+                    status.textContent = "STBY";
+                    status.style.color = "#4a5c39";
+                } else {
+                    radioAudio
+                        .play()
+                        .catch((e) => console.error("Radio play blocked:", e));
+                    radioPlaying = true;
+                    btn.textContent = "POWER OFF";
+                    btn.style.background =
+                        "linear-gradient(180deg, #222, #111)";
+                    btn.style.boxShadow = "0 0px 0px rgba(0,0,0,0.5)";
+                    btn.style.transform = "translateY(2px)";
+                    status.textContent = "LIVE";
+                    status.style.color = "#8bc34a";
+                }
+            }
+
+            function playAIPilotVoice(base64Audio) {
+                const audio = new Audio("data:audio/mp3;base64," + base64Audio);
+                audio.play().catch((e) => console.error("Pilot voice blocked:", e));
+            }
+
+            function initAudio() {
+                if (audioInited) return;
+                audioInited = true;
+                audioCtx = new (window.AudioContext ||
+                    window.webkitAudioContext)();
+
+                // Engine: dual oscillator for richer sound
+                engineOsc = audioCtx.createOscillator();
+                engineOsc.type = "sawtooth";
+                engineOsc.frequency.value = 80;
+                const eng2 = audioCtx.createOscillator();
+                eng2.type = "triangle";
+                eng2.frequency.value = 120;
+
+                engineGain = audioCtx.createGain();
+                engineGain.gain.value = 0;
+                const engFilter = audioCtx.createBiquadFilter();
+                engFilter.type = "lowpass";
+                engFilter.frequency.value = 350;
+
+                const eng2Gain = audioCtx.createGain();
+                eng2Gain.gain.value = 0.03;
+
+                engineOsc.connect(engFilter);
+                eng2.connect(engFilter);
+                engFilter.connect(engineGain);
+                engineGain.connect(audioCtx.destination);
+                engineOsc.start();
+                eng2.start();
+
+                // Wind
+                const bufSz = 2 * audioCtx.sampleRate;
+                const noiseBuf = audioCtx.createBuffer(
+                    1,
+                    bufSz,
+                    audioCtx.sampleRate,
+                );
+                const out = noiseBuf.getChannelData(0);
+                for (let i = 0; i < bufSz; i++) out[i] = Math.random() * 2 - 1;
+                windNoise = audioCtx.createBufferSource();
+                windNoise.buffer = noiseBuf;
+                windNoise.loop = true;
+                const windFilter = audioCtx.createBiquadFilter();
+                windFilter.type = "bandpass";
+                windFilter.frequency.value = 600;
+                windFilter.Q.value = 0.4;
+                windGain = audioCtx.createGain();
+                windGain.gain.value = 0;
+                windNoise.connect(windFilter);
+                windFilter.connect(windGain);
+                windGain.connect(audioCtx.destination);
+                windNoise.start();
+
+                // Stall horn
+                stallOsc = audioCtx.createOscillator();
+                stallOsc.type = "square";
+                stallOsc.frequency.value = 550;
+                stallGain = audioCtx.createGain();
+                stallGain.gain.value = 0;
+                stallOsc.connect(stallGain);
+                stallGain.connect(audioCtx.destination);
+                stallOsc.start();
+
+                // GPWS tone
+                gpwsOsc = audioCtx.createOscillator();
+                gpwsOsc.type = "sine";
+                gpwsOsc.frequency.value = 900;
+                gpwsGain = audioCtx.createGain();
+                gpwsGain.gain.value = 0;
+                gpwsOsc.connect(gpwsGain);
+                gpwsGain.connect(audioCtx.destination);
+                gpwsOsc.start();
+            }
+
+            function updateAudio() {
+                if (!audioCtx || !audioInited) return;
+                const t = audioCtx.currentTime;
+                const mute = paused || crashed;
+
+                // Engine
+                const freq = 55 + ac.throttle * 150 + ac.speed * 0.3;
+                const vol = mute ? 0 : 0.02 + ac.throttle * 0.06;
+                engineOsc.frequency.setTargetAtTime(freq, t, 0.08);
+                engineGain.gain.setTargetAtTime(vol, t, 0.08);
+
+                // Wind
+                const wVol = mute
+                    ? 0
+                    : Math.min(0.07, (ac.speed / ac.maxSpeed) * 0.07);
+                windGain.gain.setTargetAtTime(wVol, t, 0.08);
+
+                // Stall
+                stallGain.gain.setTargetAtTime(
+                    ac.isStalling && !mute ? 0.08 : 0,
+                    t,
+                    0.04,
+                );
+
+                // GPWS
+                gpwsGain.gain.setTargetAtTime(
+                    gpwsActive && !mute ? 0.06 : 0,
+                    t,
+                    0.04,
+                );
+            }
+
+            // ================================================================
+            // BOOT
+            // ================================================================
+
+            // Handle window resize for speed lines
+            window.addEventListener("resize", () => {
+                const c = document.getElementById("speed-lines");
+                if (c) {
+                    c.width = window.innerWidth;
+                    c.height = window.innerHeight;
+                }
+            });
+
+            initViewer();
+        </script>
+    </body>
+</html>
