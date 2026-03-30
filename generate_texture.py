@@ -16,9 +16,13 @@ def generate_building_texture(prompt: str):
     gemini_model = GenerativeModel("gemini-2.5-flash")
     
     svg_prompt = f"""
-    Generate a minimal, tiled SVG texture for a 3D building. Theme: '{prompt}'.
-    Focus on neon windows, metallic surfaces, or futuristic patterns.
-    Return ONLY the raw <svg>...</svg> code without any markdown or formatting.
+    Generate a seamless, tiling SVG texture for a 3D building facade. Theme: '{prompt}'.
+    
+    If the theme is cyberpunk-related, use a dark purple/blue background, rectangular neon windows (cyan, magenta, yellow) displaying abstract computer interfaces, and include dark silhouettes of people or glowing rain streaks.
+    
+    The SVG should use CSS/SVG glow effects, simple flat geometry for performance, and must be perfectly tileable.
+    
+    Return ONLY the raw <svg>...</svg> code without any markdown, HTML wrapper, or formatting.
     """
     
     print(f"🎨 Generating texture: '{prompt}'")
@@ -50,8 +54,8 @@ if __name__ == "__main__":
         "prompt", 
         type=str, 
         nargs="?", 
-        default="glowing neon cyberpunk, rain, high tech", 
-        help="Description of your building windows (e.g., 'rusty mars colony' or 'glowing neon cyberpunk')"
+        default="Cyberpunk hacker apartment block: neon blue and pink windows, hacker silhouettes, glowing interfaces, raining down.", 
+        help="Description of your building windows (e.g., 'rusty mars colony' or 'Cyberpunk hacker apartment block')"
     )
     args = parser.parse_args()
 
