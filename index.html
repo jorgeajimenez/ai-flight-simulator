@@ -3601,9 +3601,21 @@
                 try {
                     const textureRes = await fetch(`/texture?prompt=${theme}`);
                     const textureData = await textureRes.json();
+                    
+                    // PERFORMANCE FIX: Pre-rasterize SVG to a Canvas. 
+                    // Cesium will freeze rendering hundreds of entities with raw SVG Data URIs.
+                    const img = new Image();
+                    img.src = "data:image/svg+xml;base64," + textureData.image;
+                    await new Promise(r => { img.onload = r; img.onerror = r; });
+                    const canvas = document.createElement("canvas");
+                    canvas.width = 1024;
+                    canvas.height = 1024;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, 1024, 1024);
+
                     sharedBuildingMaterial = new Cesium.ImageMaterialProperty({
-                        image: "data:image/svg+xml;base64," + textureData.image,
-                        repeat: new Cesium.Cartesian2(1, 1),
+                        image: canvas,
+                        repeat: new Cesium.Cartesian2(2, 6), // Tile vertically for skyscrapers
                     });
                 } catch (e) {
                     console.error("Failed to fetch dynamic texture:", e);
@@ -3658,7 +3670,7 @@
                         const shapeType = Math.random();
                         let currentZ = ground;
 
-                        if (shapeType < 0.15) {
+                        if (false) { // Disabled Orbs/Arches for better aesthetics
                             // Spherical Dome / Glowing Orb
                             const orbRadius = baseW * 0.8;
                             let orbConfig = {
@@ -3671,7 +3683,7 @@
                             };
                             cityEntities.push(viewer.entities.add(orbConfig));
                             currentZ = ground + orbRadius * 2;
-                        } else if (shapeType < 0.30) {
+                        } else if (false) {
                             // Massive Arch
                             let archHeight = totalHeight * 1.2;
                             let archW = baseW * 1.5;
