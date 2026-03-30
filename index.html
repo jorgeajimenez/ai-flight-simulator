@@ -3597,16 +3597,17 @@
                 let cityEntities = [];
                 
                 // AI_WIRING_POINT: Service 1 (Vision) - Dynamic Textures
+                // Load the static texture generated offline via generate_texture.py
                 let sharedBuildingMaterial;
                 try {
-                    const textureRes = await fetch(`/texture?prompt=${theme}`);
-                    const textureData = await textureRes.json();
-                    
-                    // PERFORMANCE FIX: Pre-rasterize SVG to a Canvas. 
-                    // Cesium will freeze rendering hundreds of entities with raw SVG Data URIs.
+                    // PERFORMANCE FIX: Pre-rasterize the static SVG to a Canvas. 
+                    // Cesium will freeze rendering hundreds of entities with raw SVGs.
                     const img = new Image();
-                    img.src = "data:image/svg+xml;base64," + textureData.image;
-                    await new Promise(r => { img.onload = r; img.onerror = r; });
+                    img.src = "assets/texture.svg";
+                    await new Promise((r, reject) => { 
+                        img.onload = r; 
+                        img.onerror = () => reject(new Error("SVG load failed")); 
+                    });
                     const canvas = document.createElement("canvas");
                     canvas.width = 1024;
                     canvas.height = 1024;
@@ -3618,7 +3619,7 @@
                         repeat: new Cesium.Cartesian2(2, 6), // Tile vertically for skyscrapers
                     });
                 } catch (e) {
-                    console.error("Failed to fetch dynamic texture:", e);
+                    console.warn("Could not load assets/texture.svg, falling back to default.", e);
                     sharedBuildingMaterial = new Cesium.ImageMaterialProperty({
                         image: "assets/cyberpunk_texture.png",
                         repeat: new Cesium.Cartesian2(1, 1),

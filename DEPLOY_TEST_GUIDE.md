@@ -92,7 +92,7 @@ With the complete code already in the repository and the infrastructure wired up
    ```bash
    uv run python generate_texture.py "glowing neon steampunk"
    ```
-   *Check if `assets/cyberpunk_texture.png` was generated successfully without auth errors.*
+   *Check if `assets/texture.svg` was generated successfully without auth errors.*
 3. **Start the backend server:**
    ```bash
    uv run python app.py

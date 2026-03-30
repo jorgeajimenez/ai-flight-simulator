@@ -22,10 +22,6 @@ def slides():
 def serve_static(filename):
     return send_from_directory('.', filename)
 
-@app.route('/texture')
-def texture():
-    prompt = request.args.get('prompt', 'Cyberpunk')
-    return jsonify({"image": AIVisionService.generate_texture(prompt)})
 
 @app.route('/locate', methods=['POST'])
 def locate():

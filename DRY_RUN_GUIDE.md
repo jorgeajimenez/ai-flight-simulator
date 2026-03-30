@@ -84,7 +84,7 @@ Now, pretend to be the attendee following the Codelab.
    ```bash
    uv run python generate_texture.py "glowing neon steampunk"
    ```
-   *Did `assets/cyberpunk_texture.png` update?*
+   *Did `assets/texture.svg` update?*
 3. **The Codelab Loop:** Use the **Gemini CLI** to fill in the `TODO` markers in `services/vault.py`, `services/ai_vision.py`, etc., checking your work against Part 2 below.
 4. Start the server:
    ```bash

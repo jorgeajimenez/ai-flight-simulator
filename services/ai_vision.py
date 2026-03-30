@@ -18,41 +18,6 @@ class AIVisionService:
     """
 
     @staticmethod
-    def generate_texture(prompt: str) -> str:
-        """
-        Uses Gemini 2.0 Flash to generate high-quality SVG texture code for 3D objects.
-        Returns a base64 encoded SVG string for the frontend.
-        """
-        try:
-            gemini_model = GenerativeModel("gemini-2.5-flash")
-            svg_prompt = f"""
-            Generate a minimal, tiled SVG texture for a 3D building. Theme: '{prompt}'.
-            Focus on neon windows, metallic surfaces, or futuristic patterns.
-            Return ONLY the raw <svg>...</svg> code without any markdown or formatting.
-            """
-            
-            logger.info(f"AI Vision: Generating dynamic SVG texture for '{prompt}'...")
-            res = gemini_model.generate_content(svg_prompt)
-            
-            svg_code = res.text.strip()
-            # AI_WIRING_POINT: Handle potential markdown wrappers from Gemini
-            # Robustly handle markdown wrappers to prevent malformed SVGs
-            if "```" in svg_code:
-                match = re.search(r"<svg.*?</svg>", svg_code, re.IGNORECASE | re.DOTALL)
-                if match:
-                    svg_code = match.group(0).strip()
-                else:
-                    # Fallback string stripping
-                    svg_code = svg_code.split("```")[1].strip()
-                    for prefix in ["xml", "svg", "html"]:
-                        if svg_code.lower().startswith(prefix):
-                            svg_code = svg_code[len(prefix):].strip()
-                            break
-                
-            return base64.b64encode(svg_code.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            logger.error(f"AI Vision Texture Error: {e}")
-            return ""
 
     @staticmethod
     def describe_location(lat: float, lon: float) -> str:
