@@ -18,30 +18,47 @@ While standard map APIs provide tiles for navigation, **Google Earth Engine** pr
 
 ## Implementation: The `EarthEngineClient`
 
-We encapsulate the complex Earth Engine SDK logic into a clean `fetch_satellite_tile` method. This method performs three critical steps:
+We encapsulate the complex Earth Engine SDK logic into a clean `fetch_satellite_tile` method. Before we can query the data, we must initialize the client explicitly using the project quota.
 
-1.  **Authentication:** It seamlessly handles initialization via **Application Default Credentials (ADC)** or a local service account key.
-2.  **Dataset Filtering:** It queries the `COPERNICUS/S2_SR_HARMONIZED` collection, filtering for the clearest (least cloudy) images from the past year.
-3.  **Tile Extraction:** It clips the data to a specific 500m x 500m bounding box based on the pilot's current coordinates.
+### Initialization (`services/geospatial.py`)
+```python
+# Explicitly request the Earth Engine scope and force the Project ID
+credentials, _ = google.auth.default(scopes=[
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/earthengine"
+])
 
-### The Service Logic (`services/geospatial.py`)
+# Force the credentials to use the specific project quota
+if hasattr(credentials, "with_quota_project"):
+    credentials = credentials.with_quota_project(GCPConfig.PROJECT_ID)
+    
+ee.Initialize(credentials=credentials, project=GCPConfig.PROJECT_ID)
+```
+
+### Fetching the Tile
+The `fetch_satellite_tile` method performs three critical steps:
+1.  **Calculate bounding box:** Defines the 500m x 500m area based on the pilot's coordinates.
+2.  **Dataset Filtering:** Queries the `COPERNICUS/S2_SR_HARMONIZED` collection, filtering for the clearest (least cloudy) images.
+3.  **Tile Extraction:** Downloads and returns the raw bytes.
 
 ```python
-@classmethod
-def fetch_satellite_tile(cls, lat, lon, offset=0.0025):
-    # Define the geographical bounding box
-    region = ee.Geometry.Rectangle([lon - offset, lat - offset, lon + offset, lat + offset])
+@staticmethod
+def fetch_satellite_tile(lat: float, lon: float, offset: float = 0.0025) -> Tuple[bytes, List[float]]:
+    # 1. Calculate bounding box
+    area = ee.Geometry.Rectangle([lon - offset, lat - offset, lon + offset, lat + offset])
     
-    # Filter for the clearest satellite image
-    s2 = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-    ee_image = s2.filterBounds(region).filterDate('2023-01-01', '2024-01-01') \
-              .sort('CLOUDY_PIXEL_PERCENTAGE').first().clip(region)
+    # 2. Filter for the clearest satellite image
+    collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+                 .filterBounds(area)
+                 .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10))
+                 .sort('system:time_start', False))
 
-    # Generate a download URL for the image
-    original_img_url = ee_image.getThumbURL({'dimensions': 1024, 'region': region})
+    # 3. Process image and generate a download URL
+    image = collection.first().select(['B4', 'B3', 'B2'])
+    thumb_url = image.getThumbURL({'region': area, 'dimensions': 512, 'format': 'png', 'min': 0, 'max': 3000})
     
-    # Download and return the raw bytes
-    response = requests.get(original_img_url)
+    # 4. Download and return the raw bytes
+    response = requests.get(thumb_url)
     return response.content, [lat - offset, lon - offset, lat + offset, lon + offset]
 ```
 

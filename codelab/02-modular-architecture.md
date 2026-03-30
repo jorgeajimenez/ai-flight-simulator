@@ -19,7 +19,7 @@ graph TD
 Each service has a single responsibility and is isolated for maximum testability:
 
 1.  **Service 0 (Config):** Environment detection and logging initialization.
-2.  **Service 1 (Vault):** Zero-trust secret management (Secret Manager).
+2.  **Service 1 (Vault):** Zero-trust secret management (Secret Manager) with in-memory caching for performance (e.g., `get_maps_api_key`).
 3.  **Service 2 (Geospatial):** Real-time satellite fetching (Earth Engine).
 4.  **Service 3 (AI Vision):** Multi-stage generative pipeline (Gemini + Imagen).
 5.  **Service 4 (Audio):** Immersive Pilot voice synthesis (Text-to-Speech).
@@ -37,7 +37,7 @@ We don't just write code; we write specifications first. Our workflow for each s
 4.  **Refactor:** Clean up the code while ensuring the tests stay green.
 
 ### Example: The Vault Service Test
-We mock the `SecretManagerServiceClient` to ensure our backend handles network timeouts and fallbacks correctly without ever actually hitting the network.
+We mock the `SecretManagerServiceClient` to ensure our backend handles network timeouts and fallbacks correctly without ever actually hitting the network. We also ensure our in-memory cache prevents redundant API calls.
 
 ```python
 def test_get_maps_api_key_from_secret_manager(mocker):
