@@ -43,19 +43,7 @@ First, you must install the **[Google Cloud CLI (`gcloud`)](https://cloud.google
    ```
 3. Run the setup script:
    ```bash
-   bash setup_gcp.sh
-   ```
-
-**For Windows:**
-1. Open **PowerShell** as an Administrator.
-2. Log in to Google Cloud:
-   ```powershell
-   gcloud auth login
-   ```
-3. You may need to bypass the execution policy to run the script. Run the PowerShell script:
-   ```powershell
-   Set-ExecutionPolicy Bypass -Scope Process -Force
-   .\setup_gcp.ps1
+   bash scripts/setup_gcp.sh
    ```
 
 *The script will automatically walk you through linking a billing account, creating a project, enabling the APIs, and downloading your secure `service-account-key.json` file.*

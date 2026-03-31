@@ -12,7 +12,7 @@ Before we build the flight simulator's brain, we need to ensure our environment 
     ```
 3.  **Run the Automator:**
     ```bash
-    bash setup_gcp.sh
+    bash scripts/setup_gcp.sh
     ```
     *Note: This script enables the Essential 6 APIs and configures your Service Account permissions.*
 
@@ -23,7 +23,7 @@ Before we touch the backend code, let's prove the AI is working. We will use **G
 
 **Run the Icebreaker Script:**
 ```bash
-uv run python generate_texture.py "Cyberpunk hacker apartment block..."
+uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
 ```
 
 **What just happened?**

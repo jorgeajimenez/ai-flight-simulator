@@ -9,7 +9,7 @@ Here is a comprehensive list of everything you need to install on your local mac
    - **Install:** [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
 2. **Google Cloud CLI (`gcloud`)**
-   - **Why:** Required to run the automated Cloud and Billing setup scripts (`setup_gcp.sh` or `setup_gcp.ps1`) to easily authenticate and get your Service Account key.
+   - **Why:** Required to run the automated Cloud and Billing setup scripts (`scripts/setup_gcp.sh`) to easily authenticate and get your Service Account key.
    - **Install:** [https://cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install)
 
 3. **`uv` (Python Package Manager)**
