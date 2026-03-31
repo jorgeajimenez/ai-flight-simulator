@@ -5,7 +5,7 @@ To create a believable 3D world, we need to base our AI textures on real-world g
 ## Grounding the AI
 A major challenge with Generative AI is "hallucination." If we just ask an AI to "draw Tokyo," it might get the buildings right but the street layout wrong. By fetching a real satellite image first, we **ground** the AI, forcing it to repaint over the real physical footprint of the city.
 
-![Architecture: Geospatial Pipeline](../assets/03_geospatial_engine.svg)
+![Architecture: Geospatial Pipeline](./assets/03_geospatial_engine.png)
 
 ## Why Earth Engine?
 While standard map APIs provide tiles for navigation, **Google Earth Engine** provides programmatic access to petabytes of scientific satellite data (like Sentinel-2). This allows us to fetch the raw data we need to feed our generative AI "terraforming" pipeline.

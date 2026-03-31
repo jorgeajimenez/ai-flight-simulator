@@ -43,4 +43,4 @@ uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
 ## Architecture: The Cloud Handshake
 The diagram below shows how your Cloud Shell environment is communicating with Vertex AI using the credentials we just generated.
 
-![Architecture: Cloud Handshake](../assets/01_cloud_setup.svg)
+![Architecture: Cloud Handshake](./assets/01_cloud_setup.png)

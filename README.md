@@ -38,7 +38,7 @@ uv run app.py
 
 - **CesiumJS Cache Annihilation:** Aggressively caps memory to 256MB.
 - **Velocity-Linked Degradation:** Dynamically drops texture resolution during high-speed turns to prevent VRAM spikes.
-- **AI Terraformer (Vertex AI & Earth Engine):** The simulator uses Vertex AI as an image-to-image generator (`imagegeneration@006`) to perform real-time "terraforming." 
+- **AI Terraformer (Vertex AI & Earth Engine):** The simulator uses Vertex AI as an image-to-image generator (`imagen-3.0-generate-001`) to perform real-time "terraforming." 
   
   ![Cyberpunk City Terraforming](assets/03_cyberpunk_city.png)
   

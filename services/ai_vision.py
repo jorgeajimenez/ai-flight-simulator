@@ -80,7 +80,7 @@ class AIVisionService:
             logger.info(f"AI Vision: Pilot Advisory: {ai_plan.get('advisory')}")
 
             # Stage 2: Imagen 3 Terraforming
-            imagen_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+            imagen_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
             base_image = VertexImage(image_bytes=image_bytes)
 
             logger.info(f"AI Vision: Terraforming with Imagen 3...")
