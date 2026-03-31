@@ -34,6 +34,27 @@ uv run app.py
 
 ---
 
+## 📋 Implementation Checklist (Codelab Guide)
+If you are following the "Build with AI" codelab from the `main` branch, the table below maps exactly which functionality needs to be implemented, the file it belongs in, and the corresponding marker.
+
+| Module | Codelab Step | File | Functionality to Implement |
+| :--- | :--- | :--- | :--- |
+| **0. Icebreaker** | `[ICEBREAKER]` | `scripts/generate_texture.py` | Use Gemini 2.5 Flash to generate a tiling SVG building texture via CLI. |
+| **1. Modular Arch** | `[CODELAB STEP 1]` | `services/vault.py` | Fetch the Google Maps API Key securely from Secret Manager. |
+| **1. Modular Arch** | `[CODELAB ORCHESTRATION]` | `app.py` | **(Copy/Paste)** Wire up the Flask backend routing orchestrator. |
+| **2. Geospatial** | `[CODELAB STEP 2A]` | `services/geospatial.py` | Initialize the Google Earth Engine SDK with cloud-platform scopes. |
+| **2. Geospatial** | `[CODELAB STEP 2B]` | `services/geospatial.py` | Query Sentinel-2 for a high-res, cloud-free satellite tile of the current location. |
+| **3. AI Vision** | `[CODELAB STEP 3A]` | `services/ai_vision.py` | Use Gemini 2.5 Flash to identify the real-world landmark the pilot is flying over. |
+| **3. AI Vision** | `[CODELAB STEP 3B]` | `services/ai_vision.py` | Use Gemini to analyze satellite terrain and engineer a terraforming prompt. |
+| **3. AI Vision** | `[CODELAB STEP 3C]` | `services/ai_vision.py` | Use Imagen 3 to perform image-to-image terraforming based on the prompt. |
+| **4. Audio Engine** | `[CODELAB STEP 4]` | `services/audio_engine.py` | Synthesize the AI pilot advisory text into an MP3 file using Studio/Journey voices. |
+| **5. Persistent World** | `[CODELAB STEP 5A]` | `services/state_sync.py` | Upload the terraformed texture image to a public CDN bucket (Cloud Storage). |
+| **5. Persistent World** | `[CODELAB STEP 5B]` | `services/state_sync.py` | Save terraforming metadata (coords, prompt, CDN url) to the NoSQL database (Firestore). |
+| **6. Agentic ATC** | `[CODELAB STEP 6B]` | `services/state_sync.py` | Query the database for the 3 most recent terraforming events globally (Anomaly Tracker). |
+| **6. Agentic ATC** | `[CODELAB STEP 6C]` | `services/control_tower.py` | Implement the Parallel Tool Calling loop for the autonomous Air Traffic Control agent. |
+
+---
+
 ## Architecture Highlights
 
 - **CesiumJS Cache Annihilation:** Aggressively caps memory to 256MB.
