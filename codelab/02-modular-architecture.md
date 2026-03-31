@@ -6,7 +6,7 @@ In this module, we transition from a monolithic "script" to an enterprise-grade 
 
 To scale this simulator, we've deconstructed the backend into six specialized services.
 
-![Architecture: Modular SOA](../assets/02_modular_architecture.svg)
+![Architecture: Modular SOA](./assets/02_modular_architecture.png)
 
 Each service has a single responsibility and is isolated for maximum testability:
 
@@ -76,6 +76,6 @@ Now that you've implemented the Vault Service using the Gemini CLI, the backend 
 2. Click the **Web Preview** button (the eye icon) in the top right of your Cloud Shell.
 3. Select **Preview on port 8080**.
 
-![Screenshot: Cloud Shell Web Preview button](../assets/dummy_web_preview.png)
+![Screenshot: Cloud Shell Web Preview button](./assets/dummy_web_preview.png)
 
 You should now see the 3D globe load successfully! The AI terraforming features won't work yet, but you can fly around the world. Keep the server running and open a **new terminal tab** for the next modules.

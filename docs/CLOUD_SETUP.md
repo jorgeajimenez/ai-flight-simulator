@@ -9,7 +9,7 @@ Welcome to the Cloud Setup Guide! This document explains **what** we are buildin
 The **Infinite Flight Simulator** uses advanced Artificial Intelligence to dynamically re-texture the Earth as you fly over it. To do this, it needs two major services from Google Cloud:
 
 1.  **[Google Earth Engine](https://earthengine.google.com/):** We use this API to fetch real, high-resolution satellite imagery of the ground you are flying over.
-2.  **[Vertex AI](https://cloud.google.com/vertex-ai):** We use Google's enterprise AI platform (specifically the `imagegeneration@006` model) to take that real satellite image and a text prompt (like "Cyberpunk City") to generate a brand new, themed texture in real-time.
+2.  **[Vertex AI](https://cloud.google.com/vertex-ai):** We use Google's enterprise AI platform (specifically the `imagen-3.0-generate-001` model) to take that real satellite image and a text prompt (like "Cyberpunk City") to generate a brand new, themed texture in real-time.
 
 To use these powerful tools securely, you need a **Google Cloud Project**. This project acts as a container for your APIs, your billing information, and your **Service Account Key** (a secure file acting as a "password" for your simulator to talk to Google).
 

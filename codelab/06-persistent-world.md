@@ -19,7 +19,7 @@ The Agent executes these tools in **parallel**, reads the data, and synthesizes 
 ## Architecture: Parallel ADK Loop
 This diagram shows how the Agent orchestrates other Cloud services as tools.
 
-![Architecture: Persistent World Agent](../assets/06_persistent_world.svg)
+![Architecture: Persistent World Agent](./assets/06_persistent_world.png)
 
 ---
 

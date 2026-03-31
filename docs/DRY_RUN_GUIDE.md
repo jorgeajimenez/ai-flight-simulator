@@ -201,7 +201,7 @@ ai_plan = json.loads(gemini_res.text.strip())
 
 **[CODELAB STEP 3C] Imagen 3 Terraforming**
 ```python
-imagen_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+imagen_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
 base_image = VertexImage(image_bytes=image_bytes)
 
 generated_images = imagen_model.edit_image(

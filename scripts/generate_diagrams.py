@@ -1,126 +1,82 @@
 import os
-import re
-import vertexai
-from vertexai.generative_models import GenerativeModel
 import sys
+import vertexai
+from vertexai.preview.vision_models import ImageGenerationModel
 
 # Add parent directory to path so we can import config.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import GCPConfig
 
-# Ensure Vertex AI is initialized
-vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
-
-DIAGRAMS = {
-    "01_cloud_setup.svg": """graph LR
-    CS[Cloud Shell / uv] -->|Auth via service-account-key.json| VAI[Vertex AI API]
-    VAI -->|Gemini 2.5 Flash| IMG[Generated SVG Texture]
-    IMG -->|Saved to| FILE[assets/texture.svg]""",
+def main():
+    print("🚀 Initializing Vertex AI...")
+    vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
     
-    "02_modular_architecture.svg": """graph TD
-    Orch[app.py Orchestrator] --> Config[0. Config]
-    Orch --> Vault[1. Secret Manager]
-    Orch --> Geo[2. Earth Engine]
-    Orch --> Vision[3. Vertex AI]
-    Orch --> Audio[4. Cloud TTS]
-    Orch --> State[5. Firestore]""",
-
-    "03_geospatial_engine.svg": """graph LR
-    Coord[Pilot Lat/Lon] --> EE[Earth Engine]
-    EE -->|Satellite Query| S2[Sentinel-2 Data]
-    S2 -->|Clipped to| B64[Raw Image Bytes]
-    B64 -->|Grounded Input| Vision[Module 4: AI Vision]""",
-
-    "04_ai_vision.svg": """sequenceDiagram
-    participant App as app.py
-    participant EE as Earth Engine
-    participant G25 as Gemini 2.5 Flash
-    participant I3 as Imagen 3
-
-    App->>EE: Fetch Satellite PNG at Lat/Lon
-    EE-->>App: Raw Image Bytes
-    App->>G25: Analyze Image + "Mars Colony"
-    G25-->>App: JSON {technical_prompt, advisory}
-    App->>I3: edit_image(base_image, technical_prompt)
-    I3-->>App: Terraformed Texture""",
-
-    "05_immersive_audio.svg": """graph TD
-    Text[AI Generated Text] --> TTS[Cloud TTS Engine]
-    TTS -->|en-US-Studio-O| P[Pilot Audio]
-    TTS -->|en-US-Journey-D| ATC[Control Tower Audio]
-    P --> FE[Frontend Speaker]
-    ATC --> FE""",
-
-    "06_persistent_world.svg": """graph TD
-    Button[Pilot Clicks 'WHERE AM I?'] --> Agent[Control Tower Agent<br>gemini-2.5-flash]
+    print("🧠 Loading Imagen 3 (imagen-3.0-generate-001)...")
+    model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
     
-    subgraph Parallel ADK Loop
-        Agent -->|Decides to use Tools| Decision{Orchestrator}
-        Decision -->|get_telemetry| T1[Identify Landmark]
-        Decision -->|scan_anomaly_tracker| T2[Scan Anomaly Tracker]
-        
-        T1 -.->|Vertex AI Vision| Decision
-        T2 -.->|Cloud Firestore| Decision
-    end
-    
-    Decision -->|Aggregated Data| Agent
-    Agent -->|Immersive Text| TTS[Cloud Text-to-Speech]
-    TTS -->|MP3 Audio| Pilot[Pilot Audio Player]"""
-}
+    out_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "codelab", "assets")
+    os.makedirs(out_dir, exist_ok=True)
 
-def generate_svgs():
-    print("🧠 Loading Gemini 2.5 Flash...")
-    model = GenerativeModel("gemini-2.5-flash")
-    
-    os.makedirs("assets", exist_ok=True)
+    print(f"\n📁 Images will be saved to: {out_dir}/")
 
-    for filename, mermaid_code in DIAGRAMS.items():
-        print(f"🎨 Generating SVG for {filename}...")
+    # Simplified, minimalist prompts with VERY little text to prevent rendering issues.
+    # Flight simulator HUD/Cyberpunk theme.
+    diagram_prompts = {
+        "01_cloud_setup.png": "Minimalist futuristic flight HUD diagram. Three glowing digital icons: a terminal, a brain, and a file. Connected by neon cyan data streams. Minimal text. Dark mode.",
         
-        prompt = f"""
-        You are an expert technical diagram designer and SVG artist.
-        I have a Mermaid diagram representing software architecture.
-        I need you to convert this logic into a highly aesthetic, beautiful, self-contained SVG diagram.
-        
-        Style Requirements:
-        - Dark mode (cyberpunk-ish or sleek modern cloud architecture).
-        - Dark backgrounds (#0a0e17, #1f2833) with neon accents (cyan #66fcf1, magenta, or green).
-        - Rounded nodes, glowing edges, and clean typography (sans-serif like Arial or Roboto).
-        - The diagram must accurately represent the nodes and connections of the Mermaid code.
-        - Ensure text is readable, correctly positioned, and doesn't overlap edges.
-        - Add drop shadows or glow filters to the shapes.
-        - Draw explicit arrows or sequence lines reflecting the Mermaid relationships.
-        - Output width should be around 800px, height around 600px (or adjust as needed).
-        
-        Mermaid Code:
-        {mermaid_code}
-        
-        Return ONLY the raw <svg>...</svg> code. Do not include markdown blocks, HTML, or explanations.
-        """
-        
-        res = model.generate_content(prompt)
-        svg_code = res.text.strip()
-        
-        # Robustly extract SVG from potential markdown
-        if "```" in svg_code:
-            match = re.search(r"<svg.*?</svg>", svg_code, re.IGNORECASE | re.DOTALL)
-            if match:
-                svg_code = match.group(0).strip()
-            else:
-                try:
-                    svg_code = svg_code.split("```")[1].strip()
-                    for prefix in ["xml", "svg", "html"]:
-                        if svg_code.lower().startswith(prefix):
-                            svg_code = svg_code[len(prefix):].strip()
-                            break
-                except IndexError:
-                    pass
-                        
-        filepath = f"assets/{filename}"
-        with open(filepath, "w") as f:
-            f.write(svg_code)
+        "02_modular_architecture.png": "Futuristic flight radar screen. Central core icon with 6 surrounding nodes connected by glowing targeting lines. High-tech interface. Minimal text. Neon green.",
+
+        "03_geospatial_engine.png": "Aero-navigation HUD. A 3D globe icon with a data flow pointing to a 'Vision' node. Minimalist orange glowing lines. High-tech. Minimal text.",
+
+        "04_ai_vision.png": "Flight simulator HUD sequence. A horizontal flow of 4 technical icons connected by purple data streaks. Dark technical blueprint style. Minimal text.",
+
+        "05_immersive_audio.png": "Futuristic audio waveform interface. A speaker icon branching into a headset and a radar tower. Neon yellow glowing soundwaves. Minimal text.",
+
+        "06_persistent_world.png": "Tactical flight map. A central AI core node connected to two scanning sub-nodes. Glowing cyan and pink tactical elements. Complex technical blueprint. Minimal text."
+    }
+
+    dummy_prompts = {
+        "dummy_web_preview.png": "Minimalist dark mode flight HUD button icon: an eye symbol with text '8080'. Cyan neon.",
+        "dummy_enable_apis.png": "Minimalist dark mode UI mockup: a glowing blue 'ENABLE' button. High-tech interface.",
+        "dummy_iam_roles.png": "Minimalist flight HUD radar screen showing a user role icon. Neon green accents.",
+        "dummy_secret_manager.png": "Minimalist dark mode UI mockup: a secret key icon with a green checkmark. Technical UI.",
+        "dummy_firestore.png": "Minimalist dark mode UI mockup: a database icon with a 'Create' button. Glowing blue."
+    }
+
+    all_prompts = {**diagram_prompts, **dummy_prompts}
+
+    print("\n--- Interactive Generation Menu ---")
+    for filename, prompt_text in all_prompts.items():
+        ans = input(f"\n▶️  Generate '{filename}'? [Press Enter to start, 's' to skip, 'q' to quit]: ").strip().lower()
+        if ans == 'q':
+            print("Exiting.")
+            return
+        if ans == 's':
+            continue
             
-        print(f"✅ Saved to {filepath}")
+        print(f"🎨 Processing {filename} with Imagen 3...")
+        
+        try:
+            # Removed aspect_ratio to fix compatibility error. 
+            # Simplified arguments for maximum compatibility with current SDK version.
+            response = model.generate_images(
+                prompt=prompt_text,
+                number_of_images=1
+            )
+            
+            if response.images:
+                generated_image = response.images[0]
+                filepath = os.path.join(out_dir, filename)
+                
+                with open(filepath, "wb") as f:
+                    f.write(generated_image._image_bytes)
+                    
+                print(f"  ✅ Saved to {filepath}")
+            else:
+                print(f"  ❌ No image returned for {filename}")
+                
+        except Exception as e:
+            print(f"  ❌ Failed to generate {filename}: {e}")
 
 if __name__ == "__main__":
-    generate_svgs()
+    main()
