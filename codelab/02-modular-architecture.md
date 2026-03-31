@@ -6,7 +6,7 @@ In this module, we transition from a monolithic "script" to an enterprise-grade 
 
 To scale this simulator, we've deconstructed the backend into six specialized services.
 
-![Architecture: Modular SOA](../assets/02_modular_architecture.svg)
+![Architecture: Modular SOA](../assets/02_modular_architecture.png)
 
 Each service has a single responsibility and is isolated for maximum testability:
 

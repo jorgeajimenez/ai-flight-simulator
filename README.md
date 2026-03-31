@@ -39,19 +39,19 @@ If you are following the "Build with AI" codelab from the `main` branch, the tab
 
 | Module | Codelab Step | File | Functionality to Implement |
 | :--- | :--- | :--- | :--- |
-| **0. Icebreaker** | `[ICEBREAKER]` | `scripts/generate_texture.py` | Use Gemini 2.5 Flash to generate a tiling SVG building texture via CLI. |
-| **1. Modular Arch** | `[CODELAB STEP 1]` | `services/vault.py` | Fetch the Google Maps API Key securely from Secret Manager. |
-| **1. Modular Arch** | `[CODELAB ORCHESTRATION]` | `app.py` | **(Copy/Paste)** Wire up the Flask backend routing orchestrator. |
-| **2. Geospatial** | `[CODELAB STEP 2A]` | `services/geospatial.py` | Initialize the Google Earth Engine SDK with cloud-platform scopes. |
-| **2. Geospatial** | `[CODELAB STEP 2B]` | `services/geospatial.py` | Query Sentinel-2 for a high-res, cloud-free satellite tile of the current location. |
-| **3. AI Vision** | `[CODELAB STEP 3A]` | `services/ai_vision.py` | Use Gemini 2.5 Flash to identify the real-world landmark the pilot is flying over. |
-| **3. AI Vision** | `[CODELAB STEP 3B]` | `services/ai_vision.py` | Use Gemini to analyze satellite terrain and engineer a terraforming prompt. |
-| **3. AI Vision** | `[CODELAB STEP 3C]` | `services/ai_vision.py` | Use Imagen 3 to perform image-to-image terraforming based on the prompt. |
-| **4. Audio Engine** | `[CODELAB STEP 4]` | `services/audio_engine.py` | Synthesize the AI pilot advisory text into an MP3 file using Studio/Journey voices. |
-| **5. Persistent World** | `[CODELAB STEP 5A]` | `services/state_sync.py` | Upload the terraformed texture image to a public CDN bucket (Cloud Storage). |
-| **5. Persistent World** | `[CODELAB STEP 5B]` | `services/state_sync.py` | Save terraforming metadata (coords, prompt, CDN url) to the NoSQL database (Firestore). |
-| **6. Agentic ATC** | `[CODELAB STEP 6B]` | `services/state_sync.py` | Query the database for the 3 most recent terraforming events globally (Anomaly Tracker). |
-| **6. Agentic ATC** | `[CODELAB STEP 6C]` | `services/control_tower.py` | Implement the Parallel Tool Calling loop for the autonomous Air Traffic Control agent. |
+| **Module 1: Cloud Setup** | `[ICEBREAKER]` | `scripts/generate_texture.py` | Use Gemini 2.5 Flash to generate a tiling SVG building texture via CLI. |
+| **Module 2: Modular Arch** | `[CODELAB STEP 1]` | `services/vault.py` | Fetch the Google Maps API Key securely from Secret Manager. |
+| **Module 2: Modular Arch** | `[CODELAB ORCHESTRATION]` | `app.py` | **(Copy/Paste)** Wire up the Flask backend routing orchestrator. |
+| **Module 3: Geospatial** | `[CODELAB STEP 2A]` | `services/geospatial.py` | Initialize the Google Earth Engine SDK with cloud-platform scopes. |
+| **Module 3: Geospatial** | `[CODELAB STEP 2B]` | `services/geospatial.py` | Query Sentinel-2 for a high-res, cloud-free satellite tile of the current location. |
+| **Module 4: AI Vision** | `[CODELAB STEP 3A]` | `services/ai_vision.py` | Use Gemini 2.5 Flash to identify the real-world landmark the pilot is flying over. |
+| **Module 4: AI Vision** | `[CODELAB STEP 3B]` | `services/ai_vision.py` | Use Gemini to analyze satellite terrain and engineer a terraforming prompt. |
+| **Module 4: AI Vision** | `[CODELAB STEP 3C]` | `services/ai_vision.py` | Use Imagen 3 to perform image-to-image terraforming based on the prompt. |
+| **Module 5: Audio Engine** | `[CODELAB STEP 4]` | `services/audio_engine.py` | Synthesize the AI pilot advisory text into an MP3 file using Studio/Journey voices. |
+| **Module 6: Persistent World** | `[CODELAB STEP 5A]` | `services/state_sync.py` | Upload the terraformed texture image to a public CDN bucket (Cloud Storage). |
+| **Module 6: Persistent World** | `[CODELAB STEP 5B]` | `services/state_sync.py` | Save terraforming metadata (coords, prompt, CDN url) to the NoSQL database (Firestore). |
+| **Module 6: Persistent World** | `[CODELAB STEP 6B]` | `services/state_sync.py` | Query the database for the 3 most recent terraforming events globally (Anomaly Tracker). |
+| **Module 6: Agentic ATC** | `[CODELAB STEP 6C]` | `services/control_tower.py` | Implement the Parallel Tool Calling loop for the autonomous Air Traffic Control agent. |
 
 ---
 

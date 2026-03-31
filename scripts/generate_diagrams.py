@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import GCPConfig
 
 def main():
-    print("🚀 Initializing Vertex AI...")
+    print("🚀 Initializing Setup...")
     vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
     
     print("🧠 Loading Imagen 3 (imagen-3.0-generate-001)...")
@@ -19,7 +19,7 @@ def main():
 
     print(f"\n📁 Images will be saved to: {out_dir}/")
 
-    # The exact Mermaid code from the codelabs
+    # 1. THE ARCHITECTURE CHARTS
     mermaid_code_blocks = {
         "01_cloud_setup.png": """graph LR
     CS[Cloud Shell / uv] -->|Auth via service-account-key.json| VAI[Vertex AI API]
@@ -77,29 +77,24 @@ def main():
     TTS -->|MP3 Audio| Pilot[Pilot Audio Player]"""
     }
 
-    # Style instructions to prepend to the Mermaid code
-    diagram_styles = {
-        "01_cloud_setup.png": "A highly detailed, futuristic flight simulator HUD style architecture diagram. Dark mode, cyberpunk, sleek modern cloud architecture. Neon cyan and magenta accents. Please render the structure and text exactly as described in this Mermaid code:\n\n",
-        "02_modular_architecture.png": "A highly detailed, futuristic flight radar screen architecture diagram. Dark mode, neon green and blue targeting lines, high-tech interface. Please render the structure and text exactly as described in this Mermaid code:\n\n",
-        "03_geospatial_engine.png": "A futuristic aero-navigation HUD architecture diagram. Dark mode, neon orange and cyan glowing lines, holographic displays. Please render the structure and text exactly as described in this Mermaid code:\n\n",
-        "04_ai_vision.png": "A futuristic flight simulator HUD sequence diagram. Dark mode, glowing data streams, neon purple and cyan, technical blueprint feel. Please render the structure and text exactly as described in this Mermaid code:\n\n",
-        "05_immersive_audio.png": "A futuristic audio-wave interface architecture diagram. Dark mode, glowing soundwaves, neon green and yellow, futuristic HUD style. Please render the structure and text exactly as described in this Mermaid code:\n\n",
-        "06_persistent_world.png": "A futuristic tactical flight map architecture diagram. Dark mode, complex technical blueprint style, neon cyan and pink accents. Please render the structure and text exactly as described in this Mermaid code:\n\n"
-    }
+    # Extremely simple prompt to keep the image legible, focusing on the mermaid code directly.
+    base_style = """
+A clean, flat, highly legible software architecture diagram. Flight simulator aesthetic. Dark purple background, glowing cyan and neon green shapes. Very simple, large readable text. The exact nodes and structure are strictly defined by this Mermaid code:
+"""
 
     dummy_prompts = {
-        "dummy_web_preview.png": "A clean, minimalist UI mockup of a Google Cloud Shell 'Web Preview' button, styled like a dark-mode flight simulator HUD. Show an eye icon and the text 'Preview on port 8080'. Glowing cyan neon accents, sleek technical UI.",
-        "dummy_enable_apis.png": "A clean, minimalist UI mockup of a Google Cloud Console 'Enable APIs' screen, styled like a dark-mode flight simulator HUD. Show a glowing blue 'ENABLE' button next to futuristic text blocks. Dark mode, technical UI.",
-        "dummy_iam_roles.png": "A clean mockup of a Google Cloud IAM Roles assignment screen, styled like a dark-mode flight simulator HUD radar. Show a dropdown menu assigning 'Vertex AI User'. Glowing neon accents, technical UI.",
-        "dummy_secret_manager.png": "A clean mockup of a Google Cloud Secret Manager UI, styled like a dark-mode flight simulator HUD. Show a data table with a secret named 'GOOGLE_MAPS_API_KEY' and a green glowing checkmark. Technical UI.",
-        "dummy_firestore.png": "A clean mockup of a Google Cloud Firestore setup screen, styled like a dark-mode flight simulator HUD. Show a dialog box selecting 'Native Mode' and a glowing 'Create Database' button. Technical UI."
+        "dummy_web_preview.png": "A clean, minimalist 3D isometric illustration of a Google Cloud Shell 'Web Preview' button on a dark purple background. Show an eye icon and the text 'Preview on port 8080'. Glowing cyan neon accents.",
+        "dummy_enable_apis.png": "A clean, minimalist 3D isometric illustration of a Google Cloud Console 'Enable APIs' screen on a dark purple background. Show a glowing blue 'ENABLE' button next to soft rounded text blocks.",
+        "dummy_iam_roles.png": "A clean 3D isometric illustration of a Google Cloud IAM Roles assignment dropdown on a dark purple background. Show 'Vertex AI User' being assigned with glowing neon accents.",
+        "dummy_secret_manager.png": "A clean 3D isometric illustration of a Google Cloud Secret Manager UI on a dark purple background. Show a glowing data table with a secret named 'GOOGLE_MAPS_API_KEY' and a green glowing checkmark.",
+        "dummy_firestore.png": "A clean 3D isometric illustration of a Google Cloud Firestore setup screen on a dark purple background. Show a dialog box selecting 'Native Mode' and a glowing 'Create Database' button."
     }
 
-    print("\n--- Interactive Generation Menu ---")
+    print("\n--- Interactive Generation Menu: Architecture Diagrams (Imagen 3) ---")
     
-    # Process Diagrams
+    # Process Diagrams via Imagen 3 directly
     for filename, mermaid in mermaid_code_blocks.items():
-        full_prompt = diagram_styles[filename] + "```mermaid\n" + mermaid + "\n```"
+        full_prompt = base_style + f"\n```mermaid\n{mermaid}\n```"
         
         ans = input(f"\n▶️  Generate '{filename}'? [Press Enter to start, 's' to skip, 'q' to quit]: ").strip().lower()
         if ans == 'q':
@@ -108,7 +103,7 @@ def main():
         if ans == 's':
             continue
             
-        print(f"🎨 Processing {filename} with Imagen 3...")
+        print(f"🎨 Generating {filename} with Imagen 3...")
         try:
             response = model.generate_images(
                 prompt=full_prompt,
@@ -119,12 +114,14 @@ def main():
                 filepath = os.path.join(out_dir, filename)
                 with open(filepath, "wb") as f:
                     f.write(generated_image._image_bytes)
-                print(f"  ✅ Saved to {filepath}")
+                print(f"  ✅ Saved aesthetic PNG to {filepath}")
             else:
                 print(f"  ❌ No image returned for {filename}")
         except Exception as e:
             print(f"  ❌ Failed to generate {filename}: {e}")
 
+    print("\n--- Interactive Generation Menu: UI Placeholders (Imagen 3) ---")
+    
     # Process Dummy UIs
     for filename, prompt_text in dummy_prompts.items():
         ans = input(f"\n▶️  Generate '{filename}'? [Press Enter to start, 's' to skip, 'q' to quit]: ").strip().lower()
@@ -134,7 +131,7 @@ def main():
         if ans == 's':
             continue
             
-        print(f"🎨 Processing {filename} with Imagen 3...")
+        print(f"🎨 Generating {filename} with Imagen 3...")
         try:
             response = model.generate_images(
                 prompt=prompt_text,
@@ -145,7 +142,7 @@ def main():
                 filepath = os.path.join(out_dir, filename)
                 with open(filepath, "wb") as f:
                     f.write(generated_image._image_bytes)
-                print(f"  ✅ Saved to {filepath}")
+                print(f"  ✅ Saved aesthetic PNG to {filepath}")
             else:
                 print(f"  ❌ No image returned for {filename}")
         except Exception as e:
