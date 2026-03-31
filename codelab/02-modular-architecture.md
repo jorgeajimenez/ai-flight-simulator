@@ -6,15 +6,7 @@ In this module, we transition from a monolithic "script" to an enterprise-grade 
 
 To scale this simulator, we've deconstructed the backend into six specialized services.
 
-```mermaid
-graph TD
-    Orch[app.py Orchestrator] --> Config[0. Config]
-    Orch --> Vault[1. Secret Manager]
-    Orch --> Geo[2. Earth Engine]
-    Orch --> Vision[3. Vertex AI]
-    Orch --> Audio[4. Cloud TTS]
-    Orch --> State[5. Firestore]
-```
+![Architecture: Modular SOA](../assets/02_modular_architecture.svg)
 
 Each service has a single responsibility and is isolated for maximum testability:
 

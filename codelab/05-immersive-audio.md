@@ -8,14 +8,7 @@ We are using **Cloud Text-to-Speech** to bring our AI entities to life. To diffe
 *   **The Pilot (`voice_type="pilot"`):** Uses `en-US-Studio-O` for extremely natural, smooth briefings.
 *   **The ATC (`voice_type="atc"`):** Uses `en-US-Journey-D` for an authoritative, "command-center" tone.
 
-```mermaid
-graph TD
-    Text[AI Generated Text] --> TTS[Cloud TTS Engine]
-    TTS -->|en-US-Studio-O| P[Pilot Audio]
-    TTS -->|en-US-Journey-D| ATC[Control Tower Audio]
-    P --> FE[Frontend Speaker]
-    ATC --> FE
-```
+![Architecture: Audio Engine](../assets/05_immersive_audio.svg)
 
 ## Implementation: `AudioSynthesisService`
 

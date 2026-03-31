@@ -43,9 +43,4 @@ uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
 ## Architecture: The Cloud Handshake
 The diagram below shows how your Cloud Shell environment is communicating with Vertex AI using the credentials we just generated.
 
-```mermaid
-graph LR
-    CS[Cloud Shell / uv] -->|Auth via service-account-key.json| VAI[Vertex AI API]
-    VAI -->|Gemini 2.5 Flash| IMG[Generated SVG Texture]
-    IMG -->|Saved to| FILE[assets/texture.svg]
-```
+![Architecture: Cloud Handshake](../assets/01_cloud_setup.svg)
