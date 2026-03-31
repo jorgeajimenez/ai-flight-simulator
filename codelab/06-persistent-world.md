@@ -19,23 +19,7 @@ The Agent executes these tools in **parallel**, reads the data, and synthesizes 
 ## Architecture: Parallel ADK Loop
 This diagram shows how the Agent orchestrates other Cloud services as tools.
 
-```mermaid
-graph TD
-    Button[Pilot Clicks 'WHERE AM I?'] --> Agent[Control Tower Agent<br>gemini-2.5-flash]
-
-    subgraph Parallel ADK Loop
-        Agent -->|Decides to use Tools| Decision{Orchestrator}
-        Decision -->|get_telemetry| T1[Identify Landmark]
-        Decision -->|scan_anomaly_tracker| T2[Scan Anomaly Tracker]
-
-        T1 -.->|Vertex AI Vision| Decision
-        T2 -.->|Cloud Firestore| Decision
-    end
-
-    Decision -->|Aggregated Data| Agent
-    Agent -->|Immersive Text| TTS[Cloud Text-to-Speech]
-    TTS -->|MP3 Audio| Pilot[Pilot Audio Player]
-```
+![Architecture: Persistent World Agent](../assets/06_persistent_world.svg)
 
 ---
 

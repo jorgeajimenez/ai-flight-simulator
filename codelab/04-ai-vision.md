@@ -16,20 +16,7 @@ The `AIVisionService` acts as our multimodal intelligence hub, providing two key
 ## Architecture: Visual RAG Sequence
 This diagram shows how we move from a 1D text prompt to a 2D geographically grounded texture.
 
-```mermaid
-sequenceDiagram
-    participant App as app.py
-    participant EE as Earth Engine
-    participant G25 as Gemini 2.5 Flash
-    participant I3 as Imagen 3
-
-    App->>EE: Fetch Satellite PNG at Lat/Lon
-    EE-->>App: Raw Image Bytes
-    App->>G25: Analyze Image + "Mars Colony"
-    G25-->>App: JSON {technical_prompt, advisory}
-    App->>I3: edit_image(base_image, technical_prompt)
-    I3-->>App: Terraformed Texture
-```
+![Architecture: AI Vision Pipeline](../assets/04_ai_vision.svg)
 
 ---
 
