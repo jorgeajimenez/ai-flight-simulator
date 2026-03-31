@@ -1,5 +1,7 @@
 # Build with AI: Infinite Flight Simulator
 
+> **⚠️ ATTENTION:** You are currently on the **STARTER** branch. This codebase contains `TODO` markers where you will implement the AI logic. If you get stuck or want to see the final result, switch to the **solution** branch: `git checkout solution`.
+
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0.2-green.svg)
 ![CesiumJS](https://img.shields.io/badge/CesiumJS-WebGL-blueviolet)
@@ -18,8 +20,8 @@ This project uses Python for the backend to proxy Vertex AI and Earth Engine req
 
 ### Prerequisites
 
-1.  **System Requirements:** Review the **[INSTALL_GUIDE.md](./INSTALL_GUIDE.md)** for a complete list of required tools (Git, gcloud, uv, and a modern web browser) and how to install them on your OS.
-2.  **Google Cloud Setup:** You need an active Google Cloud project with billing enabled, Vertex AI and Earth Engine APIs enabled, and a valid `service-account-key.json` in the root of this directory. **[Please read the complete CLOUD_SETUP.md guide](./CLOUD_SETUP.md)** for step-by-step instructions and helpful setup scripts for Windows, Mac, and Linux.
+1.  **System Requirements:** Review the **[INSTALL_GUIDE.md](./docs/INSTALL_GUIDE.md)** for a complete list of required tools (Git, gcloud, uv, and a modern web browser) and how to install them on your OS.
+2.  **Google Cloud Setup:** You need an active Google Cloud project with billing enabled, Vertex AI and Earth Engine APIs enabled, and a valid `service-account-key.json` in the root of this directory. **[Please read the complete CLOUD_SETUP.md guide](./docs/CLOUD_SETUP.md)** for step-by-step instructions and helpful setup scripts for Windows, Mac, and Linux.
 3.  **uv:** Ensure you have `uv` installed.
 
 ### Start the Server
