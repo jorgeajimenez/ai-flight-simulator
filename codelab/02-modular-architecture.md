@@ -70,3 +70,20 @@ infinite-loop-simulator/
 ```
 
 This structure makes the application **"AI-Wirable"**—meaning each service can be independently tested and easily integrated into the main application via standardized interfaces.
+
+---
+
+## 🚀 Your First Flight: Test the Simulator!
+
+Now that you've implemented the Vault Service using the Gemini CLI, the backend can finally pull the Google Maps API Key and serve it to the frontend. Let's test it!
+
+1. Start the Flask server in your Cloud Shell terminal:
+   ```bash
+   uv run app.py
+   ```
+2. Click the **Web Preview** button (the eye icon) in the top right of your Cloud Shell.
+3. Select **Preview on port 8080**.
+
+![Screenshot: Cloud Shell Web Preview button](../assets/dummy_web_preview.png)
+
+You should now see the 3D globe load successfully! The AI terraforming features won't work yet, but you can fly around the world. Keep the server running and open a **new terminal tab** for the next modules.

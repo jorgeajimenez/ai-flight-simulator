@@ -2,19 +2,26 @@
 
 Before we build the flight simulator's brain, we need to ensure our environment is correctly wired to Google Cloud.
 
-## The Setup
+## 🛠 The Setup
+You will perform all development inside Google Cloud Shell, which comes pre-installed with the tools you need.
+
 1.  **Activate Cloud Shell:** Click the `>_` icon in the top right of your Google Cloud Console.
-2.  **Clone & Prepare:**
+2.  **Get Your Maps API Key:** 
+    *   In the Cloud Console search bar, type "Google Maps Platform Credentials".
+    *   Click **Create Credentials** -> **API Key** and copy it. You will need this in a moment.
+    *   *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
+3.  **Clone & Prepare:** Run this in your Cloud Shell terminal:
     ```bash
     git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
     cd ai-flight-simulator
     uv sync
     ```
-3.  **Run the Automator:**
+4.  **Run the Automator:** We've built a script that handles creating your Service Account, enabling the APIs (Vertex AI, Earth Engine, Secret Manager, TTS), and securely storing your Maps API key.
     ```bash
     bash scripts/setup_gcp.sh
     ```
-    *Note: This script enables the Essential 6 APIs and configures your Service Account permissions.*
+    *When prompted, paste your Google Maps API Key. The script will securely lock it inside Google Cloud Secret Manager.*
+5. **Earth Engine Terms:** Finally, you must accept the Earth Engine terms. Visit **[earthengine.google.com/signup](https://earthengine.google.com/signup)** and click "Register".
 
 ---
 
