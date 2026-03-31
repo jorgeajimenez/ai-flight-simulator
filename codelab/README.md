@@ -1,4 +1,4 @@
-# 🚀 Codelab: Build the Infinite Flight Multiverse
+# 🚀 Codelab: Build the Infinite Flight Persistent World
 
 Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will deconstruct a monolithic 3D flight simulator and rebuild its brain using the **Essential 6 Google Cloud Stack**.
 
@@ -14,8 +14,8 @@ Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will 
     *   Building a **Visual RAG** pipeline with Gemini 2.5 Flash and Imagen 3.
 5.  **[Module 5: Immersive Audio Engine](./05-immersive-audio.md)**
     *   Synthesizing lifelike pilot advisories with Cloud Text-to-Speech.
-6.  **[Module 6: Agentic Intelligence & The Radar](./06-multiverse-state.md)**
-    *   **The Grand Finale:** Building an autonomous Agent using Vertex AI Function Calling (ADK) to scan the Firestore Multiverse.
+6.  **[Module 6: Agentic Intelligence & The Anomaly Tracker](./06-persistent-world.md)**
+    *   **The Grand Finale:** Building an autonomous Agent using Vertex AI Function Calling (ADK) to scan the Persistent World.
 
 ## 🛠 Prerequisites
 *   A Google Cloud Project with Billing enabled.

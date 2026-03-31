@@ -2,11 +2,13 @@ import logging
 from google.cloud import secretmanager
 from config import GCPConfig, logger
 
+
 class VaultService:
     """
     Secure Key Management Service.
     Handles retrieval and local caching of API keys and secrets from GCP Secret Manager.
     """
+
     _cache: dict[str, str] = {}
 
     @classmethod
@@ -21,9 +23,11 @@ class VaultService:
         try:
             logger.info(f"Vault: Accessing secret {secret_id}...")
             client = secretmanager.SecretManagerServiceClient()
-            name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{secret_id}/versions/latest"
+            name = (
+                f"projects/{GCPConfig.PROJECT_ID}/secrets/{secret_id}/versions/latest"
+            )
             response = client.access_secret_version(request={"name": name})
-            
+
             key = response.payload.data.decode("UTF-8")
             cls._cache[secret_id] = key
             return key

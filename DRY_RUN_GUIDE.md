@@ -1,4 +1,4 @@
-# 🧪 The Ultimate "Cloud Shell" Dry Run & Teacher's Guide
+# 🧪 The Infinite Flight Persistent World: Dry Run Guide
 
 **Purpose:** This document is your master control manual for the GDG event. 
 
@@ -96,7 +96,7 @@ Now, pretend to be the attendee following the Codelab.
 6. **The Final Verification Checklist:**
    - [ ] **Maps:** Do the 3D buildings load? 
    - [ ] **Terraform (Vision/Earth Engine/TTS):** Click "Transform Area". Does the audio play, and does the terrain change to a Cyberpunk city?
-   - [ ] **ADK (Agentic Radar):** Fly somewhere else, click "WHERE AM I?". Does the ATC agent warn you about the Cyberpunk anomaly you just created?
+   **The Anomaly Tracker:** Fly somewhere else, click "WHERE AM I?". Does the ATC agent warn you about the anomaly you just created?
 
 ---
 
@@ -243,14 +243,14 @@ response = client.synthesize_speech(
 return base64.b64encode(response.audio_content).decode("utf-8")
 ```
 
-### Module 6: State Sync & ADK (`services/state_sync.py` & `control_tower.py`)
+### Module 6: Persistent World State Sync & Anomaly Tracker (`services/state_sync.py` & `control_tower.py`)
 **Goal:** Global Texture CDN and the Agentic Radar loop.
 
 **[CODELAB STEP 5A & 5B] Write State & Upload CDN (`state_sync.py`)**
 ```python
 # 1. Cloud Storage Upload
 storage_client = storage.Client(project=GCPConfig.PROJECT_ID)
-bucket_name = f"{GCPConfig.PROJECT_ID}-multiverse-textures"
+bucket_name = f"{GCPConfig.PROJECT_ID}-persistent-textures"
 
 try:
     bucket = storage_client.get_bucket(bucket_name)
@@ -289,7 +289,7 @@ res = gemini_model.generate_content(prompt)
 return res.text.strip()
 ```
 
-**[CODELAB STEP 6B] Read Firestore Radar (`state_sync.py`)**
+**[CODELAB STEP 6B] Read Firestore Anomaly Tracker (`state_sync.py`)**
 ```python
 db = firestore.Client(project=GCPConfig.PROJECT_ID)
 docs = db.collection("terraforms").order_by(
@@ -328,9 +328,9 @@ if response.candidates and response.candidates[0].content.parts:
                     Part.from_function_response(name=fn.name, response={"content": {"weather": "Winds 12kt North.", "landmark": location_desc}})
                 )
                 
-            elif fn.name == "scan_multiverse_activity":
-                from services.state_sync import GlobalMultiverseClient
-                recent_anomalies = GlobalMultiverseClient.get_recent_activity(lat, lon)
+            elif fn.name == "scan_anomaly_tracker":
+                from services.state_sync import PersistentWorldClient
+                recent_anomalies = PersistentWorldClient.get_recent_activity(lat, lon)
                 function_responses.append(
                     Part.from_function_response(name=fn.name, response={"content": {"recent_anomalies": recent_anomalies}})
                 )

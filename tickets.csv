@@ -10,7 +10,7 @@ ID,Summary,Description,Status
 9,Write tests for audio engine service,Mock the Cloud Text-to-Speech client to ensure the synthesize_advisory method requests the correct Studio voice and returns Base64 encoded audio.,DONE
 10,Implement TTS in audio engine service,Implement the AudioSynthesisService to convert the AI-generated advisory narrative into a playable MP3 file for the frontend.,DONE
 11,Write tests for state sync service,Mock the Firestore client to verify that log_terraform_event correctly targets the 'terraforms' collection and adds a server-side timestamp.,DONE
-12,Implement Firestore in state sync service,Build the GlobalMultiverseClient to asynchronously save every successful terraforming event into the database to create a shared multiverse.,DONE
+12,Implement Firestore in state sync service,Build the PersistentWorldClient to asynchronously save every successful terraforming event into the database to create a shared persistent world.,DONE
 13,Write tests for app routing,Mock all the newly created services and simulate a POST request to /terraform to verify the Flask application orchestrates the flow correctly.,DONE
 14,Refactor app routing to use modular services,Strip app.py down to less than 50 lines of routing logic and inject the AI_WIRING_POINT comments for the codelab attendees.,DONE
 15,Implement the Radio UI,Add a frontend component to play the Base64 audio returned by the TTS service.,DONE

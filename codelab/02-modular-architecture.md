@@ -23,7 +23,7 @@ Each service has a single responsibility and is isolated for maximum testability
 3.  **Service 2 (Geospatial):** Real-time satellite fetching (Earth Engine).
 4.  **Service 3 (AI Vision):** Multi-stage generative pipeline (Gemini + Imagen).
 5.  **Service 4 (Audio):** Immersive Pilot voice synthesis (Text-to-Speech).
-6.  **Service 5 (State Sync):** Shared Multiverse persistence (Firestore).
+6.  **Service 5 (State Sync):** Shared Persistent World persistence (Firestore).
 
 ---
 

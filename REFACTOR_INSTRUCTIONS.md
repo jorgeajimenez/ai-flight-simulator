@@ -1,7 +1,7 @@
 # Refactor Instructions: The Essential 6 Service-Oriented Architecture (Test-Driven)
 
 ## Objective
-Deconstruct the `app.py` monolith into an enterprise-grade, modular backend using a **Test-Driven Development (TDD)** approach. This architecture is designed to be "Seamless," "AI-Wirable," and strictly utilizes the **Essential 6 Google Cloud Stack** to deliver a persistent 3D generative multiverse. 
+Deconstruct the `app.py` monolith into an enterprise-grade, modular backend using a **Test-Driven Development (TDD)** approach. This architecture is designed to be "Seamless," "AI-Wirable," and strictly utilizes the **Essential 6 Google Cloud Stack** to deliver a persistent 3D generative world. 
 
 The goal is to build out the tests first, verify the architecture, and then implement the modular codebase with clear `TODO` markers where the actual codelab attendees will "wire up" the Google Cloud services.
 
@@ -20,7 +20,7 @@ infinite-loop-simulator/
 │   ├── ai_vision.py           # Service 1: Vertex AI (Gemini 1.5 Flash + Imagen 3)
 │   ├── geospatial.py          # Service 2: Google Earth Engine (Satellite Fetching)
 │   ├── audio_engine.py        # Service 3: Cloud Text-to-Speech (Studio Voice Engine)
-│   ├── state_sync.py          # Service 4: Firestore (Real-time Multiverse Persistence)
+│   ├── state_sync.py          # Service 4: Firestore (Real-time Persistent World Persistence)
 │   └── vault.py               # Service 5: Secret Manager (Zero-Trust Key Management)
 └── tests/                     # TDD Test Suite
     ├── __init__.py
@@ -79,7 +79,7 @@ Before implementing the service logic, write comprehensive unit tests using `pyt
 - **Cloud Service:** **Cloud Text-to-Speech** (`texttospeech.googleapis.com`).
 - **Method:** `synthesize_advisory(text)` using the `en-US-Studio-O` voice, returning Base64 MP3 bytes.
 
-### Task 5: Multiverse State Sync (`services/state_sync.py`)
+### Task 5: Persistent World State Sync (`services/state_sync.py`)
 - **Cloud Service:** **Firestore** (`firestore.googleapis.com`).
 - **Method:** `log_terraform_event(lat, lon, prompt)`.
 

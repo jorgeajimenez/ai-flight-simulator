@@ -43,5 +43,5 @@ As we refactor, we will inject these comments into `app.py` to facilitate the fi
 - Using `pytest` and `pytest-mock` for TDD.
 - User handles integration testing after each modular step.
 - **CRITICAL REQUIREMENT:** The codelab MUST be "Seamless". Build with re-buildability top of mind. Any manual configuration steps (like creating secrets in the UI) must be automated in setup scripts so attendees have a flawless, one-click start.
-- Created `codelab/06-multiverse-state.md` to document the Firestore module built in Ticket 11/12.
+- Created `codelab/06-persistent-world.md` to document the Firestore module built in Ticket 11/12.
 - Added tasks 15-17 to handle "The Radio" (audio playback), Procedural City Generation, and using Gemini Flash for texture generation.

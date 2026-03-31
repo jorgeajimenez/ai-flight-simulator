@@ -103,7 +103,7 @@ With the complete code already in the repository and the infrastructure wired up
 5. **The Final Verification Checklist:**
    - [ ] **Maps:** Do the 3D buildings load instantly upon opening the preview? 
    - [ ] **Terraform (Vision/Earth Engine/TTS):** Click "Transform Area". Does the audio play, and does the terrain change to a Cyberpunk city?
-   - [ ] **ADK (Agentic Radar):** Fly somewhere else, click "WHERE AM I?". Does the ATC agent warn you about the Cyberpunk anomaly you just created?
+   - [ ] **ADK (Anomaly Tracker):** Fly somewhere else, click "WHERE AM I?". Does the ATC agent warn you about the Cyberpunk anomaly you just created?
 
 ---
 
