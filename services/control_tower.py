@@ -1,120 +1,80 @@
-import json
-import traceback
-import vertexai
-from vertexai.generative_models import GenerativeModel, Tool, FunctionDeclaration, Part
-from config import GCPConfig, logger
-
-# Ensure Vertex AI is initialized
-vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
-
+from google import genai
+from google.genai import types
+from config import GCPConfig
+from services.state_sync import PersistentWorldClient
 
 class ControlTowerAgent:
-    """
-    Agentic Air Traffic Control using Vertex AI Function Calling.
-    """
 
     @staticmethod
     def contact_tower(lat: float, lon: float) -> str:
-        """
-        Acts as an intelligent ATC using tool-calling patterns.
-        """
-        logger.info(f"ATC Agent: Pilot requesting update at {lat}, {lon}")
+        client = genai.Client(
+            vertexai=True,
+            project=GCPConfig.PROJECT_ID,
+            location=GCPConfig.LOCATION
+        )
 
-        try:
-            # 1. Define the Tools
-            get_telemetry = FunctionDeclaration(
-                name="get_telemetry",
-                description="Fetches current weather and visually identifies the real-world landmark the pilot is flying over.",
-                parameters={
-                    "type": "object",
-                    "properties": {
-                        "lat": {"type": "number"},
-                        "lon": {"type": "number"},
-                    },
-                    "required": ["lat", "lon"],
-                },
+        # 1. Tool Schema Definition
+        get_telemetry_tool = types.Tool(
+            function_declarations=[
+                types.FunctionDeclaration(
+                    name="get_telemetry",
+                    description="Get the current geographical landmark name at these coordinates.",
+                    parameters={
+                        "type": "OBJECT",
+                        "properties": {
+                            "lat": {"type": "NUMBER"},
+                            "lon": {"type": "NUMBER"}
+                        }
+                    }
+                )
+            ]
+        )
+
+        scan_anomaly_tool = types.Tool(
+            function_declarations=[
+                types.FunctionDeclaration(
+                    name="scan_anomaly_tracker",
+                    description="Scan the persistent world for terraforming anomalies nearby.",
+                    parameters={
+                        "type": "OBJECT",
+                        "properties": {
+                            "lat": {"type": "NUMBER"},
+                            "lon": {"type": "NUMBER"}
+                        }
+                    }
+                )
+            ]
+        )
+
+        # 2. Agent Initialization
+        model = client.models.create_chat_session(
+            model='gemini-2.5-flash',
+            config=types.GenerateContentConfig(
+                tools=[get_telemetry_tool, scan_anomaly_tool],
+                temperature=0.3
             )
+        )
 
-            scan_anomaly_tracker = FunctionDeclaration(
-                name="scan_anomaly_tracker",
-                description="Queries the Persistent World database (Firestore) for recently generated terraforming anomalies (e.g. Cyberpunk or Mars bases).",
-                parameters={
-                    "type": "object",
-                    "properties": {
-                        "lat": {"type": "number"},
-                        "lon": {"type": "number"},
-                    },
-                    "required": ["lat", "lon"],
-                },
-            )
+        initial_prompt = f"Pilot requesting telemetry and anomaly scan at Coordinates: {lat}, {lon}."
+        response = model.send_message(initial_prompt)
 
-            atc_tools = Tool(
-                function_declarations=[get_telemetry, scan_anomaly_tracker]
-            )
+        # 3. The Execution Loop
+        if response.function_calls:
+            function_responses = []
+            for function_call in response.function_calls:
+                if function_call.name == "get_telemetry":
+                    # Simulated geocoding for demonstration
+                    result = {"status": "success", "location": "Unknown Sector"}
+                    function_responses.append(
+                        types.Part.from_function_response(name="get_telemetry", response=result)
+                    )
+                elif function_call.name == "scan_anomaly_tracker":
+                    anomalies = PersistentWorldClient.scan_vicinity(lat, lon)
+                    function_responses.append(
+                        types.Part.from_function_response(name="scan_anomaly_tracker", response={"anomalies": anomalies})
+                    )
+            
+            final_response = model.send_message(function_responses)
+            return final_response.text
 
-            # 2. Initialize Model (Using 2.5 Flash per user mandate)
-            model_name = "gemini-2.5-flash"
-            agent = GenerativeModel(model_name, tools=[atc_tools])
-
-            # 3. Immersive ATC Prompt
-            chat = agent.start_chat()
-            system_instruction = (
-                "You are an Air Traffic Control agent. You MUST use your tools to check visual telemetry AND scan the Anomaly Tracker. "
-                "Respond strictly as an ATC (max 30 words). Tell the pilot what landmark they are over. "
-                "If the Anomaly Tracker finds recent anomalies (terraforms), warn the pilot about them. Be immersive."
-            )
-            prompt = f"{system_instruction} Flight 001 at {lat}, {lon} requesting airspace update."
-
-            response = chat.send_message(prompt)
-
-            # 4. Handle Parallel Tool Calling Loop
-            if response.candidates and response.candidates[0].content.parts:
-                function_responses = []
-                for part in response.candidates[0].content.parts:
-                    if part.function_call:
-                        fn = part.function_call
-                        logger.info(f"ATC Agent: Decided to execute tool -> {fn.name}")
-
-                        if fn.name == "get_telemetry":
-                            from services.ai_vision import AIVisionService
-
-                            location_desc = AIVisionService.describe_location(lat, lon)
-                            function_responses.append(
-                                Part.from_function_response(
-                                    name=fn.name,
-                                    response={
-                                        "content": {
-                                            "weather": "Winds 12kt North.",
-                                            "landmark": location_desc,
-                                        }
-                                    },
-                                )
-                            )
-
-                        elif fn.name == "scan_anomaly_tracker":
-                            from services.state_sync import PersistentWorldClient
-
-                            recent_anomalies = (
-                                PersistentWorldClient.get_recent_activity(lat, lon)
-                            )
-                            function_responses.append(
-                                Part.from_function_response(
-                                    name=fn.name,
-                                    response={
-                                        "content": {
-                                            "recent_anomalies": recent_anomalies
-                                        }
-                                    },
-                                )
-                            )
-
-                # Send all the tool execution results back to Gemini at once
-                if function_responses:
-                    response = chat.send_message(function_responses)
-
-            return response.text.replace("*", "").strip()
-
-        except Exception as e:
-            error_msg = traceback.format_exc()
-            logger.error(f"ATC Agent Error Details:\n{error_msg}")
-            return "Flight 001, tower is reading you. Airspace clear. Maintain current heading."
+        return response.text
