@@ -6,12 +6,6 @@ Before building the flight simulator's brain, we need to ensure your environment
 
 1.  **Billing Account:** You must have an active billing account. Go to the [Google Cloud Billing Console](https://console.cloud.google.com/billing) and ensure a billing account is linked to your current project.
 2.  **Activate Cloud Shell:** Click the `>_` terminal icon in the top right of your Google Cloud Console. This is your primary development environment.
-3.  **Google Maps Platform:** 
-    *   In the Cloud Console search bar, type "Google Maps Platform Credentials".
-    *   Click **Create Credentials** -> **API Key** and copy it. You will need this in a moment.
-    *   *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
-
-<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the APIs/Credentials screen. Save as `assets/dummy_enable_apis.png`</span>
 
 ## Step 2: Clone & Synchronize
 
@@ -27,14 +21,23 @@ uv sync
 
 ## Step 3: Identity & Access Management (IAM)
 
-We've provided a script to automate the creation of your Service Account and the enablement of APIs (Vertex AI, Earth Engine, Secret Manager, TTS).
+We've provided a script to automate the creation of your Google Cloud Project, enable APIs (Vertex AI, Earth Engine, Secret Manager, TTS), and configure your Service Account. 
 
-**Action Marker 1.2:** Run the setup script. When prompted, paste your **Google Maps API Key**.
+**Action Marker 1.2:** Run the setup script in your terminal. 
 
 ```bash
 bash scripts/setup_gcp.sh
 ```
 
+**Pause for the Maps API Key:**
+During execution, the script will pause and ask you for a **Google Maps API Key**. 
+
+1. *While the script is paused*, hold `CTRL` (or `CMD` on Mac) and click this link to open the credentials page in a new tab: **[Google Maps Platform Credentials](https://console.cloud.google.com/google/maps-apis/credentials)**
+2. If prompted by a "Try Google Maps Platform" wizard, click **Agree & continue** to link your billing account.
+3. Click **Create Credentials** -> **API Key** and copy it. *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
+4. Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.
+
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the Maps APIs/Credentials screen. Save as `assets/dummy_enable_apis.png`</span>
 <br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png`</span>
 
 ## Step 4: Earth Engine Registration (CRITICAL)
