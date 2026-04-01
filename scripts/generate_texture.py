@@ -1,6 +1,12 @@
 import argparse
 import base64
 import re
+import os
+import sys
+
+# Add parent directory to path so we can import config.py
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import vertexai
 from vertexai.generative_models import GenerativeModel
 from config import GCPConfig
