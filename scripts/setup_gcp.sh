@@ -64,21 +64,41 @@ if [[ "$PROJECT_CHOICE" == "n" || "$PROJECT_CHOICE" == "N" ]]; then
 
     # Link billing account (only needed for new projects here)
     echo "💳 Fetching available billing accounts..."
-    BILLING_ACCOUNTS=$(gcloud billing accounts list --format="value(name,displayName)")
+    
+    BILLING_IDS=()
+    BILLING_NAMES=()
+    while IFS=$'\t' read -r id name; do
+        if [ -n "$id" ]; then
+            # Remove 'billingAccounts/' prefix if present
+            id=${id#billingAccounts/}
+            BILLING_IDS+=("$id")
+            BILLING_NAMES+=("$name")
+        fi
+    done < <(gcloud billing accounts list --format="value(name,displayName)")
 
-    if [ -z "$BILLING_ACCOUNTS" ]; then
+    if [ ${#BILLING_IDS[@]} -eq 0 ]; then
         echo "❌ Error: No billing accounts found. Please create one at https://console.cloud.google.com/billing"
         exit 1
     fi
 
-    echo "Available Billing Accounts:"
-    gcloud billing accounts list
-    echo ""
-    read -p "Enter the ACCOUNT_ID of the billing account to link to this project: " BILLING_ID
-
-    if [ -z "$BILLING_ID" ]; then
-        echo "❌ Error: Billing ID cannot be empty."
-        exit 1
+    if [ ${#BILLING_IDS[@]} -eq 1 ]; then
+        BILLING_ID="${BILLING_IDS[0]}"
+        echo "✅ Auto-selecting the only available billing account: ${BILLING_NAMES[0]} ($BILLING_ID)"
+    else
+        echo "Available Billing Accounts:"
+        for i in "${!BILLING_IDS[@]}"; do
+            echo "  $((i+1))) ${BILLING_NAMES[$i]} (${BILLING_IDS[$i]})"
+        done
+        echo ""
+        read -p "Select a billing account by number: " BILLING_CHOICE
+        
+        if ! [[ "$BILLING_CHOICE" =~ ^[0-9]+$ ]] || [ "$BILLING_CHOICE" -lt 1 ] || [ "$BILLING_CHOICE" -gt ${#BILLING_IDS[@]} ]; then
+            echo "❌ Error: Invalid selection."
+            exit 1
+        fi
+        
+        INDEX=$((BILLING_CHOICE-1))
+        BILLING_ID="${BILLING_IDS[$INDEX]}"
     fi
 
     echo "🔗 Linking billing account..."
