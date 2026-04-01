@@ -11,6 +11,8 @@ Before building the flight simulator's brain, we need to ensure your environment
     *   Click **Create Credentials** -> **API Key** and copy it. You will need this in a moment.
     *   *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
 
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the APIs/Credentials screen. Save as `assets/dummy_enable_apis.png` to replace the placeholder!</span>
+
 ## Step 2: Clone & Configure
 
 Run these commands in your Cloud Shell terminal to download the project and install dependencies:
@@ -27,6 +29,8 @@ We've provided a setup script that creates your Service Account, enables necessa
 bash scripts/setup_gcp.sh
 ```
 *When prompted, paste your Google Maps API Key. The script will securely lock it inside Google Cloud Secret Manager.*
+
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png` to replace the placeholder!</span>
 
 ## Step 3: Earth Engine Registration (CRITICAL)
 If you have a new Google Cloud account, you **must** manually accept the Earth Engine Terms of Service before the API will work, even if the script enabled it. 

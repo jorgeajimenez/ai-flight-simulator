@@ -144,6 +144,12 @@ Now that you've implemented the Vault Service using the Gemini CLI, the backend 
 2. Click the **Web Preview** button (the eye icon) in the top right of your Cloud Shell.
 3. Select **Preview on port 8080**.
 
-![Screenshot: Cloud Shell Web Preview button](../assets/dummy_web_preview.png)
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: The Cloud Shell 'Web Preview' dropdown menu. Save as `assets/dummy_web_preview.png` to replace the placeholder!</span>
+
+![Screenshot: Cloud Shell Web Preview button](./assets/dummy_web_preview.png)
+
+*The Web Preview feature securely tunnels port 8080 from your Cloud Shell virtual machine directly to your browser. If you don't see the CesiumJS globe, double-check that your `service-account-key.json` is in the root directory and that the Flask server output doesn't show any startup errors.*
 
 You should now see the 3D globe load successfully! The AI terraforming features won't work yet, but you can fly around the world. Keep the server running and open a **new terminal tab** for the next modules.
+
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: The initial 3D globe loaded in the browser. Save as `assets/intro_screenshot.png` to replace the placeholder!</span>

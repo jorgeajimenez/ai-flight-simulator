@@ -33,6 +33,9 @@ Open `services/ai_vision.py` and find **[CODELAB STEP 3B]**. You will use the Ge
 # 5. Call edit_image with the base_image and engineered prompt
 ```
 
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Terraform a city (e.g., Cyberpunk) and capture the result! Save as `assets/03_cyberpunk_city.png`</span>
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Terraform 4 times in a row to trigger the memory limit. Capture the red "EVICTING OLD PATCH" toast notification! Save as `assets/04_memory_eviction.png`</span>
+
 ---
 
 ## 🛠 Troubleshooting AI Quotas
