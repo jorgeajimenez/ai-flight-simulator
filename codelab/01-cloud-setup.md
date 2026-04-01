@@ -35,8 +35,9 @@ During execution, the script will pause and ask you for a **Google Maps API Key*
 1. *While the script is paused*, hold `CTRL` (or `CMD` on Mac) and click this link to open the credentials page in a new tab: **[Google Maps Platform Credentials](https://console.cloud.google.com/google/maps-apis/credentials)**
 2. If prompted by a "Try Google Maps Platform" wizard, click **Agree & continue**.
 3. **Account Verification:** For new accounts, you may see a popup asking to **"Verify your account to use Maps APIs and services"**. This is a mandatory anti-abuse check. Click **Verify Account** and follow the prompts (this may include a quick phone number verification).
-4. Click **Create Credentials** -> **API Key** and copy it. *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
-5. Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.
+4. **Enable the Map Tiles API (CRITICAL):** Even though our script attempts to enable this, Google often requires a manual "Enable" click to accept specific 3D Map terms. Click this direct link: **[Enable Map Tiles API](https://console.cloud.google.com/apis/library/tile.googleapis.com)**. Ensure your project is selected in the top dropdown and click the blue **ENABLE** button.
+5. **Create the Key:** Once enabled, click **Keys & Credentials** on the left sidebar. Click **Create Credentials** -> **API Key** and copy it.
+6. Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.
 
 <br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the Maps APIs/Credentials screen. Save as `assets/dummy_enable_apis.png`</span>
 <br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png`</span>
