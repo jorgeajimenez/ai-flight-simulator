@@ -120,45 +120,51 @@ fi
 gcloud config set project "$PROJECT_ID"
 
 # Enable APIs
-echo "⚡ Enabling Vertex AI, Earth Engine, Text-to-Speech, Firestore, and Secret Manager APIs..."
-gcloud services enable aiplatform.googleapis.com
-gcloud services enable earthengine.googleapis.com
-gcloud services enable secretmanager.googleapis.com
-gcloud services enable texttospeech.googleapis.com
-gcloud services enable firestore.googleapis.com
+echo "⚡ Enabling Vertex AI, Earth Engine, Text-to-Speech, Firestore, Map Tiles, and Secret Manager APIs (this may take a minute)..."
+gcloud services enable \
+    aiplatform.googleapis.com \
+    earthengine.googleapis.com \
+    secretmanager.googleapis.com \
+    texttospeech.googleapis.com \
+    firestore.googleapis.com \
+    tile.googleapis.com
 
-echo "⚠️ Note: The Google Maps Photorealistic 3D Tiles API must often be enabled manually in the Cloud Console due to specific Terms of Service."
 echo "✅ Core APIs enabled."
-echo ""
-
-# Check Maps API Status safely
-echo "🗺️ Checking Google Maps Platform APIs..."
-if gcloud services list --enabled --format="value(config.name)" | grep -q "maps-backend.googleapis.com"; then
-    echo "✅ Google Maps API is already enabled!"
-else
-    echo "⚠️ Google Maps API is NOT enabled yet."
-    echo "   You must enable it manually in the Cloud Console due to specific Terms of Service:"
-    echo "   👉 https://console.cloud.google.com/apis/library/maps-backend.googleapis.com"
-fi
+echo "⚠️  CRITICAL: Even though we enabled 'tile.googleapis.com' via CLI,"
+echo "   you MAY need to manually click 'ENABLE' in the browser to accept 3D Map Terms."
+echo "   👉 https://console.cloud.google.com/apis/library/tile.googleapis.com"
 echo ""
 
 # Manage Google Maps API Key Secret
-echo "🗺️ We need your Google Maps API Key to store securely in Secret Manager."
-echo "You can get one at: https://console.cloud.google.com/google/maps-apis/credentials"
-read -p "Enter your Google Maps API Key: " MAPS_API_KEY
+echo "🗺️ Google Maps API Key Management"
+SECRET_EXISTS=false
+if gcloud secrets describe GOOGLE_MAPS_API_KEY &> /dev/null; then
+    SECRET_EXISTS=true
+    if gcloud secrets versions access latest --secret="GOOGLE_MAPS_API_KEY" &> /dev/null; then
+        echo "✅ A Google Maps API Key is already stored securely in Secret Manager."
+        read -p "Do you want to update it? (y/N): " UPDATE_KEY
+        if [[ ! "$UPDATE_KEY" =~ ^[Yy]$ ]]; then
+            echo "⏭️ Skipping API Key update."
+            MAPS_API_KEY="SKIPPED"
+        fi
+    fi
+fi
 
 if [ -z "$MAPS_API_KEY" ]; then
-    echo "⚠️ Warning: No API Key provided. The 3D map will not load until you add it to Secret Manager manually."
-else
-    echo "🔒 Saving API Key to Secret Manager..."
-    # Check if secret exists, if not create it
-    if ! gcloud secrets describe GOOGLE_MAPS_API_KEY &> /dev/null; then
-        gcloud secrets create GOOGLE_MAPS_API_KEY --replication-policy="automatic"
+    echo "We need your Google Maps API Key to store securely in Secret Manager."
+    echo "You can get one at: https://console.cloud.google.com/google/maps-apis/credentials"
+    read -p "Enter your Google Maps API Key (or press Enter to skip): " MAPS_API_KEY
+
+    if [ -z "$MAPS_API_KEY" ]; then
+        echo "⚠️ Warning: No API Key provided. The 3D map will not load until you add it to Secret Manager manually."
+    else
+        echo "🔒 Saving API Key to Secret Manager..."
+        if [ "$SECRET_EXISTS" = false ]; then
+            gcloud secrets create GOOGLE_MAPS_API_KEY --replication-policy="automatic"
+        fi
+        echo -n "$MAPS_API_KEY" | gcloud secrets versions add GOOGLE_MAPS_API_KEY --data-file=-
+        echo "✅ API Key securely saved."
     fi
-    
-    # Add the value as a new version
-    echo -n "$MAPS_API_KEY" | gcloud secrets versions add GOOGLE_MAPS_API_KEY --data-file=-
-    echo "✅ API Key securely saved."
 fi
 echo ""
 
@@ -171,13 +177,14 @@ if ! gcloud iam service-accounts describe "$SA_EMAIL" &> /dev/null; then
     gcloud iam service-accounts create "$SA_NAME" \
         --description="Backend service account for Infinite Flight Simulator" \
         --display-name="Flight Sim Backend"
+    # Wait for SA to propagate only if newly created
+    sleep 5
 else
     echo "Service account already exists, skipping creation."
 fi
 
 # Assign Roles
 echo "🔐 Assigning roles (Vertex AI User, Earth Engine Viewer, Secret Accessor, Service Usage Consumer)..."
-sleep 5 # Wait for SA to propagate
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SA_EMAIL" \
     --role="roles/aiplatform.user" > /dev/null
@@ -198,14 +205,24 @@ echo "✅ Roles assigned."
 echo ""
 
 # Generate Key
-echo "🔑 Generating service-account-key.json..."
+echo "🔑 Checking service-account-key.json..."
 if [ -f "service-account-key.json" ]; then
-    echo "⚠️ Existing service-account-key.json found. Backing it up to service-account-key.json.bak"
-    mv service-account-key.json service-account-key.json.bak
+    echo "✅ Existing service-account-key.json found."
+    read -p "Do you want to generate a new key? (y/N): " GEN_KEY
+    if [[ "$GEN_KEY" =~ ^[Yy]$ ]]; then
+        echo "Backing up to service-account-key.json.bak"
+        mv service-account-key.json service-account-key.json.bak
+        gcloud iam service-accounts keys create service-account-key.json \
+            --iam-account="$SA_EMAIL"
+        echo "✅ New key generated."
+    else
+        echo "⏭️ Skipping key generation."
+    fi
+else
+    gcloud iam service-accounts keys create service-account-key.json \
+        --iam-account="$SA_EMAIL"
+    echo "✅ New key generated."
 fi
-
-gcloud iam service-accounts keys create service-account-key.json \
-    --iam-account="$SA_EMAIL"
 
 echo ""
 echo "🎉 Setup Complete!"
