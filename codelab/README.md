@@ -4,13 +4,15 @@ Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will 
 
 ## 🧠 The Curriculum
 
-1.  **[Module 1: Cloud Setup & The Icebreaker](./01-cloud-setup.md)**
+0.  **[Module 0: Welcome to Infinite Flight](./00-introduction.md)**
+    *   The mission, the tech stack, and what you will build today.
+1.  **[Module 1: Cloud Setup & Initial Generation](./01-cloud-setup.md)**
     *   Auth, Project Creation, and generating your first Imagen 3 texture.
 2.  **[Module 2: Modular Architecture](./02-modular-architecture.md)**
     *   Implementing Service-Oriented Design and Zero-Trust with Secret Manager.
-3.  **[Module 3: The Geospatial Engine](./03-geospatial-engine.md)**
+3.  **[Module 3: The Geospatial Engine (Physical Grounding)](./03-geospatial-engine.md)**
     *   Using Google Earth Engine to fetch real-world satellite data.
-4.  **[Module 4: Grounded Multimodal Vision](./04-ai-vision.md)**
+4.  **[Module 4: Multimodal AI Vision (Visual RAG)](./04-ai-vision.md)**
     *   Building a **Visual RAG** pipeline with Gemini 2.5 Flash and Imagen 3.
 5.  **[Module 5: Immersive Audio Engine](./05-immersive-audio.md)**
     *   Synthesizing lifelike pilot advisories with Cloud Text-to-Speech.
@@ -22,4 +24,4 @@ Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will 
 *   Access to Google Cloud Shell.
 *   A "Build with AI" mindset.
 
-Let's take flight. Get started with **[Module 1](./01-cloud-setup.md)**.
+Let's take flight. Get started with **[Module 0](./00-introduction.md)**.
