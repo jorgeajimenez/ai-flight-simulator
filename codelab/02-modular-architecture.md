@@ -1,12 +1,14 @@
 # Module 2: Enterprise Modular Architecture & TDD
 
-In this module, we transition from a monolithic "script" to an enterprise-grade Service-Oriented Architecture (SOA). We will also adopt a **Test-Driven Development (TDD)** workflow to ensure our AI application is robust and "re-buildable."
+This module refactors our application into an enterprise-grade Service-Oriented Architecture (SOA). We will also adopt a **Test-Driven Development (TDD)** workflow to ensure the AI application is robust.
 
 ## The "Essential 6" Stack
 
-To scale this simulator, we've deconstructed the backend into six specialized services.
+To scale this simulator, the backend has been deconstructed into six specialized services.
 
-![Architecture: Modular SOA](../assets/02_modular_architecture.png)
+![Architecture: Modular SOA](./assets/02_modular_architecture.png)
+
+*As seen in the diagram above, `app.py` acts as a central orchestrator. Instead of containing all the business logic, it delegates tasks to specialized modules. This prevents the "monolith" anti-pattern and makes it easy to swap out services.*
 
 Each service has a single responsibility and is isolated for maximum testability:
 

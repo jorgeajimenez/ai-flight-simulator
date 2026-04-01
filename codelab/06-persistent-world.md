@@ -43,3 +43,11 @@ By mastering **Visual RAG**, **Function Calling**, and **Global State Sync**, yo
 1.  Terraform an area into "Mars Colony".
 2.  Fly to a different city.
 3.  Click "WHERE AM I?" and listen as your Agentic Control Tower warns you about the anomaly you just created in the Persistent World.
+
+---
+
+## 🛠 Troubleshooting Firestore
+
+If you get a database error when saving or scanning the anomaly tracker:
+
+*   **Firestore Initialization:** New Google Cloud projects do not have a database initialized by default. Go to the **Firestore** section in the Google Cloud Console. If prompted, click **Create Database** and ensure you select **Native Mode**. The `setup_gcp.sh` script attempts to create this, but it may require manual confirmation on a brand new billing account.
