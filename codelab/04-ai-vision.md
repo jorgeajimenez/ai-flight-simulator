@@ -32,3 +32,12 @@ Open `services/ai_vision.py` and find **[CODELAB STEP 3B]**. You will use the Ge
 # 4. Stage 2: Initialize imagen-3.0-generate-001
 # 5. Call edit_image with the base_image and engineered prompt
 ```
+
+---
+
+## 🛠 Troubleshooting AI Quotas
+
+If you are using a new Google Cloud account, you might run into quota limitations:
+
+*   **`429 Quota Exceeded`:** Vertex AI image generation limits are strict on fresh billing accounts. If the image fails to generate, wait a minute and try clicking the Terraform button again. 
+*   **"API Not Enabled":** If `imagen` or `gemini` throws an unauthorized error, verify that the **Vertex AI API** is enabled in your Google Cloud Console.

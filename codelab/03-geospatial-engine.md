@@ -66,3 +66,12 @@ image_bytes, bounds = EarthEngineClient.fetch_satellite_tile(lat, lon)
 ```
 
 By isolating this logic, we keep our main application logic focused purely on orchestration.
+
+---
+
+## 🛠 Troubleshooting Earth Engine
+
+If your server crashes when attempting to fetch the tile, check the following:
+
+*   **`403 Forbidden` / User Not Registered:** If you are using a new Google account, you must explicitly accept the terms of service. Visit **[earthengine.google.com/signup](https://earthengine.google.com/signup)** and click "Register", then restart your server.
+*   **API Not Enabled:** Ensure the Earth Engine API is actually enabled in your GCP Console. The `setup_gcp.sh` script should have done this, but quotas can occasionally delay activation.
