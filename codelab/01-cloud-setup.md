@@ -1,6 +1,6 @@
 # Module 1: Cloud Setup & Initial Generation
 
-Before building the flight simulator's brain, we need to ensure your environment is correctly wired to Google Cloud. If you are using a brand new Google account, follow these steps very carefully.
+Before building the flight simulator's brain, we need to ensure your environment is correctly wired to Google Cloud. If you are using a brand new Google account, follow these steps exactly.
 
 ## Step 1: Account Preparation & Billing
 
@@ -11,11 +11,13 @@ Before building the flight simulator's brain, we need to ensure your environment
     *   Click **Create Credentials** -> **API Key** and copy it. You will need this in a moment.
     *   *(Note: The Photorealistic 3D Tiles API must be enabled for this key).*
 
-<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the APIs/Credentials screen. Save as `assets/dummy_enable_apis.png` to replace the placeholder!</span>
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the APIs/Credentials screen. Save as `assets/dummy_enable_apis.png`</span>
 
-## Step 2: Clone & Configure
+## Step 2: Clone & Synchronize
 
-Run these commands in your Cloud Shell terminal to download the project and install dependencies:
+Google Cloud Shell comes pre-configured with the tools you need, including the ultra-fast `uv` Python package manager!
+
+**Action Marker 1.1:** Open your Cloud Shell terminal, clone the project, and synchronize the locked dependencies.
 
 ```bash
 git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
@@ -23,35 +25,36 @@ cd ai-flight-simulator
 uv sync
 ```
 
-We've provided a setup script that creates your Service Account, enables necessary APIs (Vertex AI, Earth Engine, Secret Manager, TTS), and securely stores your Maps API key. Run it now:
+## Step 3: Identity & Access Management (IAM)
+
+We've provided a script to automate the creation of your Service Account and the enablement of APIs (Vertex AI, Earth Engine, Secret Manager, TTS).
+
+**Action Marker 1.2:** Run the setup script. When prompted, paste your **Google Maps API Key**.
 
 ```bash
 bash scripts/setup_gcp.sh
 ```
-*When prompted, paste your Google Maps API Key. The script will securely lock it inside Google Cloud Secret Manager.*
 
-<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png` to replace the placeholder!</span>
+<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png`</span>
 
-## Step 3: Earth Engine Registration (CRITICAL)
-If you have a new Google Cloud account, you **must** manually accept the Earth Engine Terms of Service before the API will work, even if the script enabled it. 
+## Step 4: Earth Engine Registration (CRITICAL)
+
+If you are using a new Google Cloud account, you **must** manually accept the Earth Engine Terms of Service. If you skip this, your simulator will fail with a `403 Forbidden` error later.
 
 1. Visit **[earthengine.google.com/signup](https://earthengine.google.com/signup)**
-2. Ensure you are logged in with the correct Google account.
-3. Click "Register" and accept the terms. If you skip this, your simulator will fail with a `403 Forbidden` error later.
+2. Click **Register** and accept the terms for your project.
 
----
+## Step 5: Verification (The Vertex AI Handshake)
 
-## Step 4: Generate Base Texture
+Let's verify that the AI is working before touching the code. We will use **Gemini 2.5 Flash** to generate a custom 3D building texture.
 
-Before touching the backend code, let's test that your Vertex AI connection is working. We will use **Gemini 2.5 Flash** to generate a custom 3D building texture that will be used throughout the simulator.
+**Action Marker 1.3:** Execute the texture verification script.
 
-Run the texture generation script:
 ```bash
 uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
 ```
 
-**Verification:**
-If successful, the script will output `Saved texture to assets/texture.svg`. You can click on the `assets/texture.svg` file in the Cloud Shell editor to verify the image was generated. 
+**Verification:** If you see `Saved texture to assets/texture.svg`, your cloud environment is structurally sound.
 
 ---
 
