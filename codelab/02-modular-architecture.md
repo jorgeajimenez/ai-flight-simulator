@@ -54,13 +54,13 @@ class VaultService:
         if VaultService._api_key_cache:
             return VaultService._api_key_cache
 
-        # Instantiate the official Google Cloud Secret Manager client
-        client = secretmanager.SecretManagerServiceClient()
-
-        # Construct the fully qualified resource name
-        name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{cache_key}/versions/latest"
-
         try:
+            # Instantiate the official Google Cloud Secret Manager client
+            client = secretmanager.SecretManagerServiceClient()
+
+            # Construct the fully qualified resource name
+            name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{cache_key}/versions/latest"
+
             # Execute the secure retrieval request
             response = client.access_secret_version(request={"name": name})
             secret_payload = response.payload.data.decode("UTF-8")
