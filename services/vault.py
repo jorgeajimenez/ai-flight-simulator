@@ -1,37 +1,34 @@
-import logging
+import os
 from google.cloud import secretmanager
-from config import GCPConfig, logger
-
+from config import GCPConfig
 
 class VaultService:
-    """
-    Secure Key Management Service.
-    Handles retrieval and local caching of API keys and secrets from GCP Secret Manager.
-    """
+    # Initialize an in-memory dictionary to cache retrieved secrets
+    _cache = {}
 
-    _cache: dict[str, str] = {}
+    @staticmethod
+    def get_maps_api_key() -> str:
+        cache_key = "GOOGLE_MAPS_API_KEY"
 
-    @classmethod
-    def get_maps_api_key(cls, secret_id: str = "GOOGLE_MAPS_API_KEY") -> str:
-        """
-        Fetches the Google Maps API Key from Secret Manager.
-        Uses in-memory caching to reduce redundant API calls and latency.
-        """
-        if secret_id in cls._cache:
-            return cls._cache[secret_id]
+        # Consult the cache to prevent redundant API latency
+        if cache_key in VaultService._cache:
+            return VaultService._cache[cache_key]
+
+        # Instantiate the official Google Cloud Secret Manager client
+        client = secretmanager.SecretManagerServiceClient()
+
+        # Construct the fully qualified resource name
+        name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{cache_key}/versions/latest"
 
         try:
-            logger.info(f"Vault: Accessing secret {secret_id}...")
-            client = secretmanager.SecretManagerServiceClient()
-            name = (
-                f"projects/{GCPConfig.PROJECT_ID}/secrets/{secret_id}/versions/latest"
-            )
+            # Execute the secure retrieval request
             response = client.access_secret_version(request={"name": name})
+            secret_payload = response.payload.data.decode("UTF-8")
 
-            key = response.payload.data.decode("UTF-8")
-            cls._cache[secret_id] = key
-            return key
+            # Persist the payload in the local cache
+            VaultService._cache[cache_key] = secret_payload
+            return secret_payload
+
         except Exception as e:
-            logger.error(f"Vault Error: Failed to fetch {secret_id}: {e}")
-            # AI_WIRING_POINT: Secret Recovery Strategy (Fall back to env or local)
-            return ""
+            print(f"Vault Security Exception: {e}")
+            return None

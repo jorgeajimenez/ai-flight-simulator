@@ -1,104 +1,63 @@
-import json
 import base64
-import re
-from io import BytesIO
-from typing import Dict
-import vertexai
-from vertexai.generative_models import GenerativeModel, Part
-from vertexai.preview.vision_models import Image as VertexImage, ImageGenerationModel
-from config import GCPConfig, logger
+import json
+from pydantic import BaseModel, Field
+from google import genai
+from google.genai import types
+from config import GCPConfig
 
-# Initialize Vertex AI SDK
-vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
-
+# Define the deterministic JSON structure required from Gemini 2.5 Flash
+class VisionAnalysis(BaseModel):
+    advisory: str = Field(description="A short pilot briefing describing the terrain transformation.")
+    imagen_prompt: str = Field(description="A detailed technical prompt optimized for Imagen 3.")
 
 class AIVisionService:
-    """
-    Multimodal Intelligence powered by Vertex AI.
-    Handles terrain analysis with Gemini 1.5 Flash and terraforming with Imagen 3.
-    """
 
     @staticmethod
-    def describe_location(lat: float, lon: float) -> str:
-        """
-        Uses Gemini to generate a short pilot advisory about their current global position.
+    def analyze_and_terraform(base_image_bytes: bytes, user_prompt: str) -> dict:
+        # Initialize the unified Vertex AI GenAI client
+        client = genai.Client(
+            vertexai=True,
+            project=GCPConfig.PROJECT_ID,
+            location=GCPConfig.LOCATION
+        )
 
-        Args:
-            lat (float): Latitude of the pilot's current position.
-            lon (float): Longitude of the pilot's current position.
+        # STAGE 1: The Analyst (Gemini 2.5 Flash)
+        image_part = types.Part.from_bytes(data=base_image_bytes, mime_type="image/png")
+        
+        analysis_prompt = (
+            f"Analyze this satellite image. The pilot wants to terraform this area into: '{user_prompt}'. "
+            "Generate a technical prompt for an image generator that maintains the current road layout. "
+            "Also provide a 1-sentence pilot advisory describing the anomaly."
+        )
 
-        Returns:
-            str: A short, immersive advisory describing the location.
-        """
-        try:
-            gemini_model = GenerativeModel("gemini-2.5-flash")
-            prompt = f"""
-            You are an AI flight computer in a flight simulator. 
-            The pilot is flying at exactly Latitude {lat}, Longitude {lon}.
-            In exactly one short sentence (max 20 words), tell the pilot what real-world region, city, or landmark they are flying over. Be immersive.
-            """
-            logger.info(f"AI Vision: Identifying location at {lat}, {lon}...")
-            res = gemini_model.generate_content(prompt)
-            return res.text.strip()
-        except Exception as e:
-            logger.error(f"AI Vision Location Error: {e}")
-            return "Sensors offline. Unable to determine current location."
-
-    @staticmethod
-    def analyze_and_terraform(image_bytes: bytes, user_prompt: str) -> Dict[str, str]:
-        """
-        The 2-Stage Terraforming Pipeline:
-        1. Gemini analyzes satellite image and engineers a technical prompt.
-        2. Imagen 3 performs image-to-image transformation using the engineered prompt.
-
-        Args:
-            image_bytes (bytes): The raw satellite image bytes to terraform.
-            user_prompt (str): The user's desired transformation (e.g., "Cyberpunk City").
-
-        Returns:
-            Dict[str, str]: A dictionary containing 'image_b64' and the AI 'advisory'.
-        """
-        try:
-            # Stage 1: Gemini Strategic Analysis
-            gemini_model = GenerativeModel("gemini-2.5-flash")
-            terrain_image = Part.from_data(data=image_bytes, mime_type="image/png")
-
-            gemini_prompt = f"""
-            Analyze this satellite image. The user wants to terraform this into: '{user_prompt}'.
-            1. Create a narrative 'Flight Advisory' for the pilot (max 30 words).
-            2. Generate a highly detailed Imagen prompt starting with 'A photorealistic high-resolution aerial view of'.
-            Return JSON exactly matching this structure: {{"advisory": "string", "imagen_prompt": "string"}}
-            """
-
-            logger.info(f"AI Vision: Analyzing terrain for '{user_prompt}'...")
-            gemini_res = gemini_model.generate_content(
-                [terrain_image, gemini_prompt],
-                generation_config={"response_mime_type": "application/json"},
+        # Execute generation with strict Pydantic JSON schema enforcement
+        gemini_response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[analysis_prompt, image_part],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=VisionAnalysis,
+                temperature=0.4
             )
+        )
+        
+        analysis_data = VisionAnalysis.model_validate_json(gemini_response.text)
 
-            ai_plan = json.loads(gemini_res.text.strip())
-            logger.info(f"AI Vision: Pilot Advisory: {ai_plan.get('advisory')}")
-
-            # Stage 2: Imagen 3 Terraforming
-            imagen_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
-            base_image = VertexImage(image_bytes=image_bytes)
-
-            logger.info(f"AI Vision: Terraforming with Imagen 3...")
-            generated_images = imagen_model.edit_image(
-                base_image=base_image, prompt=ai_plan["imagen_prompt"]
+        # STAGE 2: The Painter (Imagen 3)
+        imagen_response = client.models.generate_images(
+            model='imagen-3.0-generate-001',
+            prompt=analysis_data.imagen_prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+                include_rai_reason=True,
+                output_mime_type="image/jpeg"
             )
+        )
+        
+        final_image_bytes = imagen_response.generated_images[0].image_bytes
+        image_b64 = base64.b64encode(final_image_bytes).decode('utf-8')
 
-            # Save output to buffer and encode as Base64
-            output_buffer = BytesIO()
-            generated_images[0].save(output_buffer, include_generation_parameters=False)
-            generated_img_b64 = base64.b64encode(output_buffer.getvalue()).decode(
-                "utf-8"
-            )
-
-            return {
-                "image_b64": generated_img_b64,
-                "advisory": ai_plan.get("advisory", ""),
-            }
-        except Exception as e:
-            logger.error(f"AI Vision Terraforming Error: {e}")
-            raise e
+        return {
+            "advisory": analysis_data.advisory,
+            "image_b64": image_b64
+        }
