@@ -26,7 +26,7 @@ Cloud Shell is an ephemeral Linux VM. We just need to get the code.
 1. **Clone the Repository:**
    *(Note: If the repo is still private during your dry run, you will need to generate a GitHub Personal Access Token (PAT) to clone it here).*
    ```bash
-   git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
+   git clone --depth 1 -b solution-slim https://github.com/jorgeajimenez/ai-flight-simulator.git
    cd ai-flight-simulator
    ```
 
@@ -238,10 +238,17 @@ class CopilotAgent:
 
             final_text = ""
             for event in events:
+                if getattr(event, 'error_message', None):
+                    logger.error(f"ADK Event Error: {event.error_message}")
                 if event.content and event.content.parts:
                     for part in event.content.parts:
                         if part.text:
                             final_text += part.text
+
+            final_text = final_text.strip()
+            if not final_text:
+                logger.warning(f"Copilot Agent: Received empty transmission. Using fallback.")
+                return f"Captain, I'm getting static from the Control Tower over {city_name}. Standby."
 
             return final_text
         except Exception as e:
