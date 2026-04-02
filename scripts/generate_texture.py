@@ -1,26 +1,22 @@
 import argparse
-import base64
-import re
 import os
 import sys
+import re
 
 # Add parent directory to path so we can import config.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import vertexai
-from vertexai.generative_models import GenerativeModel
+from google import genai
 from config import GCPConfig
-
 
 def generate_building_texture(prompt: str):
     """
     Icebreaker Script: Generate a custom building texture using Gemini 2.5 Flash.
     """
-    print(f"🚀 Initializing Vertex AI in project: {GCPConfig.PROJECT_ID}...")
-    vertexai.init(project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
+    print(f"🚀 Initializing Vertex AI via google-genai in project: {GCPConfig.PROJECT_ID}...")
+    client = genai.Client(vertexai=True, project=GCPConfig.PROJECT_ID, location=GCPConfig.LOCATION)
 
-    print("🧠 Loading Gemini 2.5 Flash...")
-    gemini_model = GenerativeModel("gemini-2.5-flash")
+    print("🧠 Hailing Gemini 2.5 Flash...")
 
     svg_prompt = f"""
     Generate a seamless, tiling SVG texture for a 3D building facade. Theme: '{prompt}'.
@@ -33,7 +29,11 @@ def generate_building_texture(prompt: str):
     """
 
     print(f"🎨 Generating texture: '{prompt}'")
-    res = gemini_model.generate_content(svg_prompt)
+    res = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=svg_prompt
+    )
+    
     svg_code = res.text.strip()
 
     # Robustly extract SVG from potential markdown
@@ -48,13 +48,15 @@ def generate_building_texture(prompt: str):
                     svg_code = svg_code[len(prefix) :].strip()
                     break
 
+    # Ensure assets directory exists before writing
+    os.makedirs("assets", exist_ok=True)
     output_path = "assets/texture.svg"
+    
     with open(output_path, "w") as f:
         f.write(svg_code)
 
     print(f"✅ Success! Your custom texture has been saved to '{output_path}'.")
     print("Refresh your flight simulator browser to see your custom buildings!")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
