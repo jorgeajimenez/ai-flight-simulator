@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Engineering the Infinite</title>
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.min.css">
+
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+			:root {
+				--g-blue: #4285F4;
+				--g-red: #EA4335;
+				--g-yellow: #FBBC05;
+				--g-green: #34A853;
+				--g-gray-900: #202124;
+				--g-gray-800: #3C4043;
+				--g-gray-700: #5F6368;
+				--bg: #FFFFFF;
+			}
+
+			.reveal {
+				font-family: 'Google Sans', sans-serif;
+				background-color: var(--bg);
+				color: var(--g-gray-800);
+			}
+
+			.reveal h1, .reveal h2, .reveal h3 {
+				font-family: 'Google Sans', sans-serif;
+				font-weight: 700;
+				text-transform: none;
+				letter-spacing: -0.02em;
+				margin: 0 0 20px 0;
+				color: var(--g-gray-900);
+			}
+
+			.reveal h1 { font-size: 4em; line-height: 1.1; }
+			.reveal h2 { font-size: 3em; line-height: 1.2; }
+			.reveal h3 { font-size: 2em; font-weight: 500; color: var(--g-gray-700); }
+
+			.reveal .slides section {
+				height: 100% !important;
+				display: flex !important;
+				flex-direction: column !important;
+				justify-content: center !important;
+				align-items: flex-start !important; /* Left align like Google decks */
+				text-align: left !important;
+				box-sizing: border-box;
+				padding: 8% 10% !important;
+				margin: 0 !important;
+			}
+
+            /* Section Divider Slides */
+            .reveal .slides section.section-divider {
+                align-items: center !important;
+                text-align: center !important;
+                background-color: var(--g-gray-50);
+            }
+
+            .section-label {
+                font-family: 'Roboto Mono', monospace;
+                color: var(--g-blue);
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-bottom: 20px;
+                font-size: 0.8em;
+            }
+
+			.reveal .slides section img.hero {
+				margin: 40px 0 0 0;
+				max-height: 40vh;
+				width: 100%;
+				object-fit: cover;
+				border-radius: 12px;
+				box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+			}
+
+            .reveal .slides section img.icon {
+				margin: 40px 0;
+				height: 120px;
+				width: auto;
+			}
+
+			.reveal .slides section p {
+				font-size: 1.4em;
+				line-height: 1.4;
+				color: var(--g-gray-700);
+				margin: 20px 0 0 0;
+                max-width: 900px;
+			}
+
+            .reveal .slides section p.huge {
+                font-size: 2em;
+                color: var(--g-gray-900);
+                font-weight: 500;
+                line-height: 1.2;
+            }
+
+			.blue { color: var(--g-blue); }
+			.red { color: var(--g-red); }
+			.green { color: var(--g-green); }
+			.yellow { color: var(--g-yellow); }
+			.gray { color: var(--g-gray-700); }
+
+            /* Persistent Google Branding */
+            .google-stripe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 8px;
+                background: linear-gradient(to right, var(--g-blue) 25%, var(--g-red) 25% 50%, var(--g-yellow) 50% 75%, var(--g-green) 75%);
+                z-index: 1000;
+            }
+
+            .gdg-logo {
+                position: absolute;
+                top: 40px;
+                left: 40px;
+                height: 45px;
+                z-index: 1000;
+                opacity: 0.8;
+            }
+
+		</style>
+	</head>
+	<body>
+		<div class="reveal">
+            <!-- Persistent Google Branding -->
+            <div class="google-stripe"></div>
+            <img src="./gdg_assets/3%20line%20logo/GDG-Lockup-3Line-Left-Black.png" class="gdg-logo" alt="Google Developer Groups">
+
+			<div class="slides">
+
+				<!-- TITLE SLIDE -->
+				<section class="section-divider">
+					<div class="section-label blue">BUILD WITH AI WORKSHOP</div>
+					<h1>Engineering the Infinite.</h1>
+					<h3 class="gray">Beyond Vibe Coding.</h3>
+				</section>
+
+				<!-- SECTION 0 -->
+				<section class="section-divider">
+					<div class="section-label red">SECTION 0</div>
+					<h2>THE PROBLEM</h2>
+				</section>
+
+				<section>
+					<h2 class="red">Vibe Coding.</h2>
+					<p class="huge">Throwing unstructured text at an LLM and hoping for the best.</p>
+				</section>
+
+				<section>
+					<h2>The "It Worked Once" Fallacy</h2>
+					<p>Building a 3D app used to require a degree in linear algebra.</p>
+                    <p>Now, it requires battling <span class="red">hallucinations</span> and <span class="red">brittle prompts</span>.</p>
+				</section>
+
+                <section>
+					<h2>Symptoms of the Vibe</h2>
+					<p>▹ 50-line "spaghetti" prompts.</p>
+					<p>▹ Monolithic <code>generate()</code> calls that control everything.</p>
+					<p>▹ Zero unit tests.</p>
+				</section>
+
+
+				<!-- SECTION 1 -->
+				<section class="section-divider">
+					<div class="section-label yellow">SECTION 1</div>
+					<h2>THE PIVOT</h2>
+				</section>
+
+				<section>
+					<h2>The Engineering Shift.</h2>
+					<p class="huge">Treating AI models like standard software services.</p>
+				</section>
+
+                <section>
+					<h2>Modularity.</h2>
+					<p>Instead of one massive prompt, we are building a <span class="blue">Service-Oriented Architecture (SOA)</span>.</p>
+				</section>
+
+                <!-- SECTION 2 -->
+				<section class="section-divider">
+					<div class="section-label blue">SECTION 2</div>
+					<h2>THE WORKFLOW</h2>
+				</section>
+
+				<section>
+					<h2 class="blue">The Gemini CLI.</h2>
+					<p class="huge">Your autonomous pair programmer.</p>
+				</section>
+
+				<section>
+					<h2>The Navigator</h2>
+					<p>It lives in your terminal.</p>
+					<p>It reads your local files, runs your tests, and applies surgical edits.</p>
+				</section>
+
+                <section>
+					<h2>The Constitution</h2>
+					<p>An AI needs absolute laws. We define them in <span class="blue">GEMINI.MD</span>.</p>
+					<p>It acts as a contextual boundary, enforcing your project conventions, style, and architectural mandates.</p>
+				</section>
+
+                <section>
+					<h2 class="green">Test-Driven AI.</h2>
+					<p class="huge">Logic is proven before the first token is generated.</p>
+				</section>
+
+                <section>
+					<h2>The Shield (TDD)</h2>
+					<p>Stop testing against live APIs.</p>
+					<p>We use local mocks (<code>pytest-mock</code>) to prove our code is structurally sound before we ever introduce a "vibe".</p>
+				</section>
+
+                <section>
+					<h2 class="yellow">The Tickets.</h2>
+					<p class="huge">Engineers don't chat; they clear tickets.</p>
+				</section>
+
+                <section>
+					<h2>Deterministic Progress</h2>
+					<p>We use a strict tracker (<code>tickets_v2.csv</code>).</p>
+					<p>Every code change you make maps to a specific, measurable requirement.</p>
+				</section>
+
+                <!-- SECTION 3 -->
+				<section class="section-divider">
+					<div class="section-label green">SECTION 3</div>
+					<h2>THE STACK</h2>
+				</section>
+
+                <section>
+					<h2 class="blue">1. The Grounding.</h2>
+					<p class="huge">An AI without grounding is a hallucination in search of context.</p>
+				</section>
+
+                <section>
+					<h2>Telemetry</h2>
+					<p>We start with <span class="blue">Reverse Geocoding</span>.</p>
+					<p>Instead of terraforming an arbitrary landscape, the AI knows you are specifically flying over "Tokyo, Japan".</p>
+				</section>
+
+                <section>
+					<h2 class="red">2. The Biome Pipeline.</h2>
+					<p class="huge">Separation of concerns is the soul of software.</p>
+				</section>
+
+                <section>
+					<h2>Architect // Painter</h2>
+					<p>Don't make one model do everything.</p>
+					<p>▹ <span class="blue">Gemini 2.5 Flash</span> architects the vibe and outputs strict JSON.</p>
+                    <p>▹ <span class="blue">Imagen 3</span> paints the reality.</p>
+				</section>
+
+                <section>
+					<h2 class="green">3. Agentic Intelligence.</h2>
+					<p class="huge">Moving from Prompts to Tools.</p>
+				</section>
+
+                <section>
+					<h2>The Google ADK</h2>
+					<p>Using the Google Agent Development Kit (ADK), we build an AI Control Tower.</p>
+					<p>It can autonomously decide to execute Python tools <em>before</em> responding to the pilot.</p>
+				</section>
+
+                <section>
+					<h2 class="yellow">4. Infrastructure as Code.</h2>
+					<p class="huge">No clicking through cloud consoles.</p>
+				</section>
+
+                <section>
+					<h2>The Forge</h2>
+					<p>Environments are provisioned instantly and deterministically via <code>setup_gcp.sh</code>.</p>
+					<p>APIs are enabled, and API Keys are locked down in Secret Manager automatically.</p>
+				</section>
+
+				<!-- CLOSING -->
+				<section class="section-divider">
+					<div class="section-label blue">MISSION BRIEFING COMPLETE</div>
+					<h1>Ready for <span class="blue">Flight</span>.</h1>
+					<h3 class="gray">Open your terminal. Ticket #1 is waiting.</h3>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+		<script>
+			Reveal.initialize({
+				hash: true,
+				transition: 'fade',
+				backgroundTransition: 'none',
+				center: false,
+                disableLayout: true,
+				controls: true,
+				progress: true,
+			});
+		</script>
+	</body>
+</html>

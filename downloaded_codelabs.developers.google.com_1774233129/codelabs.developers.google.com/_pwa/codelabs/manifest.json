@@ -1,9 +1,0 @@
-{
-  "name": "Google Codelabs",
-  "short_name": "Codelabs",
-  "start_url": "/?utm_source=web_app_manifest",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#37474f",
-  "theme_color": "#37474f"
-}

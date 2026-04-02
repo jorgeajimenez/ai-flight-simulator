@@ -1,17 +1,14 @@
 import pytest
 import base64
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from services.ai_vision import AIVisionService
 
-
-def test_analyze_and_terraform_success(mocker):
-    # 1. Mock the classes in the service namespace
-    mock_gemini_class = mocker.patch("services.ai_vision.GenerativeModel")
-    mock_gemini_instance = MagicMock()
-    mock_gemini_class.return_value = mock_gemini_instance
-
-    mocker.patch("services.ai_vision.Part.from_data")
+def test_generate_biome_texture_success(mocker):
+    # 1. Mock the GenAI client
+    mock_genai = mocker.patch("services.ai_vision.genai.Client")
+    mock_client_instance = MagicMock()
+    mock_genai.return_value = mock_client_instance
 
     # Mock Gemini response (The mandated JSON structure)
     mock_gemini_res = MagicMock()
@@ -21,34 +18,23 @@ def test_analyze_and_terraform_success(mocker):
             "imagen_prompt": "A photorealistic high-resolution aerial view of a cyberpunk city.",
         }
     )
-    mock_gemini_instance.generate_content.return_value = mock_gemini_res
+    mock_client_instance.models.generate_content.return_value = mock_gemini_res
 
-    # 2. Mock ImageGenerationModel (Imagen 3) in the service namespace
-    mock_imagen_class = mocker.patch(
-        "services.ai_vision.ImageGenerationModel.from_pretrained"
-    )
-    mock_imagen_model = MagicMock()
-    mock_imagen_class.return_value = mock_imagen_model
-
-    mocker.patch("services.ai_vision.VertexImage")
-
-    # Mock the generated image response
+    # Mock Imagen 3 response
+    mock_imagen_res = MagicMock()
     mock_generated_image = MagicMock()
-    mock_imagen_model.edit_image.return_value = [mock_generated_image]
-
-    # Mock the save method of the generated image to simulate writing bytes
-    def mock_save(buffer, include_generation_parameters=False):
-        buffer.write(b"generated-texture-bytes")
-
-    mock_generated_image.save.side_effect = mock_save
+    mock_generated_image.image_bytes = b"generated-texture-bytes"
+    mock_imagen_res.generated_images = [mock_generated_image]
+    mock_client_instance.models.generate_images.return_value = mock_imagen_res
 
     # 3. Execute Service
-    result = AIVisionService.analyze_and_terraform(
-        b"original-satellite-bytes", "Cyberpunk City"
+    result = AIVisionService.generate_biome_texture(
+        "Paris", "Cyberpunk City"
     )
 
     # 4. Assertions
     assert result["advisory"] == "Pilot, prepare for neon entry."
+    
     # Verify image was base64 encoded
     expected_b64 = base64.b64encode(b"generated-texture-bytes").decode("utf-8")
     assert result["image_b64"] == expected_b64

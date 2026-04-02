@@ -1,5 +1,36 @@
+# Module 3: Telemetry & Reverse Geocoding
+
+To create a believable 3D world, our generative AI needs to know *where* it is. In this module, we will implement **Reverse Geocoding** to convert the pilot's raw latitude and longitude coordinates into a human-readable city name.
+
+## Grounding the AI
+
+If a pilot asks to terraform the terrain into a "Cyberpunk City," the AI needs context. A Cyberpunk version of Paris should look different from a Cyberpunk version of Tokyo. By reverse-geocoding the coordinates, we provide this crucial "grounding" to the Gemini model.
+
+```mermaid
+graph LR
+    Coord[Pilot Lat/Lon] --> Geo[ReverseGeocode Utility]
+    Geo -->|Google Maps API| API[Geocoding API]
+    API -->|JSON Data| Geo
+    Geo -->|City, Country Name| Output
+```
+
+![Architecture: Telemetry](./assets/03_telemetry_geocoding.png)
+
+---
+
+## 🎯 Ticket #1: Reverse Geocoding Utility
+
+Your task is to create a utility that leverages the Google Maps API to translate coordinates into city names.
+
+### Step 1: Open `services/geospatial.py`
+Navigate to `services/geospatial.py`. You will see the `EarthEngineClient`, which the frontend uses for base mapping. We need to add a new class at the bottom.
+
+### Step 2: Implement `ReverseGeocode`
+Add the following class to the bottom of the file. Notice how it securely fetches the Maps API key from the `VaultService` we configured earlier.
+
+```python
 import requests
-from config import GCPConfig, logger
+from config import logger
 from services.vault import VaultService
 
 class ReverseGeocode:
@@ -47,3 +78,7 @@ class ReverseGeocode:
         except Exception as e:
             logger.error(f"Geospatial: Reverse Geocode Error: {e}")
             return "Unknown Location"
+```
+
+### Step 3: Test and Verify
+While you can't test this in isolation yet, this foundational utility will be crucial for the next modules where we build the AI Biome Generator and the Copilot Agent!
