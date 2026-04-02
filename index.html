@@ -3609,7 +3609,7 @@
                     // PERFORMANCE FIX: Pre-rasterize the static SVG to a Canvas. 
                     // Cesium will freeze rendering hundreds of entities with raw SVGs.
                     const img = new Image();
-                    img.src = "assets/texture.svg";
+                    img.src = "assets/texture.svg?t=" + new Date().getTime();
                     await new Promise((r, reject) => { 
                         img.onload = r; 
                         img.onerror = () => reject(new Error("SVG load failed")); 
@@ -3625,11 +3625,10 @@
                         repeat: new Cesium.Cartesian2(2, 6), // Tile vertically for skyscrapers
                     });
                 } catch (e) {
-                    console.warn("Could not load assets/texture.svg, falling back to default.", e);
-                    sharedBuildingMaterial = new Cesium.ImageMaterialProperty({
-                        image: "assets/cyberpunk_texture.png",
-                        repeat: new Cesium.Cartesian2(1, 1),
-                    });
+                    console.warn("Could not load assets/texture.svg, falling back to white.", e);
+                    sharedBuildingMaterial = new Cesium.ColorMaterialProperty(
+                        new Cesium.Color(1.0, 1.0, 1.0, 1.0)
+                    );
                 }
 
                 // Suspend events to prevent the browser from freezing while adding hundreds of entities
