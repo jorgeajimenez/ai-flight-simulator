@@ -105,10 +105,17 @@ class CopilotAgent:
 
             final_text = ""
             for event in events:
+                if getattr(event, 'error_message', None):
+                    logger.error(f"ADK Event Error: {event.error_message}")
                 if event.content and event.content.parts:
                     for part in event.content.parts:
                         if part.text:
                             final_text += part.text
+
+            final_text = final_text.strip()
+            if not final_text:
+                logger.warning(f"Copilot Agent: Received empty transmission. Using fallback.")
+                return f"Captain, I'm getting static from the Control Tower over {city_name}. Standby."
 
             logger.info(f"Copilot Agent: Received transmission: {final_text}")
             return final_text
