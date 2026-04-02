@@ -120,23 +120,22 @@ fi
 gcloud config set project "$PROJECT_ID"
 
 # Enable APIs
-echo "⚡ Enabling Vertex AI, Earth Engine, Text-to-Speech, Firestore, Map Tiles, and Secret Manager APIs (this may take a minute)..."
+echo "⚡ Enabling Vertex AI, Secret Manager, Text-to-Speech, Firestore, Map Tiles, and Geocoding APIs (this may take a minute)..."
 gcloud services enable \
     aiplatform.googleapis.com \
-    earthengine.googleapis.com \
     secretmanager.googleapis.com \
     texttospeech.googleapis.com \
     firestore.googleapis.com \
-    tile.googleapis.com
+    tile.googleapis.com \
+    geocoding-backend.googleapis.com
 
 echo "✅ Core APIs enabled."
-echo "⚠️  CRITICAL: Even though we enabled 'tile.googleapis.com' via CLI,"
-echo "   you MAY need to manually click 'ENABLE' in the browser to accept 3D Map Terms."
-echo "   👉 https://console.cloud.google.com/apis/library/tile.googleapis.com"
 echo ""
 
 # Manage Google Maps API Key Secret
-echo "🗺️ Google Maps API Key Management"
+echo -e "\n====================================================="
+echo -e " 🗺️  CRITICAL MANUAL STEP: Google Maps API Configuration"
+echo -e "====================================================="
 SECRET_EXISTS=false
 if gcloud secrets describe GOOGLE_MAPS_API_KEY &> /dev/null; then
     SECRET_EXISTS=true
@@ -151,12 +150,21 @@ if gcloud secrets describe GOOGLE_MAPS_API_KEY &> /dev/null; then
 fi
 
 if [ -z "$MAPS_API_KEY" ]; then
-    echo "We need your Google Maps API Key to store securely in Secret Manager."
-    echo "You can get one at: https://console.cloud.google.com/google/maps-apis/credentials"
-    read -p "Enter your Google Maps API Key (or press Enter to skip): " MAPS_API_KEY
+    echo -e "\nYou must manually enable the 3D Map Tiles API and generate an API key."
+    echo -e "\033[1;36mSTEP 1: Enable the Map Tiles API\033[0m"
+    echo -e "Please hold CTRL (or CMD on Mac) and click this link to open it in a new tab:"
+    echo -e "\033[4;34mhttps://console.cloud.google.com/apis/library/tile.googleapis.com?project=$PROJECT_ID\033[0m"
+    echo -e "-> Click the blue \033[1mENABLE\033[0m button.\n"
+    
+    echo -e "\033[1;36mSTEP 2: Generate your API Key\033[0m"
+    echo -e "Please hold CTRL (or CMD on Mac) and click this link to open the Credentials page:"
+    echo -e "\033[4;34mhttps://console.cloud.google.com/google/maps-apis/credentials?project=$PROJECT_ID\033[0m"
+    echo -e "-> Click \033[1mCreate Credentials\033[0m -> \033[1mAPI Key\033[0m and copy it.\n"
+
+    read -p "Paste your Google Maps API Key here (or press Enter to skip): " MAPS_API_KEY
 
     if [ -z "$MAPS_API_KEY" ]; then
-        echo "⚠️ Warning: No API Key provided. The 3D map will not load until you add it to Secret Manager manually."
+        echo -e "⚠️  \033[1;33mWarning: No API Key provided. The 3D map will not load until you add it manually.\033[0m"
     else
         echo "🔒 Saving API Key to Secret Manager..."
         if [ "$SECRET_EXISTS" = false ]; then
@@ -184,14 +192,10 @@ else
 fi
 
 # Assign Roles
-echo "🔐 Assigning roles (Vertex AI User, Earth Engine Viewer, Secret Accessor, Service Usage Consumer)..."
+echo "🔐 Assigning roles (Vertex AI User, Secret Accessor, Service Usage Consumer)..."
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SA_EMAIL" \
     --role="roles/aiplatform.user" > /dev/null
-
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$SA_EMAIL" \
-    --role="roles/earthengine.viewer" > /dev/null
 
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$SA_EMAIL" \

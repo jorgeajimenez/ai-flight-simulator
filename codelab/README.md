@@ -1,27 +1,20 @@
 # 🚀 Codelab: Build the Infinite Flight Persistent World
 
-Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will deconstruct a monolithic 3D flight simulator and rebuild its brain using the **Essential 6 Google Cloud Stack**.
+Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will wire up a 3D flight simulator to a modern Google Cloud AI Backend.
 
 ## 🧠 The Curriculum
 
-0.  **[Module 0: Welcome to Infinite Flight](./00-introduction.md)**
-    *   The mission, the tech stack, and what you will build today.
-1.  **[Module 1: Cloud Setup & Initial Generation](./01-cloud-setup.md)**
-    *   Auth, Project Creation, and generating your first Imagen 3 texture.
-2.  **[Module 2: Modular Architecture](./02-modular-architecture.md)**
-    *   Implementing Service-Oriented Design and Zero-Trust with Secret Manager.
-3.  **[Module 3: The Geospatial Engine (Physical Grounding)](./03-geospatial-engine.md)**
-    *   Using Google Earth Engine to fetch real-world satellite data.
-4.  **[Module 4: Multimodal AI Vision (Visual RAG)](./04-ai-vision.md)**
-    *   Building a **Visual RAG** pipeline with Gemini 2.5 Flash and Imagen 3.
-5.  **[Module 5: Immersive Audio Engine](./05-immersive-audio.md)**
-    *   Synthesizing lifelike pilot advisories with Cloud Text-to-Speech.
-6.  **[Module 6: Agentic Intelligence & The Anomaly Tracker](./06-persistent-world.md)**
-    *   **The Grand Finale:** Building an autonomous Agent using Vertex AI Function Calling (ADK) to scan the Persistent World.
+The codelab is broken down into 6 distinct modules:
 
-## 🛠 Prerequisites
-*   A Google Cloud Project with Billing enabled.
-*   Access to Google Cloud Shell.
-*   A "Build with AI" mindset.
+*   **Module 1: Cloud Setup** - Provisioning your Google Cloud project and enabling required APIs.
+*   **Module 2: Modular Architecture** - Understanding the Service-Oriented Architecture (SOA) and the ticketing workflow.
+*   **Module 3: Telemetry & Reverse Geocoding** - Implementing the Google Maps API to ground the AI with real-world city names.
+*   **Module 4: Generative Biomes** - Using Gemini 2.5 Flash as an Architect and Imagen 3 as a Painter to procedurally generate immersive new worlds.
+*   **Module 5: Immersive Audio** - Converting the AI's pilot advisories into high-quality human speech using Cloud TTS.
+*   **Module 6: Agentic Intelligence** - Building autonomous AI Agents using the Google Agent Development Kit (ADK) that can actively call external tools.
 
-Let's take flight. Get started with **[Module 0](./00-introduction.md)**.
+## 🎫 The Workflow
+
+You will act as an engineer clearing tickets from a Jira-style board. Your tracker is `tickets_v2.csv` (or the equivalent UI provided by your instructor). Look at the ticket, follow the module instructions to implement the code, and clear the ticket.
+
+Let's get flying.

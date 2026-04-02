@@ -23,58 +23,51 @@ def main():
     mermaid_code_blocks = {
         "01_cloud_setup.png": """graph LR
     CS[Cloud Shell / uv] -->|Auth via service-account-key.json| VAI[Vertex AI API]
-    VAI -->|Gemini 2.5 Flash| IMG[Generated SVG Texture]
-    IMG -->|Saved to| FILE[assets/texture.svg]""",
+    VAI -->|Gemini 2.5 Flash| IMG[Generated Texture]
+    IMG -->|Saved to| FILE[assets/texture.png]""",
         
         "02_modular_architecture.png": """graph TD
     Orch[app.py Orchestrator] --> Config[0. Config]
     Orch --> Vault[1. Secret Manager]
-    Orch --> Geo[2. Earth Engine]
-    Orch --> Vision[3. Vertex AI]
+    Orch --> Geo[2. Reverse Geocoding]
+    Orch --> Vision[3. Procedural Biomes]
     Orch --> Audio[4. Cloud TTS]
-    Orch --> State[5. Firestore]""",
+    Orch --> State[5. Firestore Ledger]
+    Orch --> Agents[6. ADK Control Tower]""",
 
-        "03_geospatial_engine.png": """graph LR
-    Coord[Pilot Lat/Lon] --> EE[Earth Engine]
-    EE -->|Satellite Query| S2[Sentinel-2 Data]
-    S2 -->|Clipped to| B64[Raw Image Bytes]
-    B64 -->|Grounded Input| Vision[Module 4: AI Vision]""",
+        "03_telemetry_geocoding.png": """graph LR
+    Coord[Pilot Lat/Lon] --> Geo[ReverseGeocode Utility]
+    Geo -->|Google Maps API| API[Geocoding API]
+    API -->> Geo: JSON Data
+    Geo -->> Output[City, Country Name]""",
 
-        "04_ai_vision.png": """sequenceDiagram
-    participant App as app.py
-    participant EE as Earth Engine
-    participant G25 as Gemini 2.5 Flash
-    participant I3 as Imagen 3
+        "04_generative_biomes.png": """sequenceDiagram
+    participant App
+    participant G25 as Gemini (Architect)
+    participant I3 as Imagen 3 (Painter)
 
-    App->>EE: Fetch Satellite PNG at Lat/Lon
-    EE-->>App: Raw Image Bytes
-    App->>G25: Analyze Image + "Mars Colony"
+    App->>G25: City Name + User Prompt
     G25-->>App: JSON {technical_prompt, advisory}
-    App->>I3: edit_image(base_image, technical_prompt)
-    I3-->>App: Terraformed Texture""",
+    App->>I3: Generate Image(technical_prompt)
+    I3-->>App: Raw Image Bytes""",
 
         "05_immersive_audio.png": """graph TD
-    Text[AI Generated Text] --> TTS[Cloud TTS Engine]
-    TTS -->|en-US-Studio-O| P[Pilot Audio]
-    TTS -->|en-US-Journey-D| ATC[Control Tower Audio]
-    P --> FE[Frontend Speaker]
-    ATC --> FE""",
+    Text[AI Generated Advisory] --> TTS[Cloud TTS Engine]
+    TTS -->|en-US-Journey-D| ATC[Audio Bytes]
+    ATC --> FE[Frontend Speaker]""",
 
-        "06_persistent_world.png": """graph TD
-    Button[Pilot Clicks 'WHERE AM I?'] --> Agent[Control Tower Agent<br>gemini-2.5-flash]
+        "06_collaborative_agents.png": """sequenceDiagram
+    participant FE as Frontend
+    participant Copilot as Copilot Agent
+    participant Tower as ADK Control Tower
+    participant Tool as get_local_time Tool
     
-    subgraph Parallel ADK Loop
-        Agent -->|Decides to use Tools| Decision{Orchestrator}
-        Decision -->|get_telemetry| T1[Identify Landmark]
-        Decision -->|scan_anomaly_tracker| T2[Scan Anomaly Tracker]
-        
-        T1 -.->|Vertex AI Vision| Decision
-        T2 -.->|Cloud Firestore| Decision
-    end
-    
-    Decision -->|Aggregated Data| Agent
-    Agent -->|Immersive Text| TTS[Cloud Text-to-Speech]
-    TTS -->|MP3 Audio| Pilot[Pilot Audio Player]"""
+    FE->>Copilot: Request Airspace Update
+    Copilot->>Tower: "Flight 001 over City, requesting time."
+    Tower->>Tool: execute(City Name)
+    Tool-->>Tower: "9:00 AM Local Time"
+    Tower-->>Copilot: Synthesized Briefing
+    Copilot-->>FE: Final Audio Briefing"""
     }
 
     # Extremely simple prompt to keep the image legible, focusing on the mermaid code directly.
@@ -90,18 +83,11 @@ A clean, flat, highly legible software architecture diagram. Flight simulator ae
         "dummy_firestore.png": "A clean 3D isometric illustration of a Google Cloud Firestore setup screen on a dark purple background. Show a dialog box selecting 'Native Mode' and a glowing 'Create Database' button."
     }
 
-    print("\n--- Interactive Generation Menu: Architecture Diagrams (Imagen 3) ---")
+    print("\n--- Generating Architecture Diagrams (Imagen 3) ---")
     
     # Process Diagrams via Imagen 3 directly
     for filename, mermaid in mermaid_code_blocks.items():
         full_prompt = base_style + f"\n```mermaid\n{mermaid}\n```"
-        
-        ans = input(f"\n▶️  Generate '{filename}'? [Press Enter to start, 's' to skip, 'q' to quit]: ").strip().lower()
-        if ans == 'q':
-            print("Exiting.")
-            return
-        if ans == 's':
-            continue
             
         print(f"🎨 Generating {filename} with Imagen 3...")
         try:
@@ -120,17 +106,10 @@ A clean, flat, highly legible software architecture diagram. Flight simulator ae
         except Exception as e:
             print(f"  ❌ Failed to generate {filename}: {e}")
 
-    print("\n--- Interactive Generation Menu: UI Placeholders (Imagen 3) ---")
+    print("\n--- Generating UI Placeholders (Imagen 3) ---")
     
     # Process Dummy UIs
     for filename, prompt_text in dummy_prompts.items():
-        ans = input(f"\n▶️  Generate '{filename}'? [Press Enter to start, 's' to skip, 'q' to quit]: ").strip().lower()
-        if ans == 'q':
-            print("Exiting.")
-            return
-        if ans == 's':
-            continue
-            
         print(f"🎨 Generating {filename} with Imagen 3...")
         try:
             response = model.generate_images(

@@ -1,6 +1,5 @@
 import pytest
 import json
-from unittest.mock import MagicMock, patch
 from app import app
 
 
@@ -12,12 +11,12 @@ def client():
 
 
 def test_terraform_orchestration_success(client, mocker):
-    # 1. Mock all services
-    mock_ee = mocker.patch("services.geospatial.EarthEngineClient.fetch_satellite_tile")
-    mock_ee.return_value = (b"satellite-bytes", [0, 0, 1, 1])
+    # 1. Mock all services for V2 pipeline
+    mock_geo = mocker.patch("services.geospatial.ReverseGeocode.get_location_name")
+    mock_geo.return_value = "Neo Tokyo"
 
     mock_vision = mocker.patch(
-        "services.ai_vision.AIVisionService.analyze_and_terraform"
+        "services.ai_vision.AIVisionService.generate_biome_texture"
     )
     mock_vision.return_value = {
         "image_b64": "fake-image",
@@ -32,6 +31,7 @@ def test_terraform_orchestration_success(client, mocker):
     mock_sync = mocker.patch(
         "services.state_sync.PersistentWorldClient.log_terraform_event"
     )
+    mock_sync.return_value = "http://cdn/texture.png"
 
     # 2. Execute Request
     payload = {"lat": 37.0, "lon": -122.0, "prompt": "Cyberpunk"}
@@ -46,19 +46,21 @@ def test_terraform_orchestration_success(client, mocker):
     assert data["image"] == "fake-image"
     assert data["audio"] == "fake-audio-b64"
     assert data["narrative"] == "Neon skies ahead."
-    assert data["bounds"] == [0, 0, 1, 1]
+    assert data["texture_url"] == "http://cdn/texture.png"
+    assert data["city"] == "Neo Tokyo"
+    assert "bounds" in data
 
     # Verify orchestration order and arguments
-    mock_ee.assert_called_once_with(37.0, -122.0)
-    mock_vision.assert_called_once_with(b"satellite-bytes", "Cyberpunk")
+    mock_geo.assert_called_once_with(37.0, -122.0)
+    mock_vision.assert_called_once_with("Neo Tokyo", "Cyberpunk")
     mock_audio.assert_called_once_with("Neon skies ahead.")
-    mock_sync.assert_called_once_with(37.0, -122.0, "Cyberpunk")
+    mock_sync.assert_called_once_with(37.0, -122.0, "Cyberpunk", "fake-image")
 
 
 def test_terraform_orchestration_failure(client, mocker):
     # Mock one service to fail
     mocker.patch(
-        "services.geospatial.EarthEngineClient.fetch_satellite_tile",
+        "services.geospatial.ReverseGeocode.get_location_name",
         side_effect=Exception("Geospatial Error"),
     )
 

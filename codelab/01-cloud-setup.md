@@ -21,7 +21,7 @@ uv sync
 
 ## Step 3: Identity & Access Management (IAM)
 
-We've provided a script to automate the creation of your Google Cloud Project, enable APIs (Vertex AI, Earth Engine, Secret Manager, TTS), and configure your Service Account. 
+We've provided a script to automate the creation of your Google Cloud Project, enable APIs (Vertex AI, Geocoding, Secret Manager, TTS), and configure your Service Account. 
 
 **Action Marker 1.2:** Run the setup script in your terminal. 
 
@@ -30,26 +30,19 @@ bash scripts/setup_gcp.sh
 ```
 
 **Pause for the Maps API Key:**
-During execution, the script will pause and ask you for a **Google Maps API Key**. 
+During execution, the script will automatically pause and present you with two highly visible, clickable links.
 
-1. *While the script is paused*, hold `CTRL` (or `CMD` on Mac) and click this link to open the credentials page in a new tab: **[Google Maps Platform Credentials](https://console.cloud.google.com/google/maps-apis/credentials)**
-2. If prompted by a "Try Google Maps Platform" wizard, click **Agree & continue**.
-3. **Account Verification:** For new accounts, you may see a popup asking to **"Verify your account to use Maps APIs and services"**. This is a mandatory anti-abuse check. Click **Verify Account** and follow the prompts (this may include a quick phone number verification).
-4. **Enable the Map Tiles API (CRITICAL):** Even though our script attempts to enable this, Google often requires a manual "Enable" click to accept specific 3D Map terms. Click this direct link: **[Enable Map Tiles API](https://console.cloud.google.com/apis/library/tile.googleapis.com)**. Ensure your project is selected in the top dropdown and click the blue **ENABLE** button.
-5. **Create the Key:** Once enabled, click **Keys & Credentials** on the left sidebar. Click **Create Credentials** -> **API Key** and copy it.
-6. Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.
+1. *While the script is paused*, hold `CTRL` (or `CMD` on Mac) and click the **STEP 1** link. This will open the Map Tiles API page for your specific project. Click the blue **ENABLE** button.
 
-<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Your Google Cloud Console showing the Maps APIs/Credentials screen. Save as `assets/dummy_enable_apis.png`</span>
-<br><span style="color:red; font-weight:bold;">📸 TAKE SCREENSHOT: Open 'Secret Manager' in your GCP Console UI and screenshot the `GOOGLE_MAPS_API_KEY` table. Save as `assets/dummy_secret_manager.png`</span>
+![Enable Map Tiles API](./assets/screenshots/enable_map_tiles_api.png)
 
-## Step 4: Earth Engine Registration (CRITICAL)
+2. Next, hold `CTRL` (or `CMD` on Mac) and click the **STEP 2** link to open the Credentials page. Click **Create Credentials** -> **API Key** and copy it.
 
-If you are using a new Google Cloud account, you **must** manually accept the Earth Engine Terms of Service. If you skip this, your simulator will fail with a `403 Forbidden` error later.
+![Create API Key](./assets/screenshots/confirmed_maps_api_key.png)
 
-1. Visit **[earthengine.google.com/signup](https://earthengine.google.com/signup)**
-2. Click **Register** and accept the terms for your project.
+3. Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.
 
-## Step 5: Verification (The Vertex AI Handshake)
+## Step 4: Verification (The Vertex AI Handshake)
 
 Let's verify that the AI is working before touching the code. We will use **Gemini 2.5 Flash** to generate a custom 3D building texture.
 
@@ -65,7 +58,17 @@ uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
 
 ## Architecture: The Cloud Handshake
 
+> 💡 **A Note on Mermaid Diagrams (Docs as Code)**
+> Throughout this codelab, you will see `mermaid` code blocks followed by an image of a diagram. [Mermaid](https://mermaid.js.org/) is a popular open-source tool that allows engineers to generate architectural flowcharts using simple, readable text. We have intentionally included both the raw Mermaid code and the final rendered image as a pedagogical tool, so you can learn how to easily document your own AI architectures!
+
 The diagram below shows how your Cloud Shell environment is communicating with Vertex AI using the credentials we just generated.
+
+```mermaid
+graph LR
+    CS[Cloud Shell / uv] -->|Auth via service-account-key.json| VAI[Vertex AI API]
+    VAI -->|Gemini 2.5 Flash| IMG[Generated Texture]
+    IMG -->|Saved to| FILE[assets/texture.png]
+```
 
 ![Architecture: Cloud Handshake](./assets/01_cloud_setup.png)
 

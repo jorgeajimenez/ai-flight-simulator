@@ -1,0 +1,33 @@
+# Prompts for Poetic Slide Visuals (Use with Imagen 3 / Midjourney)
+
+These prompts are designed to create atmospheric, cinematic, and metaphorical visuals that elevate the "Imagination Engineered" keynote.
+
+**Slide 1: IMAGINATION ENGINEERED (Opening)**
+Prompt: `A breathtaking wide shot of a futuristic city appearing through a translucent digital grid. Glowing cyan lines are weaving into reality. Cinematic lighting, soft volumetric fog, high-tech elegance. Dark purple and black void background.`
+
+**Slide 2: CHAOS (The Vibe Trap)**
+Prompt: `A violent storm of glowing orange syntax and broken code fragments swirling in a dark abyss. A sense of instability, fragility, and noise. Cyberpunk glitches, high contrast, aggressive lighting.`
+
+**Slide 3: THE MISSION (What we build)**
+Prompt: `A sleek, stealthy futuristic jet aircraft suspended in a glowing blue holographic wind tunnel. Wireframe grids mapping its surface. A sense of enterprise-grade engineering and limitless flight. Cinematic, dark background.`
+
+**Slide 4: THE MIND (Google ADK)**
+Prompt: `A glowing, mechanical neural network hovering above a dark pedestal. Physical metallic gears are turning inside a translucent glowing brain, symbolizing an AI that can use physical tools. High contrast, sharp focus.`
+
+**Slide 5: THE WORKFLOW (Tickets)**
+Prompt: `A sleek, holographic heads-up display (HUD) floating in the dark. It shows a list of technical flight maneuvers as mission objectives. Each objective has a glowing green checkmark. Military-grade precision, clean typography.`
+
+**Slide 6: THE NAVIGATOR (Gemini CLI)**
+Prompt: `A lone, glowing cyan cursor blinking on a massive, curved panoramic terminal screen that fills the entire field of vision. The screen is filled with perfectly flowing streams of monospaced data. Surgical, focused, powerful.`
+
+**Slide 7: THE CONSTITUTION (GEMINI.MD)**
+Prompt: `A tall, glowing monolithic block of black obsidian etched with glowing cyan runes and geometric patterns. It stands solitary in a vast dark landscape under a starry sky. Symbolizing ancient, immutable law.`
+
+**Slide 8: THE SHIELD (TDD)**
+Prompt: `A sleek, transparent energy barrier rippling with cyan hexagonal patterns. Behind the shield, a glowing digital heart beat. In front of it, sharp red sparks are being deflected. Symbolizing protection, validation, and integrity.`
+
+**Slide 9: THE FORGE (IaC)**
+Prompt: `A futuristic automated foundry where liquid cyan light is being poured into perfectly geometric molds. A sense of heat, precision, and repeatable creation. Industrial sci-fi aesthetic.`
+
+**Slide 10: FLIGHT (Closing)**
+Prompt: `A dramatic low-angle shot of a futuristic jet engine igniting with a brilliant cyan and white flame. The ground below is a digital grid. The aircraft is tilting up towards a vast, glowing horizon. Pure motion, speed, and potential.`

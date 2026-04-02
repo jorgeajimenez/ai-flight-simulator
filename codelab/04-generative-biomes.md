@@ -1,21 +1,43 @@
-import base64
-import json
-from pydantic import BaseModel, Field
-from google import genai
-from google.genai import types
-from config import GCPConfig, logger
+# Module 4: Generative Biomes (Procedural Architect)
 
-# Define the structure for our Biome Architect
-class BiomeDesign(BaseModel):
-    advisory: str = Field(description="A 1-sentence pilot advisory describing the transformation.")
-    imagen_prompt: str = Field(description="A technical prompt for Imagen 3 to generate a thematic texture.")
+The core imaginative engine of the simulator resides within the `AIVisionService`. In this module, we transition away from literal, constrained satellite imagery and embrace **Procedural Biome Generation**.
 
-class AIVisionService:
-    """
-    Procedural Biome Engine powered by Vertex AI.
-    Converts telemetry and pilot intent into immersive world textures.
-    """
+## The Biome Pipeline
 
+Instead of asking AI to perform complex image-to-image alignment (which often results in distorted roads), we are using a two-model pipeline to generate stunning, thematic textures from scratch based purely on our location and prompt.
+
+1.  **The Biome Architect (Gemini 2.5 Flash):** Gemini takes the real-world city name (e.g., "Paris") and the pilot's prompt (e.g., "Cyberpunk City") and generates a highly detailed, top-down technical prompt. It essentially "designs" the rules of the biome.
+2.  **The Texture Painter (Imagen 3):** We pass Gemini's technical prompt into the Imagen 3 model. Imagen paints a beautiful, seamless tile representing the newly terraformed city.
+
+```mermaid
+sequenceDiagram
+    participant App
+    participant G25 as Gemini (Architect)
+    participant I3 as Imagen 3 (Painter)
+
+    App->>G25: City Name + User Prompt
+    G25-->>App: JSON {technical_prompt, advisory}
+    App->>I3: Generate Image(technical_prompt)
+    I3-->>App: Raw Image Bytes
+```
+
+![Architecture: Generative Biomes](./assets/04_generative_biomes.png)
+
+This pipeline is honest, highly performant, and perfectly highlights the strengths of both Large Language Models and Diffusion Models.
+
+---
+
+## 🎯 Ticket #2: Procedural Biome Generation
+
+Your task is to refactor the AI Vision service to utilize this new Architect/Painter pipeline.
+
+### Step 1: Open `services/ai_vision.py`
+Navigate to `services/ai_vision.py` and review the `BiomeDesign` schema. Notice how we use Pydantic to force Gemini to return structured JSON.
+
+### Step 2: Implement the Architect and Painter
+Replace the `generate_biome_texture` method with the following code. Notice how we first prompt `gemini-2.5-flash`, parse the structured output, and then feed that exact prompt into `imagen-3.0-generate-001`.
+
+```python
     @staticmethod
     def generate_biome_texture(city_name: str, user_prompt: str) -> dict:
         """
@@ -29,7 +51,6 @@ class AIVisionService:
             )
 
             # STEP 1: The Biome Architect (Gemini 2.5 Flash)
-            # We use telemetry (city name) to ground the AI's imagination.
             architect_prompt = f"""
             You are a Biome Architect. Your goal is to design a procedural texture for the city of {city_name}.
             The pilot wants to transform the terrain into: '{user_prompt}'.
@@ -75,3 +96,9 @@ class AIVisionService:
         except Exception as e:
             logger.error(f"AI Vision Error: {e}")
             raise e
+```
+
+### Step 3: Test and Verify
+Restart your Flask server. Fly to a city, enter a prompt in the AI TERRAFORMER box, and click the launch button. You should hear the advisory, and see the map update with the procedurally generated Imagen texture!
+
+![Procedural Cyberpunk City](./assets/03_cyberpunk_city.png)
