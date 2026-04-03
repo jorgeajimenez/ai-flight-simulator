@@ -14,36 +14,5 @@ class ReverseGeocode:
         Calls Google Maps Reverse Geocoding API.
         Returns "City, Country" or "Unknown Location".
         """
-        try:
-            api_key = VaultService.get_maps_api_key()
-            if not api_key:
-                logger.warning("Geospatial: No Maps API Key found in Secret Manager.")
-                return "Unknown Location"
-
-            url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lon}&key={api_key}"
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
-
-            if data.get("status") == "OK" and data.get("results"):
-                # Extract city and country from address_components
-                components = data["results"][0].get("address_components", [])
-                city = ""
-                country = ""
-
-                for component in components:
-                    types = component.get("types", [])
-                    if "locality" in types:
-                        city = component.get("long_name", "")
-                    elif "country" in types:
-                        country = component.get("long_name", "")
-
-                if city and country:
-                    return f"{city}, {country}"
-                elif country:
-                    return country
-            
-            return "Unknown Location"
-        except Exception as e:
-            logger.error(f"Geospatial: Reverse Geocode Error: {e}")
-            return "Unknown Location"
+        # TODO: [TICKET 1] Implement Reverse Geocoding via Google Maps API
+        return "Unknown Location"

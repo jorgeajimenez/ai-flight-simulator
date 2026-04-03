@@ -1,5 +1,5 @@
 ID,Summary,Description,Status
-1,Reverse Geocoding Utility,Implement a utility to convert lat/lon coordinates into human-readable city names using the Google Maps Geocoding API.,DONE
-2,Procedural Biome Generation,Refactor AIVisionService to use Gemini to analyze telemetry and Imagen 3 to generate thematic procedural textures.,DONE
-3,The ADK Control Tower,Implement the ControlTowerAgent in services/control_tower.py using Vertex AI ADK to respond to local time inquiries.,DONE
-4,The Copilot Agent,Implement the CopilotAgent in services/control_tower.py to handle cockpit interactions and directly invoke the ADK runner.,DONE
+1,Reverse Geocoding Utility,Implement a utility to convert lat/lon coordinates into human-readable city names using the Google Maps Geocoding API.,TODO
+2,Procedural Biome Generation,Refactor AIVisionService to use Gemini to analyze telemetry and Imagen 3 to generate thematic procedural textures.,TODO
+3,The ADK Control Tower,Implement the ControlTowerAgent in services/control_tower.py using Vertex AI ADK to respond to local time inquiries.,TODO
+4,The Copilot Agent,Implement the CopilotAgent in services/control_tower.py to handle cockpit interactions and directly invoke the ADK runner.,TODO
