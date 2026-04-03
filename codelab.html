@@ -1,0 +1,1171 @@
+
+<!DOCTYPE html>
+
+<html dir="ltr" lang="en">
+<head><script>
+    // Silence DevSite tracking and profile errors when running locally
+    const originalFetch = window.fetch;
+    window.fetch = function() {
+        const url = arguments[0];
+        if (typeof url === 'string' && (url.includes('/_d/profile') || url.includes('play.google.com') || url.includes('developerprofiles-pa') || url.includes('googletagmanager.com'))) {
+            return Promise.resolve(new Response('{}', {status: 200, headers: {'Content-Type': 'application/json'}}));
+        }
+        return originalFetch.apply(this, arguments);
+    };
+
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        const url = arguments[1];
+        if (typeof url === 'string' && (url.includes('/_d/profile') || url.includes('play.google.com') || url.includes('developerprofiles-pa') || url.includes('googletagmanager.com'))) {
+            this.send = function() {
+                Object.defineProperty(this, 'readyState', {get: () => 4});
+                Object.defineProperty(this, 'status', {get: () => 200});
+                Object.defineProperty(this, 'responseText', {get: () => '{}'});
+                setTimeout(() => {
+                    if (this.onload) this.onload();
+                    if (this.onreadystatechange) this.onreadystatechange();
+                }, 10);
+            };
+        }
+        return originalOpen.apply(this, arguments);
+    };
+    </script>
+<meta content="721724668570-nbkv1cfusk7kk4eni4pjvepaus73b13t.apps.googleusercontent.com" name="google-signin-client-id"/><meta content="profile email https://www.googleapis.com/auth/developerprofiles https://www.googleapis.com/auth/developerprofiles.award https://www.googleapis.com/auth/devprofiles.full_control.firstparty" name="google-signin-scope"/><meta content="Google Codelabs" property="og:site_name"/>
+<meta content="website" property="og:type"/><meta content="#1a73e8" name="theme-color"/><meta charset="utf-8"/>
+<meta content="IE=Edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+<link crossorigin="" href="https://www.gstatic.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://apis.google.com" rel="preconnect"/>
+<link crossorigin="" href="https://www.google-analytics.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500|Roboto:400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Icons&amp;family=Material+Symbols+Outlined&amp;display=block" rel="stylesheet"/><link href="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/css/app.css" rel="stylesheet"/>
+<link href="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/favicon.png" rel="shortcut icon"/>
+<link href="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/touchicon-180.png" rel="apple-touch-icon"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions" rel="canonical"/><link href="https://codelabs.developers.google.com/s/opensearch.xml" rel="search" title="Google Codelabs" type="application/opensearchdescription+xml"/>
+<link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions" hreflang="en" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions" hreflang="x-default" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=ar" hreflang="ar" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=bn" hreflang="bn" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=zh-cn" hreflang="zh-Hans" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=zh-tw" hreflang="zh-Hant" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=fa" hreflang="fa" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=fr" hreflang="fr" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=de" hreflang="de" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=he" hreflang="he" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=hi" hreflang="hi" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=id" hreflang="id" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=it" hreflang="it" rel="alternate"><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=ja" hreflang="ja" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=ko" hreflang="ko" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=pl" hreflang="pl" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=pt-br" hreflang="pt-BR" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=ru" hreflang="ru" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=es-419" hreflang="es-419" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=th" hreflang="th" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=tr" hreflang="tr" rel="alternate"/><link href="https://codelabs.developers.google.com/way-back-home-level-0/instructions?hl=vi" hreflang="vi" rel="alternate"/><title>AI Flight Simulator | Google Codelabs</title>
+<meta content="AI Flight Simulator" property="og:title"/><meta content="Generate your unique space explorer avatar using multi-turn image generation with Gemini" name="description"/>
+<meta content="Generate your unique space explorer avatar using multi-turn image generation with Gemini" property="og:description"/><meta content="https://codelabs.developers.google.com/way-back-home-level-0/instructions" property="og:url"/><meta content="en" property="og:locale"/>
+<meta content="rNevz_JFwKxa5b8U5vYo5W47LUSdzqlTwGFj5Jt9ZMo6MTc3NDAzMjgwNzQ3NTAwMA" name="xsrf_token"/>
+<meta content="0" name="session_expiry"/>
+<meta content="102761948047815885752" name="uid"/>
+</link></link></link></link></link></link></link></link></link></link></link></link></link><style>details.custom-expandable summary::-webkit-details-marker { display: none; }</style></head>
+<body class="color-scheme--light" display-toc="" layout="docs" template="codelab" theme="codelabs-theme" type="codelab">
+
+<a class="skip-link button" href="#main-content">
+      
+      Skip to main content
+    </a>
+<section class="devsite-wrapper">
+<devsite-cookie-notification-bar></devsite-cookie-notification-bar><devsite-header role="banner">
+<div class="devsite-header--inner" data-nosnippet="">
+<div class="devsite-top-logo-row-wrapper-wrapper">
+<div class="devsite-top-logo-row-wrapper">
+<div class="devsite-top-logo-row">
+<button aria-label="Open menu" class="devsite-header-icon-button button-flat material-icons gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Navigation menu button" id="devsite-hamburger-menu" type="button" visually-hidden="">
+</button>
+<div class="devsite-product-name-wrapper">
+<a class="devsite-site-logo-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Site logo" href="/" track-metadata-eventdetail="nav" track-metadata-position="nav" track-name="googleCodelabs" track-type="globalNav">
+<picture>
+<img alt="Google Codelabs" class="devsite-site-logo" src="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/lockup.svg"/>
+</picture>
+</a>
+</div>
+<div class="devsite-top-logo-row-middle">
+<div class="devsite-header-upper-tabs">
+</div>
+<devsite-search enable-query-completion="" enable-search="" enable-search-summaries="" enable-suggestions="" tenant-name="Google Codelabs">
+<form action="https://codelabs.developers.google.com/s/results" class="devsite-search-form" method="GET">
+<div class="devsite-search-container">
+<button aria-label="Open search" class="devsite-search-button devsite-header-icon-button button-flat material-icons" search-open="" type="button"></button>
+<div class="devsite-searchbox">
+<input aria-activedescendant="" aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-label="Search" autocomplete="off" class="devsite-search-field devsite-search-query" name="q" placeholder="Search" role="combobox" type="text" value=""/>
+<div aria-hidden="true" class="devsite-search-image material-icons">
+<svg class="devsite-search-ai-image" fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6641_386)">
+<path d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14167 15.375 4.875 14.125C3.625 12.8583 3 11.3167 3 9.5C3 7.68333 3.625 6.15 4.875 4.9C6.14167 3.63333 7.68333 3 9.5 3C10.0167 3 10.5167 3.05833 11 3.175C11.4833 3.275 11.9417 3.43333 12.375 3.65L10.825 5.2C10.6083 5.13333 10.3917 5.08333 10.175 5.05C9.95833 5.01667 9.73333 5 9.5 5C8.25 5 7.18333 5.44167 6.3 6.325C5.43333 7.19167 5 8.25 5 9.5C5 10.75 5.43333 11.8167 6.3 12.7C7.18333 13.5667 8.25 14 9.5 14C10.6667 14 11.6667 13.625 12.5 12.875C13.35 12.1083 13.8417 11.15 13.975 10H15.975C15.925 10.6333 15.7833 11.2333 15.55 11.8C15.3333 12.3667 15.05 12.8667 14.7 13.3L21 19.6L19.6 21ZM17.5 12C17.5 10.4667 16.9667 9.16667 15.9 8.1C14.8333 7.03333 13.5333 6.5 12 6.5C13.5333 6.5 14.8333 5.96667 15.9 4.9C16.9667 3.83333 17.5 2.53333 17.5 0.999999C17.5 2.53333 18.0333 3.83333 19.1 4.9C20.1667 5.96667 21.4667 6.5 23 6.5C21.4667 6.5 20.1667 7.03333 19.1 8.1C18.0333 9.16667 17.5 10.4667 17.5 12Z" fill="#5F6368"></path>
+</g>
+<defs>
+<clippath id="clip0_6641_386">
+<rect fill="white" height="24" width="24"></rect>
+</clippath>
+</defs>
+</svg>
+</div>
+<div aria-hidden="true" class="devsite-search-shortcut-icon-container">
+<kbd class="devsite-search-shortcut-icon">/</kbd>
+</div>
+</div>
+</div>
+</form>
+<button aria-label="Close search" class="devsite-search-button devsite-header-icon-button button-flat material-icons" search-close="" type="button"></button>
+</devsite-search>
+</div>
+<devsite-language-selector>
+<ul role="presentation">
+<li role="presentation">
+<a aria-current="true" lang="en" role="menuitem">English</a>
+</li>
+<li role="presentation">
+<a lang="de" role="menuitem">Deutsch</a>
+</li>
+<li role="presentation">
+<a lang="es" role="menuitem">Español</a>
+</li>
+<li role="presentation">
+<a lang="es_419" role="menuitem">Español – América Latina</a>
+</li>
+<li role="presentation">
+<a lang="fr" role="menuitem">Français</a>
+</li>
+<li role="presentation">
+<a lang="id" role="menuitem">Indonesia</a>
+</li>
+<li role="presentation">
+<a lang="it" role="menuitem">Italiano</a>
+</li>
+<li role="presentation">
+<a lang="pl" role="menuitem">Polski</a>
+</li>
+<li role="presentation">
+<a lang="pt_br" role="menuitem">Português – Brasil</a>
+</li>
+<li role="presentation">
+<a lang="vi" role="menuitem">Tiếng Việt</a>
+</li>
+<li role="presentation">
+<a lang="tr" role="menuitem">Türkçe</a>
+</li>
+<li role="presentation">
+<a lang="ru" role="menuitem">Русский</a>
+</li>
+<li role="presentation">
+<a lang="he" role="menuitem">עברית</a>
+</li>
+<li role="presentation">
+<a lang="ar" role="menuitem">العربيّة</a>
+</li>
+<li role="presentation">
+<a lang="fa" role="menuitem">فارسی</a>
+</li>
+<li role="presentation">
+<a lang="hi" role="menuitem">हिंदी</a>
+</li>
+<li role="presentation">
+<a lang="bn" role="menuitem">বাংলা</a>
+</li>
+<li role="presentation">
+<a lang="th" role="menuitem">ภาษาไทย</a>
+</li>
+<li role="presentation">
+<a lang="zh_cn" role="menuitem">中文 – 简体</a>
+</li>
+<li role="presentation">
+<a lang="zh_tw" role="menuitem">中文 – 繁體</a>
+</li>
+<li role="presentation">
+<a lang="ja" role="menuitem">日本語</a>
+</li>
+<li role="presentation">
+<a lang="ko" role="menuitem">한국어</a>
+</li>
+</ul>
+</devsite-language-selector>
+
+</div>
+</div>
+</div>
+</div>
+</devsite-header>
+<devsite-book-nav hidden="" scrollbars="">
+<div class="devsite-book-nav-filter" hidden="">
+<span aria-hidden="true" class="filter-list-icon material-icons"></span>
+<input aria-label="Type to filter" placeholder="Filter" role="searchbox" type="text"/>
+<span aria-label="Clear filter" class="filter-clear-button hidden" data-title="Clear filter" role="button" tabindex="0"></span>
+</div>
+<nav aria-label="Side menu" class="devsite-book-nav devsite-nav nocontent">
+<div class="devsite-mobile-header">
+<button aria-label="Close navigation" class="devsite-header-icon-button button-flat material-icons gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Close navigation" id="devsite-close-nav" type="button">
+</button>
+<div class="devsite-product-name-wrapper">
+<a class="devsite-site-logo-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Site logo" href="/" track-metadata-eventdetail="nav" track-metadata-position="nav" track-name="googleCodelabs" track-type="globalNav">
+<picture>
+<img alt="Google Codelabs" class="devsite-site-logo" src="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/lockup.svg"/>
+</picture>
+</a>
+</div>
+</div>
+<div class="devsite-book-nav-wrapper">
+<div class="devsite-mobile-nav-top">
+<ul class="devsite-nav-list">
+</ul>
+</div>
+</div>
+</nav>
+</devsite-book-nav>
+<section id="gc-wrapper">
+<main class="devsite-main-content" has-sidebar="" id="main-content" role="main">
+<div class="devsite-sidebar">
+<div class="devsite-sidebar-content">
+<devsite-toc aria-label="On this page" class="devsite-nav" depth="1" role="navigation" scrollbars=""></devsite-toc>
+<devsite-recommendations-sidebar class="nocontent devsite-nav">
+</devsite-recommendations-sidebar>
+</div>
+</div>
+<devsite-content>
+<article class="devsite-article"><style>
+      body {
+        transition: opacity ease-in 0.2s;
+      }
+
+      body[unresolved] {
+        opacity: 0;
+        display: block;
+        overflow: hidden;
+        position: relative;
+      }
+      </style>
+<div class="devsite-article-meta nocontent" role="navigation">
+<ul class="devsite-breadcrumb-list">
+</ul>
+</div>
+<h1 class="devsite-page-title" tabindex="-1">AI Flight Simulator<devsite-actions data-nosnippet="" hidden=""></devsite-actions></h1>
+<devsite-toc class="devsite-nav" depth="1" devsite-toc-embedded="">
+</devsite-toc>
+<div class="devsite-article-body clearfix">
+
+<google-codelab category="" codelab-ga4id="" codelab-gaid="" doc-id="" environment="web" feedback-link="" id="way-back-home-level-0" layout="paginated" no-tooltip="" title="AI Flight Simulator">
+
+
+
+
+
+
+
+
+<google-codelab-step label="Module 0: Welcome to Infinite Flight" duration="2" step="0"><h2 class="step-title" id="0" data-text="Module 0: Welcome to Infinite Flight" tabindex="-1">1. Module 0: Welcome to Infinite Flight</h2><p>Welcome to the <strong>"Build with AI"</strong> 3D Flight Simulator workshop! We are thrilled to have you here.</p>
+<h2>🛩️ The Mission</h2>
+<p>Today, you are stepping into the shoes of an AI Systems Engineer. We have a fully functional front-end 3D flight simulator built on CesiumJS. Your mission is to rip out its mocked backend data and wire it up to a live, production-grade <strong>Google Cloud AI Backend</strong>.</p>
+<p>By the end of this workshop, your simulator will feature:
+1.  <strong>Reverse Geocoding:</strong> The AI will know exactly where you are flying.
+2.  <strong>Procedural Biome Generation:</strong> Use Gemini and Imagen 3 to instantly terraform real-world cities into new themes (like a Cyberpunk Tokyo or a Mars Colony).
+3.  <strong>Collaborative ADK Agents:</strong> You will build a Copilot Agent that talks to an autonomous Control Tower Agent (built with the Google ADK) to fetch live airspace advisories.</p>
+<p><img alt="Infinite Flight Simulator" src="assets/intro_screenshot.png"/></p>
+<h2>🛠️ How this Workshop works</h2>
+<p>This is not a traditional tutorial where you copy and paste 500 lines of code into a single file. </p>
+<p>We will be using a <strong>Ticket-Driven Workflow</strong>, just like a real engineering team. You will look at your assigned tickets, open the corresponding Python service, implement the missing logic using the Google Cloud SDKs, and verify your changes.</p>
+<p>Let's start by getting your Google Cloud environment ready!</p>
+</google-codelab-step>
+<google-codelab-step label="Module 1: Cloud Setup & Initial Generation" duration="7" step="1"><h2 class="step-title" id="1" data-text="Module 1: Cloud Setup & Initial Generation" tabindex="-1">2. Module 1: Cloud Setup & Initial Generation</h2><p>Before building the flight simulator's brain, we need to ensure your environment is correctly wired to Google Cloud. If you are using a brand new Google account, follow these steps exactly.</p>
+<h2>Step 1: Account Preparation &amp; Billing</h2>
+<ol>
+<li><strong>Billing Account:</strong> You must have an active billing account. Go to the <a href="https://console.cloud.google.com/billing">Google Cloud Billing Console</a> and ensure a billing account is linked to your current project.</li>
+<li><strong>Activate Cloud Shell:</strong> Click the <code>&gt;_</code> terminal icon in the top right of your Google Cloud Console. This is your primary development environment.</li>
+</ol>
+<h2>Step 2: Clone &amp; Synchronize</h2>
+<p>Google Cloud Shell comes pre-configured with the tools you need, including the ultra-fast <code>uv</code> Python package manager!</p>
+<p><strong>Action Marker 1.1:</strong> Open your Cloud Shell terminal, clone the project, and synchronize the locked dependencies.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
+cd ai-flight-simulator
+uv sync
+</code></pre></devsite-code>
+<h2>Step 3: Identity &amp; Access Management (IAM)</h2>
+<p>We've provided a script to automate the creation of your Google Cloud Project, enable APIs (Vertex AI, Geocoding, Secret Manager, TTS), and configure your Service Account. </p>
+<p><strong>Action Marker 1.2:</strong> Run the setup script in your terminal. </p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">bash scripts/setup_gcp.sh
+</code></pre></devsite-code>
+<p><strong>Pause for the Maps API Key:</strong>
+During execution, the script will automatically pause and present you with two highly visible, clickable links.</p>
+<ol>
+<li><em>While the script is paused</em>, hold <code>CTRL</code> (or <code>CMD</code> on Mac) and click the <strong>STEP 1</strong> link. This will open the Map Tiles API page for your specific project. Click the blue <strong>ENABLE</strong> button.</li>
+</ol>
+<p><img alt="Enable Map Tiles API" src="assets/enable_map_tiles_api.png"/></p>
+<ol start="2">
+<li>Next, hold <code>CTRL</code> (or <code>CMD</code> on Mac) and click the <strong>STEP 2</strong> link to open the Credentials page. Click <strong>Create Credentials</strong> -&gt; <strong>API Key</strong> and copy it.</li>
+</ol>
+<p><img alt="Create API Key" src="assets/confirmed_maps_api_key.png"/></p>
+<ol start="3">
+<li>Go back to your Cloud Shell terminal, paste the key, and press Enter. The script will securely lock it inside Google Cloud Secret Manager.</li>
+</ol>
+<h2>Step 4: Verification (The Vertex AI Handshake)</h2>
+<p>Let's verify that the AI is working before touching the code. We will use <strong>Gemini 2.5 Flash</strong> to generate a custom 3D building texture.</p>
+<p><strong>Action Marker 1.3:</strong> Execute the texture verification script.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">uv run python scripts/generate_texture.py "Cyberpunk hacker apartment block..."
+</code></pre></devsite-code>
+<p><strong>Verification:</strong> If you see <code>Saved texture to assets/texture.svg</code>, your cloud environment is structurally sound.</p>
+<hr/>
+<h2>Architecture: The Cloud Handshake</h2>
+<blockquote>
+<p>💡 <strong>A Note on Mermaid Diagrams (Docs as Code)</strong>
+  Throughout this codelab, you will see <code>mermaid</code> code blocks followed by an image of a diagram. <a href="https://mermaid.js.org/">Mermaid</a> is a popular open-source tool that allows engineers to generate architectural flowcharts using simple, readable text. We have intentionally included both the raw Mermaid code and the final rendered image as a pedagogical tool, so you can learn how to easily document your own AI architectures!</p>
+
+<p>The diagram below shows how your Cloud Shell environment is communicating with Vertex AI using the credentials we just generated.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">graph LR
+    CS[Cloud Shell / uv] --&gt;|Auth via service-account-key.json| VAI[Vertex AI API]
+    VAI --&gt;|Gemini 2.5 Flash| IMG[Generated Texture]
+    IMG --&gt;|Saved to| FILE[assets/texture.png]
+</code></pre></devsite-code>
+<p><img alt="Architecture: Cloud Handshake" src="assets/01_cloud_setup.png"/></p>
+<p><em>Notice how <code>uv</code> authenticates via the <code>service-account-key.json</code> file we generated in the setup script. This establishes a secure, zero-trust handshake with the Vertex AI API, allowing Gemini 2.5 Flash to generate our initial SVG texture and save it locally to the assets folder. This fundamental auth flow will power the rest of our AI services.</em></p>
+</blockquote></google-codelab-step>
+<google-codelab-step label="Module 2: Enterprise Modular Architecture & TDD" duration="19" step="2"><h2 class="step-title" id="2" data-text="Module 2: Enterprise Modular Architecture & TDD" tabindex="-1">3. Module 2: Enterprise Modular Architecture & TDD</h2><p>In this module, we transition from a monolithic "script" to an enterprise-grade Service-Oriented Architecture (SOA). We will also adopt a <strong>Test-Driven Development (TDD)</strong> workflow to ensure our AI application is robust and "re-buildable."</p>
+<h2>The "Essential 6" Stack</h2>
+<p>To scale this simulator, we've deconstructed the backend into six specialized services.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">graph TD
+    App[app.py Orchestrator] --&gt; Config[0. Config]
+    App --&gt; Vault[1. Secret Manager]
+    App --&gt; Geo[2. Reverse Geocoding]
+    App --&gt; Vision[3. Procedural Biomes]
+    App --&gt; Audio[4. Cloud TTS]
+    App --&gt; State[5. Firestore Ledger]
+    App --&gt; Agents[6. ADK Control Tower]
+</code></pre></devsite-code>
+<p><img alt="Architecture: Modular SOA" src="assets/02_modular_architecture.png"/></p>
+<p><em>As seen in the diagram above, our <code>app.py</code> acts as a central orchestrator. Instead of containing all the business logic, it delegates tasks to specialized modules. This prevents the "monolith" anti-pattern and makes it incredibly easy to swap out services (like changing our TTS provider or database) without breaking the entire application.</em></p>
+<p>Each service has a single responsibility and is isolated for maximum testability:</p>
+<ol>
+<li><strong>Service 0 (Config):</strong> Environment detection and logging initialization.</li>
+<li><strong>Service 1 (Vault):</strong> Zero-trust secret management (Secret Manager) with in-memory caching for performance (e.g., <code>get_maps_api_key</code>).</li>
+<li><strong>Service 2 (Geospatial):</strong> Reverse geocoding utility using the Google Maps API.</li>
+<li><strong>Service 3 (AI Vision):</strong> Multi-stage generative pipeline (Gemini + Imagen).</li>
+<li><strong>Service 4 (Audio):</strong> Immersive Pilot voice synthesis (Text-to-Speech).</li>
+<li><strong>Service 5 (State Sync):</strong> Shared Persistent World persistence (Firestore).</li>
+</ol>
+<hr/>
+<h2>The TDD Workflow (Red-Green-Refactor)</h2>
+<p>In cloud engineering, TDD is paramount. Executing full integration tests against live generative AI endpoints for every code iteration introduces latency and unintended API consumption. </p>
+<p>To circumvent this, we use <code>pytest-mock</code> to simulate Google Cloud responses locally.</p>
+<p><strong>Action Marker 2.1:</strong> Execute the test suite for the Vault Service. This execution will intentionally fail (the "Red" state) because the service is not yet implemented.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">uv run pytest tests/test_vault.py
+</code></pre></devsite-code>
+<p>The terminal output will yield an <code>AssertionError</code>. To resolve this and transition to the "Green" state, you must implement the Vault Service.</p>
+<p><strong>Action Marker 2.2:</strong> Open <code>services/vault.py</code> and paste the following implementation. This code integrates an in-memory cache to minimize redundant network calls, and an environment variable fallback, perfectly satisfying our tests.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">import os
+from google.cloud import secretmanager
+from config import GCPConfig
+
+class VaultService:
+    # Initialize an in-memory variable to cache retrieved secrets
+    _api_key_cache = None
+
+    @staticmethod
+    def get_maps_api_key() -&gt; str:
+        cache_key = "GOOGLE_MAPS_API_KEY"
+
+        # Consult the cache to prevent redundant API latency
+        if VaultService._api_key_cache:
+            return VaultService._api_key_cache
+
+        try:
+            # Instantiate the official Google Cloud Secret Manager client
+            client = secretmanager.SecretManagerServiceClient()
+
+            # Construct the fully qualified resource name
+            name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{cache_key}/versions/latest"
+
+            # Execute the secure retrieval request
+            response = client.access_secret_version(request={"name": name})
+            secret_payload = response.payload.data.decode("UTF-8")
+
+            # Persist the payload in the local cache
+            VaultService._api_key_cache = secret_payload
+            return secret_payload
+
+        except Exception as e:
+            print(f"Vault Security Exception: {e}")
+            # Fallback to environment variable as defined in our tests
+            return os.environ.get("GOOGLE_MAPS_API_KEY")
+</code></pre></devsite-code>
+<p><strong>Action Marker 2.3:</strong> Re-execute the test suite. The terminal should now indicate <code>3 passed</code> (the "Green" state).</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">uv run pytest tests/test_vault.py
+</code></pre></devsite-code>
+<h2>Directory Blueprint</h2>
+<p>By the end of this refactor, your project structure will look like this:</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">infinite-loop-simulator/
+├── app.py                # The Orchestrator (&lt; 50 lines)
+├── config.py             # Service 0: GCP Configuration
+├── services/             # The Service Core
+│   ├── vault.py          # Service 1: Secret Management
+│   ├── geospatial.py     # Service 2: Reverse Geocoding
+│   └── ...               # (Services 3-5)
+└── tests/                # The TDD Suite
+</code></pre></devsite-code>
+<p>This structure makes the application <strong>"AI-Wirable"</strong>—meaning each service can be independently tested and easily integrated into the main application via standardized interfaces.</p>
+<hr/>
+<h2>🔌 The Orchestrator (<code>app.py</code>)</h2>
+<p>Before we can test our newly unlocked <code>VaultService</code>, our Flask backend needs routes that the frontend can call. In the starter code, <code>app.py</code> only has the basic <code>/</code> index route and a <code>[CODELAB ORCHESTRATION]</code> placeholder block at the bottom.</p>
+<p><strong>Instructions:</strong> Open <code>app.py</code> in your editor and locate the <code>[CODELAB ORCHESTRATION]</code> block near the bottom. We are going to paste <strong>two separate endpoints</strong> into this space.</p>
+<h3>Step 1: The Locate Endpoint</h3>
+<p>First, paste the <code>/locate</code> endpoint. This route handles the "WHERE AM I?" button click from the frontend. Notice how it reverse geocodes the coordinates and delegates the airspace analysis to the Copilot Agent.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">@app.route("/locate", methods=["POST"])
+def locate():
+    """
+    Reverse geocodes coordinates and hails the Copilot to contact the Control Tower.
+    """
+    try:
+        data = request.json
+        lat, lon = data.get("lat"), data.get("lon")
+
+        # 1. Ground the AI: Convert coordinates into a real city name
+        city_name = ReverseGeocode.get_location_name(lat, lon)
+
+        # 2. Hailing the Copilot: Triggers the direct ADK Agent-to-Agent call
+        atc_response = CopilotAgent.request_airspace_update(city_name)
+
+        # 3. Text-to-Speech: Synthesize the transmission
+        audio_b64 = AudioSynthesisService.synthesize_advisory(
+            atc_response, voice_type="atc"
+        )
+
+        return jsonify({"audio": audio_b64, "text": atc_response, "city": city_name})
+    except Exception as e:
+        logger.error(f"Locate Error: {e}")
+        return jsonify({"error": str(e)}), 500
+</code></pre></devsite-code>
+<h3>Step 2: The Terraform Endpoint</h3>
+<p>Next, immediately below the <code>/locate</code> route, paste the <code>/terraform</code> endpoint. This route is the heart of our simulator, chaining together 4 different cloud services sequentially to alter the physical world using the Procedural Biome Engine.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">@app.route("/terraform", methods=["POST"])
+def terraform():
+    """
+    Uses the Procedural Biome Engine to generate a new world texture for the current city.
+    """
+    try:
+        data = request.json
+        lat, lon, prompt = (
+            data.get("lat"),
+            data.get("lon"),
+            data.get("prompt", "Cyberpunk City"),
+        )
+
+        # 1. Reverse Geocode to identify the city biome
+        city_name = ReverseGeocode.get_location_name(lat, lon)
+
+        # 2. Procedural Biome Generation: Gemini designs it, Imagen paints it
+        ai_result = AIVisionService.generate_biome_texture(city_name, prompt)
+
+        # 3. Voice Briefing
+        audio_b64 = AudioSynthesisService.synthesize_advisory(ai_result["advisory"])
+
+        # 4. Persistence: Upload texture to CDN and log to standard event log
+        texture_url = PersistentWorldClient.log_terraform_event(
+            lat, lon, prompt, ai_result["image_b64"]
+        )
+
+        # 5. Calculate bounds for the frontend Cesium renderer
+        offset = 0.0025
+        bounds = [lat - offset, lon - offset, lat + offset, lon + offset]
+
+        return jsonify(
+            {
+                "image": ai_result["image_b64"],
+                "audio": audio_b64,
+                "narrative": ai_result["advisory"],
+                "texture_url": texture_url,
+                "city": city_name,
+                "bounds": bounds
+            }
+        )
+    except Exception as e:
+        logger.error(f"Terraforming Error: {e}")
+        return jsonify({"error": str(e)}), 500
+</code></pre></devsite-code>
+<hr/>
+<h2>🚀 Your First Flight: Test the Simulator!</h2>
+<p>Now that you've implemented the Vault Service using the Gemini CLI, the backend can finally pull the Google Maps API Key and serve it to the frontend. Let's test it!</p>
+<ol>
+<li>Start the Flask server in your Cloud Shell terminal:
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">uv run app.py
+</code></pre></devsite-code></li>
+<li>Click the <strong>Web Preview</strong> button (the eye icon) in the top right of your Cloud Shell.</li>
+<li>Select <strong>Preview on port 8080</strong>.</li>
+</ol>
+<h3>🗑️ Memory Eviction Built-In</h3>
+<p>Before we start building the AI features, note that the 3D map has built-in garbage collection logic. Our simulator only allows a maximum of 3 concurrent terraformed tiles. If you generate a 4th, the oldest tile is purged from memory and the 3D world to keep the browser running smoothly.</p>
+<p><img alt="Memory Eviction" src="assets/04_memory_eviction.png"/></p>
+<p><em>The Web Preview feature securely tunnels port 8080 from your Cloud Shell virtual machine directly to your browser. If you don't see the CesiumJS globe, double-check that your <code>service-account-key.json</code> is in the root directory and that the Flask server output doesn't show any startup errors.</em></p>
+<p>You should now see the 3D globe load successfully! The AI terraforming features won't work yet, but you can fly around the world. Keep the server running and open a <strong>new terminal tab</strong> for the next modules.</p>
+</google-codelab-step>
+<google-codelab-step label="Module 3: Telemetry & Reverse Geocoding" duration="6" step="3"><h2 class="step-title" id="3" data-text="Module 3: Telemetry & Reverse Geocoding" tabindex="-1">4. Module 3: Telemetry & Reverse Geocoding</h2><p>To create a believable 3D world, our generative AI needs to know <em>where</em> it is. In this module, we will implement <strong>Reverse Geocoding</strong> to convert the pilot's raw latitude and longitude coordinates into a human-readable city name.</p>
+<h2>Grounding the AI</h2>
+<p>If a pilot asks to terraform the terrain into a "Cyberpunk City," the AI needs context. A Cyberpunk version of Paris should look different from a Cyberpunk version of Tokyo. By reverse-geocoding the coordinates, we provide this crucial "grounding" to the Gemini model.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">graph LR
+    Coord[Pilot Lat/Lon] --&gt; Geo[ReverseGeocode Utility]
+    Geo --&gt;|Google Maps API| API[Geocoding API]
+    API --&gt;|JSON Data| Geo
+    Geo --&gt;|City, Country Name| Output
+</code></pre></devsite-code>
+<p><img alt="Architecture: Telemetry" src="assets/03_telemetry_geocoding.png"/></p>
+<hr/>
+<h2>🎯 Ticket #1: Reverse Geocoding Utility</h2>
+<p>Your task is to create a utility that leverages the Google Maps API to translate coordinates into city names.</p>
+<h3>Step 1: Open <code>services/geospatial.py</code></h3>
+<p>Navigate to <code>services/geospatial.py</code>. You will see the <code>EarthEngineClient</code>, which the frontend uses for base mapping. We need to add a new class at the bottom.</p>
+<h3>Step 2: Implement <code>ReverseGeocode</code></h3>
+<p>Add the following class to the bottom of the file. Notice how it securely fetches the Maps API key from the <code>VaultService</code> we configured earlier.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">import requests
+from config import logger
+from services.vault import VaultService
+
+class ReverseGeocode:
+    """
+    Reverse Geocoding Utility using Google Maps API.
+    Converts lat/lon to human-readable city names.
+    """
+
+    @staticmethod
+    def get_location_name(lat: float, lon: float) -&gt; str:
+        """
+        Calls Google Maps Reverse Geocoding API.
+        Returns "City, Country" or "Unknown Location".
+        """
+        try:
+            api_key = VaultService.get_maps_api_key()
+            if not api_key:
+                logger.warning("Geospatial: No Maps API Key found in Secret Manager.")
+                return "Unknown Location"
+
+            url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lon}&amp;key={api_key}"
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+
+            if data.get("status") == "OK" and data.get("results"):
+                # Extract city and country from address_components
+                components = data["results"][0].get("address_components", [])
+                city = ""
+                country = ""
+
+                for component in components:
+                    types = component.get("types", [])
+                    if "locality" in types:
+                        city = component.get("long_name", "")
+                    elif "country" in types:
+                        country = component.get("long_name", "")
+
+                if city and country:
+                    return f"{city}, {country}"
+                elif country:
+                    return country
+
+            return "Unknown Location"
+        except Exception as e:
+            logger.error(f"Geospatial: Reverse Geocode Error: {e}")
+            return "Unknown Location"
+</code></pre></devsite-code>
+<h3>Step 3: Test and Verify</h3>
+<p>While you can't test this in isolation yet, this foundational utility will be crucial for the next modules where we build the AI Biome Generator and the Copilot Agent!</p>
+</google-codelab-step>
+<google-codelab-step label="Module 4: Generative Biomes (Procedural Architect)" duration="9" step="4"><h2 class="step-title" id="4" data-text="Module 4: Generative Biomes (Procedural Architect)" tabindex="-1">5. Module 4: Generative Biomes (Procedural Architect)</h2><p>The core imaginative engine of the simulator resides within the <code>AIVisionService</code>. In this module, we transition away from literal, constrained satellite imagery and embrace <strong>Procedural Biome Generation</strong>.</p>
+<h2>The Biome Pipeline</h2>
+<p>Instead of asking AI to perform complex image-to-image alignment (which often results in distorted roads), we are using a two-model pipeline to generate stunning, thematic textures from scratch based purely on our location and prompt.</p>
+<ol>
+<li><strong>The Biome Architect (Gemini 2.5 Flash):</strong> Gemini takes the real-world city name (e.g., "Paris") and the pilot's prompt (e.g., "Cyberpunk City") and generates a highly detailed, top-down technical prompt. It essentially "designs" the rules of the biome.</li>
+<li><strong>The Texture Painter (Imagen 3):</strong> We pass Gemini's technical prompt into the Imagen 3 model. Imagen paints a beautiful, seamless tile representing the newly terraformed city.</li>
+</ol>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">sequenceDiagram
+    participant App
+    participant G25 as Gemini (Architect)
+    participant I3 as Imagen 3 (Painter)
+
+    App-&gt;&gt;G25: City Name + User Prompt
+    G25--&gt;&gt;App: JSON {technical_prompt, advisory}
+    App-&gt;&gt;I3: Generate Image(technical_prompt)
+    I3--&gt;&gt;App: Raw Image Bytes
+</code></pre></devsite-code>
+<p><img alt="Architecture: Generative Biomes" src="assets/04_generative_biomes.png"/></p>
+<p>This pipeline is honest, highly performant, and perfectly highlights the strengths of both Large Language Models and Diffusion Models.</p>
+<hr/>
+<h2>🎯 Ticket #2: Procedural Biome Generation</h2>
+<p>Your task is to refactor the AI Vision service to utilize this new Architect/Painter pipeline.</p>
+<h3>Step 1: Open <code>services/ai_vision.py</code></h3>
+<p>Navigate to <code>services/ai_vision.py</code> and review the <code>BiomeDesign</code> schema. Notice how we use Pydantic to force Gemini to return structured JSON.</p>
+<h3>Step 2: Implement the Architect and Painter</h3>
+<p>Replace the <code>generate_biome_texture</code> method with the following code. Notice how we first prompt <code>gemini-2.5-flash</code>, parse the structured output, and then feed that exact prompt into <code>imagen-3.0-generate-001</code>.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">    @staticmethod
+    def generate_biome_texture(city_name: str, user_prompt: str) -&gt; dict:
+        """
+        Uses Gemini to architect a biome and Imagen 3 to paint the texture.
+        """
+        try:
+            client = genai.Client(
+                vertexai=True,
+                project=GCPConfig.PROJECT_ID,
+                location=GCPConfig.LOCATION
+            )
+
+            # STEP 1: The Biome Architect (Gemini 2.5 Flash)
+            architect_prompt = f"""
+            You are a Biome Architect. Your goal is to design a procedural texture for the city of {city_name}.
+            The pilot wants to transform the terrain into: '{user_prompt}'.
+
+            1. Generate a technical prompt for Imagen 3. This prompt should describe a TOP-DOWN, 
+               high-resolution satellite-style texture that looks like a seamless procedural map. 
+               It should capture the 'vibe' of {user_prompt} while hinting at the layout of {city_name}.
+
+            2. Provide a short, 1-sentence pilot advisory about entering this new biome.
+            """
+
+            logger.info(f"AI Vision: Architecting biome for {city_name}...")
+            gemini_response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=architect_prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=BiomeDesign,
+                    temperature=0.7
+                )
+            )
+
+            design = BiomeDesign.model_validate_json(gemini_response.text)
+
+            # STEP 2: The Texture Painter (Imagen 3)
+            logger.info(f"AI Vision: Painting texture: '{design.imagen_prompt[:50]}...'")
+            imagen_response = client.models.generate_images(
+                model='imagen-3.0-generate-001',
+                prompt=design.imagen_prompt,
+                config=types.GenerateImagesConfig(
+                    number_of_images=1,
+                    output_mime_type="image/png"
+                )
+            )
+
+            final_image_bytes = imagen_response.generated_images[0].image_bytes
+            image_b64 = base64.b64encode(final_image_bytes).decode('utf-8')
+
+            return {
+                "advisory": design.advisory,
+                "image_b64": image_b64
+            }
+        except Exception as e:
+            logger.error(f"AI Vision Error: {e}")
+            raise e
+</code></pre></devsite-code>
+<h3>Step 3: Test and Verify</h3>
+<p>Restart your Flask server. Fly to a city, enter a prompt in the AI TERRAFORMER box, and click the launch button. You should hear the advisory, and see the map update with the procedurally generated Imagen texture!</p>
+<p><img alt="Procedural Cyberpunk City" src="assets/03_cyberpunk_city.png"/></p>
+</google-codelab-step>
+<google-codelab-step label="Module 5: Immersive Audio (Text-to-Speech)" duration="4" step="5"><h2 class="step-title" id="5" data-text="Module 5: Immersive Audio (Text-to-Speech)" tabindex="-1">6. Module 5: Immersive Audio (Text-to-Speech)</h2><p>A flight simulator is not complete without an immersive audio experience. In this module, we will implement <strong>Service 4: The Immersive Audio Engine</strong> to turn Gemini's text advisories into a high-quality human voice.</p>
+<h2>Multi-Voice Immersion</h2>
+<p>We are using <strong>Cloud Text-to-Speech</strong> to bring our AI entities to life. To differentiate between the Pilot and the Control Tower (ATC), our service accepts a <code>voice_type</code> parameter to select distinct voice models:</p>
+<ul>
+<li><strong>The Pilot (<code>voice_type="pilot"</code>):</strong> Uses <code>en-US-Studio-O</code> for natural briefings.</li>
+<li><strong>The ATC (<code>voice_type="atc"</code>):</strong> Uses <code>en-US-Journey-D</code> for an authoritative tone.</li>
+</ul>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">graph TD
+    Text[AI Generated Advisory] --&gt; TTS[Cloud TTS Engine]
+    TTS --&gt;|en-US-Journey-D| ATC[Audio Bytes]
+    ATC --&gt; FE[Frontend Speaker]
+</code></pre></devsite-code>
+<p><img alt="Architecture: Audio Engine" src="assets/05_immersive_audio.png"/></p>
+<p><em>This diagram highlights the routing of AI-generated text to the Cloud TTS Engine, which then returns base64-encoded audio directly to the browser.</em></p>
+<hr/>
+<h2>Implementation: <code>AudioSynthesisService</code></h2>
+<p><strong>Action Marker 5.1:</strong> Terminate the Flask server (CTRL+C). Open <code>services/audio_engine.py</code>, locate the <code>[CODELAB STEP 4]</code> marker, and paste the following neural TTS synthesis code.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">import base64
+from google.cloud import texttospeech
+
+class AudioSynthesisService:
+
+    @staticmethod
+    def synthesize_advisory(text: str, voice_type: str = "pilot") -&gt; str:
+        # Instantiate the Google Cloud Text-to-Speech client
+        client = texttospeech.TextToSpeechClient()
+
+        # Configure the voice based on the requested persona
+        voice_name = "en-US-Journey-D" if voice_type == "atc" else "en-US-Studio-O"
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US", 
+            name=voice_name
+        )
+
+        # Request MP3 format. A speaking_rate of 1.05 provides a professional cadence.
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3,
+            speaking_rate=1.05
+        )
+
+        response = client.synthesize_speech(
+            input=texttospeech.SynthesisInput(text=text), 
+            voice=voice, 
+            audio_config=audio_config
+        )
+
+        # Return base64 encoded bytes
+        return base64.b64encode(response.audio_content).decode('utf-8')
+</code></pre></devsite-code>
+<p><strong>Action Marker 5.2:</strong> Restart the Flask server (<code>uv run app.py</code>).</p>
+</google-codelab-step>
+<google-codelab-step label="Module 6: Agentic Intelligence (Google ADK)" duration="10" step="6"><h2 class="step-title" id="6" data-text="Module 6: Agentic Intelligence (Google ADK)" tabindex="-1">7. Module 6: Agentic Intelligence (Google ADK)</h2><p>In this final module, we move beyond simple LLM prompts and build <strong>Autonomous Agents</strong> using the <strong>Google Agent Development Kit (ADK)</strong>. </p>
+<h2>The Copilot and The Control Tower</h2>
+<p>We are going to implement an <strong>Agent-to-Agent (A2A)</strong> workflow:
+1.  <strong>The Copilot Agent:</strong> A standard Python class that handles requests from the human pilot in the cockpit.
+2.  <strong>The Control Tower Agent:</strong> An autonomous AI built with the Google ADK. It has access to external <strong>Tools</strong> (Python functions) that it can decide to execute on its own to gather information before responding to the Copilot.</p>
+<p>To keep things simple, we will give the Control Tower a single tool: the ability to look up the local time for a specific city. </p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">sequenceDiagram
+    participant FE as Frontend
+    participant Copilot as Copilot Agent
+    participant Tower as ADK Control Tower
+    participant Tool as get_local_time Tool
+
+    FE-&gt;&gt;Copilot: Request Airspace Update
+    Copilot-&gt;&gt;Tower: "Flight 001 over City, requesting time."
+    Tower-&gt;&gt;Tool: execute(City Name)
+    Tool--&gt;&gt;Tower: "9:00 AM Local Time"
+    Tower--&gt;&gt;Copilot: Synthesized Briefing
+    Copilot--&gt;&gt;FE: Final Audio Briefing
+</code></pre></devsite-code>
+<p><img alt="Architecture: Collaborative Agents" src="assets/06_collaborative_agents.png"/></p>
+<hr/>
+<h2>🎯 Tickets #3 &amp; #4: The ADK Agents</h2>
+<p>Your task is to implement both agents and wire them together.</p>
+<h3>Step 1: Open <code>services/control_tower.py</code></h3>
+<p>Navigate to <code>services/control_tower.py</code>.</p>
+<h3>Step 2: Implement the ADK Control Tower</h3>
+<p>Copy the following code. Pay close attention to how <code>get_local_time</code> is passed into the <code>Agent</code> as a tool, and how the <code>Runner</code> handles the session memory.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">from google.genai import types
+from google.adk import Agent, Runner
+from google.adk.sessions import InMemorySessionService
+from config import logger
+
+def get_local_time(city_name: str) -&gt; str:
+    """Fetches the current local time for the specified city."""
+    logger.info(f"Tool Execution: Fetching simulated time for {city_name}...")
+    return "9:00 AM Local Time"
+
+# 1. Initialize ADK Agent with Tool
+control_tower_agent = Agent(
+    name="ControlTower",
+    model="gemini-2.5-flash",
+    instruction=(
+        "You are the Global Control Tower AI. "
+        "When a Copilot contacts you with their location, ALWAYS use the 'get_local_time' "
+        "tool to find their local time. "
+        "Respond concisely with the local time and one interesting factoid about their city. "
+        "Keep the response under 3 sentences."
+    ),
+    tools=[get_local_time]
+)
+
+# 2. Initialize ADK Runner with Memory
+session_service = InMemorySessionService()
+tower_runner = Runner(
+    agent=control_tower_agent, 
+    app_name="infinite_flight", 
+    session_service=session_service, 
+    auto_create_session=True
+)
+</code></pre></devsite-code>
+<h3>Step 3: Implement the Copilot</h3>
+<p>Below the Control Tower code, add the <code>CopilotAgent</code>. This agent acts on behalf of the user to trigger the Control Tower's ADK Runner.</p>
+<div></div><devsite-code><pre class="devsite-click-to-copy" dir="ltr" is-upgraded="" translate="no"><code class="language-bash" dir="ltr" language="language-bash" translate="no">class CopilotAgent:
+    """
+    Cockpit AI Agent that interacts with the human pilot.
+    Orchestrates the A2A call directly to the Control Tower ADK Runner.
+    """
+    @staticmethod
+    def request_airspace_update(city_name: str) -&gt; str:
+        """
+        Directly invokes the Control Tower ADK agent and returns the briefing.
+        """
+        try:
+            logger.info(f"Copilot Agent: Hailing Control Tower for {city_name}...")
+
+            request_content = f"Control Tower, this is Flight 001 Copilot over {city_name}. Requesting time and local factoid."
+
+            # 3. Execute ADK Runner Loop directly (Simple A2A)
+            events = tower_runner.run(
+                user_id="pilot_1",
+                session_id="flight_001_session",
+                new_message=types.Content(
+                    role="user", 
+                    parts=[types.Part.from_text(text=request_content)]
+                )
+            )
+
+            final_text = ""
+            for event in events:
+                if getattr(event, 'error_message', None):
+                    logger.error(f"ADK Event Error: {event.error_message}")
+                if event.content and event.content.parts:
+                    for part in event.content.parts:
+                        if part.text:
+                            final_text += part.text
+
+            final_text = final_text.strip()
+            if not final_text:
+                logger.warning(f"Copilot Agent: Received empty transmission. Using fallback.")
+                return f"Captain, I'm getting static from the Control Tower over {city_name}. Standby."
+
+            logger.info(f"Copilot Agent: Received transmission: {final_text}")
+            return final_text
+
+        except Exception as e:
+            logger.error(f"Copilot Agent Error: {e}")
+            return f"Captain, we are unable to reach the Control Tower. Standard clear conditions assumed for {city_name}."
+</code></pre></devsite-code>
+<h3>Step 4: Test and Verify</h3>
+<p>Restart your Flask server. Fly to a new city, open your Comms Radio, and click <strong>WHERE AM I?</strong>. Watch your terminal logs. You will see the ADK autonomously decide to execute the <code>get_local_time</code> tool, read the result, and stream a completely unique, location-aware voice briefing back to your cockpit!</p>
+</google-codelab-step>
+<google-codelab-step label="🚀 Codelab: Build the Infinite Flight Persistent World" duration="2" step="7"><h2 class="step-title" id="7" data-text="🚀 Codelab: Build the Infinite Flight Persistent World" tabindex="-1">8. 🚀 Codelab: Build the Infinite Flight Persistent World</h2><p>Welcome to the official GDG "Build with AI" Workshop. In this codelab, you will wire up a 3D flight simulator to a modern Google Cloud AI Backend.</p>
+<h2>🧠 The Curriculum</h2>
+<p>The codelab is broken down into 6 distinct modules:</p>
+<ul>
+<li><strong>Module 1: Cloud Setup</strong> - Provisioning your Google Cloud project and enabling required APIs.</li>
+<li><strong>Module 2: Modular Architecture</strong> - Understanding the Service-Oriented Architecture (SOA) and the ticketing workflow.</li>
+<li><strong>Module 3: Telemetry &amp; Reverse Geocoding</strong> - Implementing the Google Maps API to ground the AI with real-world city names.</li>
+<li><strong>Module 4: Generative Biomes</strong> - Using Gemini 2.5 Flash as an Architect and Imagen 3 as a Painter to procedurally generate immersive new worlds.</li>
+<li><strong>Module 5: Immersive Audio</strong> - Converting the AI's pilot advisories into high-quality human speech using Cloud TTS.</li>
+<li><strong>Module 6: Agentic Intelligence</strong> - Building autonomous AI Agents using the Google Agent Development Kit (ADK) that can actively call external tools.</li>
+</ul>
+<h2>🎫 The Workflow</h2>
+<p>You will act as an engineer clearing tickets from a Jira-style board. Your tracker is <code>tickets_v2.csv</code> (or the equivalent UI provided by your instructor). Look at the ticket, follow the module instructions to implement the code, and clear the ticket.</p>
+<p>Let's get flying.</p>
+</google-codelab-step></google-codelab>
+</div>
+<div class="devsite-floating-action-buttons"></div></article>
+<devsite-content-footer class="nocontent">
+<p>Except as otherwise noted, the content of this page is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 License</a>, and code samples are licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 License</a>. For details, see the <a href="https://developers.google.com/site-policies">Google Developers Site Policies</a>. Java is a registered trademark of Oracle and/or its affiliates.</p>
+</devsite-content-footer>
+<devsite-notification>
+</devsite-notification>
+<div class="devsite-content-data">
+<template class="devsite-content-data-template">
+      [[["Easy to understand","easyToUnderstand","thumb-up"],["Solved my problem","solvedMyProblem","thumb-up"],["Other","otherUp","thumb-up"]],[["Missing the information I need","missingTheInformationINeed","thumb-down"],["Too complicated / too many steps","tooComplicatedTooManySteps","thumb-down"],["Out of date","outOfDate","thumb-down"],["Samples / code issue","samplesCodeIssue","thumb-down"],["Other","otherDown","thumb-down"]],[],[],[]]
+    </template>
+</div>
+</devsite-content>
+</main>
+<devsite-footer-promos class="devsite-footer">
+</devsite-footer-promos>
+<devsite-footer-linkboxes class="devsite-footer">
+<nav aria-label="Footer links" class="devsite-footer-linkboxes nocontent">
+<ul class="devsite-footer-linkboxes-list">
+<li class="devsite-footer-linkbox">
+<h3 class="devsite-footer-linkbox-heading no-link">Connect</h3>
+<ul class="devsite-footer-linkbox-list">
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" href="//googledevelopers.blogspot.com">
+            
+          
+            Blog
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" href="//www.facebook.com/Google-Developers-967415219957038">
+            
+          
+            Facebook
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" href="//medium.com/google-developers">
+            
+          
+            Medium
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" href="//twitter.com/googledevs">
+            
+          
+            Twitter
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" href="//www.youtube.com/user/GoogleDevelopers">
+            
+              
+              
+            
+          
+            YouTube
+          
+          </a>
+</li>
+</ul>
+</li>
+<li class="devsite-footer-linkbox">
+<h3 class="devsite-footer-linkbox-heading no-link">Programs</h3>
+<ul class="devsite-footer-linkbox-list">
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" href="//www.womentechmakers.com">
+            
+          
+            Women Techmakers
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" href="//developers.google.com/community/gdg">
+            
+          
+            Google Developer Groups
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" href="//developers.google.com/community/experts">
+            
+          
+            Google Developer Experts
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" href="//developers.google.com/community/accelerators">
+            
+              
+              
+            
+          
+            Accelerators
+          
+          </a>
+</li>
+</ul>
+</li>
+<li class="devsite-footer-linkbox">
+<h3 class="devsite-footer-linkbox-heading no-link">Developer consoles</h3>
+<ul class="devsite-footer-linkbox-list">
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 1)" href="//console.developers.google.com">
+            
+          
+            Google API Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 2)" href="//console.cloud.google.com">
+            
+          
+            Google Cloud Platform Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 3)" href="//play.google.com/apps/publish">
+            
+          
+            Google Play Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 4)" href="//console.firebase.google.com">
+            
+          
+            Firebase Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 5)" href="//console.actions.google.com">
+            
+          
+            Actions on Google Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 6)" href="//cast.google.com/publish">
+            
+          
+            Cast SDK Developer Console
+          
+          </a>
+</li>
+<li class="devsite-footer-linkbox-item">
+<a class="devsite-footer-linkbox-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Link (index 7)" href="//chrome.google.com/webstore/developer/dashboard">
+            
+              
+              
+            
+          
+            Chrome Web Store Dashboard
+          
+          </a>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</devsite-footer-linkboxes>
+<devsite-footer-utility class="devsite-footer">
+<div class="devsite-footer-utility nocontent">
+<nav aria-label="Other Google Developers websites" class="devsite-footer-sites">
+<a class="devsite-footer-sites-logo-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google Developers Link" href="https://developers.google.com/">
+<picture>
+<img alt="Google Developers" class="devsite-footer-sites-logo" loading="lazy" src="https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/lockup-google-for-developers.svg"/>
+</picture>
+</a>
+<ul class="devsite-footer-sites-list">
+<li class="devsite-footer-sites-item">
+<a class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Android Link" href="//developer.android.com">
+          Android
+        </a>
+</li>
+<li class="devsite-footer-sites-item">
+<a class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Chrome Link" href="//developer.chrome.com/home">
+          Chrome
+        </a>
+</li>
+<li class="devsite-footer-sites-item">
+<a class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Firebase Link" href="//firebase.google.com">
+          Firebase
+        </a>
+</li>
+<li class="devsite-footer-sites-item">
+<a class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Google Cloud Platform Link" href="//cloud.google.com">
+          Google Cloud Platform
+        </a>
+</li>
+<li class="devsite-footer-sites-item">
+<a class="devsite-footer-sites-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer All products Link" href="//developers.google.com/products">
+          All products
+        </a>
+</li>
+</ul>
+</nav>
+<nav aria-label="Utility links" class="devsite-footer-utility-links">
+<ul class="devsite-footer-utility-list">
+<li class="devsite-footer-utility-item">
+<a class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Terms link" href="//developers.google.com/terms/site-terms">
+          Terms
+        </a>
+</li>
+<li class="devsite-footer-utility-item">
+<a class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Privacy link" href="//policies.google.com/privacy">
+          Privacy
+        </a>
+</li>
+<li class="devsite-footer-utility-item glue-cookie-notification-bar-control">
+<a aria-hidden="true" class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Manage cookies link" href="#">
+          Manage cookies
+        </a>
+</li>
+<li class="devsite-footer-utility-item devsite-footer-utility-button">
+<span class="devsite-footer-utility-description">Sign up for the Google Developers newsletter</span>
+<a class="devsite-footer-utility-link gc-analytics-event" data-category="Site-Wide Custom Events" data-label="Footer Subscribe link" href="//services.google.com/fb/forms/googledevelopersnewsletter/?utm_medium=referral&amp;utm_source=google-products&amp;utm_team=googledevs&amp;utm_campaign=201611-newsletter-launch">
+          Subscribe
+        </a>
+</li>
+</ul>
+<devsite-language-selector>
+<ul role="presentation">
+<li role="presentation">
+<a aria-current="true" lang="en" role="menuitem">English</a>
+</li>
+<li role="presentation">
+<a lang="de" role="menuitem">Deutsch</a>
+</li>
+<li role="presentation">
+<a lang="es" role="menuitem">Español</a>
+</li>
+<li role="presentation">
+<a lang="es_419" role="menuitem">Español – América Latina</a>
+</li>
+<li role="presentation">
+<a lang="fr" role="menuitem">Français</a>
+</li>
+<li role="presentation">
+<a lang="id" role="menuitem">Indonesia</a>
+</li>
+<li role="presentation">
+<a lang="it" role="menuitem">Italiano</a>
+</li>
+<li role="presentation">
+<a lang="pl" role="menuitem">Polski</a>
+</li>
+<li role="presentation">
+<a lang="pt_br" role="menuitem">Português – Brasil</a>
+</li>
+<li role="presentation">
+<a lang="vi" role="menuitem">Tiếng Việt</a>
+</li>
+<li role="presentation">
+<a lang="tr" role="menuitem">Türkçe</a>
+</li>
+<li role="presentation">
+<a lang="ru" role="menuitem">Русский</a>
+</li>
+<li role="presentation">
+<a lang="he" role="menuitem">עברית</a>
+</li>
+<li role="presentation">
+<a lang="ar" role="menuitem">العربيّة</a>
+</li>
+<li role="presentation">
+<a lang="fa" role="menuitem">فارسی</a>
+</li>
+<li role="presentation">
+<a lang="hi" role="menuitem">हिंदी</a>
+</li>
+<li role="presentation">
+<a lang="bn" role="menuitem">বাংলা</a>
+</li>
+<li role="presentation">
+<a lang="th" role="menuitem">ภาษาไทย</a>
+</li>
+<li role="presentation">
+<a lang="zh_cn" role="menuitem">中文 – 简体</a>
+</li>
+<li role="presentation">
+<a lang="zh_tw" role="menuitem">中文 – 繁體</a>
+</li>
+<li role="presentation">
+<a lang="ja" role="menuitem">日本語</a>
+</li>
+<li role="presentation">
+<a lang="ko" role="menuitem">한국어</a>
+</li>
+</ul>
+</devsite-language-selector>
+</nav>
+</div>
+</devsite-footer-utility>
+<devsite-panel>
+</devsite-panel>
+</section></section>
+<devsite-sitemask></devsite-sitemask>
+<devsite-snackbar></devsite-snackbar>
+<devsite-tooltip></devsite-tooltip>
+<devsite-heading-link></devsite-heading-link>
+<devsite-analytics>
+<script analytics="" type="application/json">[]</script>
+<script tag-management="" type="application/json">{&#34;at&#34;: &#34;True&#34;, &#34;ga4&#34;: [], &#34;ga4p&#34;: [], &#34;gtm&#34;: [], &#34;parameters&#34;: {&#34;internalUser&#34;: &#34;False&#34;, &#34;language&#34;: {&#34;machineTranslated&#34;: &#34;False&#34;, &#34;requested&#34;: &#34;en&#34;, &#34;served&#34;: &#34;en&#34;}, &#34;pageType&#34;: &#34;codelab&#34;, &#34;projectName&#34;: null, &#34;signedIn&#34;: &#34;True&#34;, &#34;tenant&#34;: &#34;codelabs&#34;, &#34;recommendations&#34;: {&#34;sourcePage&#34;: &#34;&#34;, &#34;sourceType&#34;: 0, &#34;sourceRank&#34;: 0, &#34;sourceIdenticalDescriptions&#34;: 0, &#34;sourceTitleWords&#34;: 0, &#34;sourceDescriptionWords&#34;: 0, &#34;experiment&#34;: &#34;&#34;}, &#34;experiment&#34;: {&#34;ids&#34;: &#34;&#34;}}}</script>
+</devsite-analytics>
+<devsite-badger></devsite-badger>
+<script nonce="xSCC7akCETqGEFigzIKCxWiHAa1KIO">
+  
+  (function(d,e,v,s,i,t,E){d['GoogleDevelopersObject']=i;
+    t=e.createElement(v);t.async=1;t.src=s;E=e.getElementsByTagName(v)[0];
+    E.parentNode.insertBefore(t,E);})(window, document, 'script',
+    'https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/js/app_loader.js', '[17,"en",null,"/js/devsite_app_module.js","https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b","https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs","https://codelabs-dot-devsite-v2-prod.appspot.com",null,null,["/_pwa/codelabs/manifest.json","https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/images/video-placeholder.svg","https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/favicon.png","https://www.gstatic.com/devrel-devsite/prod/vb733f83c4d98b98a393545fb4caff59cc746f444c6f32fab64ef45038fb6ff9b/codelabs/images/lockup.svg","https://fonts.googleapis.com/css?family=Google+Sans:400,500|Roboto:400,400italic,500,500italic,700,700italic|Roboto+Mono:400,500,700&display=swap"],1,null,[1,6,8,12,14,17,21,25,50,52,63,70,75,76,80,87,91,92,93,97,98,100,101,102,103,104,105,107,108,109,110,112,113,116,117,118,120,122,124,125,126,127,129,130,131,132,133,134,135,136,138,140,141,147,148,149,151,152,156,157,158,159,161,163,164,168,169,170,179,180,182,183,186,191,193,196],"AIzaSyAP-jjEJBzmIyKR4F-3XITp8yM9T1gEEI8","AIzaSyB6xiKGDR5O3Ak2okS4rLkauxGUG7XP0hg","codelabs.developers.google.com","AIzaSyAQk0fBONSGUqCNznf6Krs82Ap1-NV6J4o","AIzaSyCCxcqdrZ_7QMeLCRY20bh_SXdAYqy70KY",null,null,null,["DevPro__enable_credits_banner","Profiles__enable_user_type","Profiles__enable_purchase_prompts","SignIn__enable_l1_signup_flow","DevPro__enable_developer_subscriptions","Search__enable_page_map","Cloud__enable_llm_concierge_chat","Profiles__enable_completequiz_endpoint","DevPro__enable_enterprise","MiscFeatureFlags__enable_explicit_template_dependencies","Analytics__enable_clearcut_logging","Profiles__enable_dashboard_curated_recommendations","Profiles__enable_release_notes_notifications","Profiles__enable_developer_profile_pages_as_content","TpcFeatures__proxy_prod_host","DevPro__enable_g1_integration","Profiles__enable_complete_playlist_endpoint","Analytics__enable_devpro_interaction_logging","DevPro__enable_free_benefits","Concierge__enable_actions_menu","Cloud__fast_free_trial","DevPro__enable_embed_profile_creation","MiscFeatureFlags__enable_firebase_utm","MiscFeatureFlags__gdp_dashboard_reskin_enabled","DevPro__enable_code_assist","Experiments__reqs_query_experiments","MiscFeatureFlags__enable_variable_operator_index_yaml","MiscFeatureFlags__remove_cross_domain_tracking_params","BookNav__enable_tenant_cache_key","MiscFeatureFlags__developers_footer_dark_image","Profiles__enable_targeted_hero","Search__enable_ai_search_summaries_for_all","CloudShell__cloud_shell_button","DevPro__enable_cloud_innovators_plus","Profiles__enable_developer_profile_benefits_ui_redesign","MiscFeatureFlags__enable_view_transitions","Cloud__enable_cloud_shell_fte_user_flow","Profiles__enable_auto_apply_credits","Concierge__enable_remove_info_panel_tags","MiscFeatureFlags__enable_variable_operator","TpcFeatures__enable_unmirrored_page_left_nav","DevPro__enable_firebase_workspaces_card","Profiles__enable_recognition_badges","Cloud__enable_cloudx_experiment_ids","Cloud__enable_cloud_shell","MiscFeatureFlags__enable_framebox_badge_methods","Cloud__enable_cloud_dlp_service","Profiles__enable_public_developer_profiles","EngEduTelemetry__enable_engedu_telemetry","DevPro__enable_vertex_credit_card","Profiles__enable_awarding_url","DevPro__enable_nvidia_credits_card","DevPro__enable_google_payments_buyflow","Profiles__enable_completecodelab_endpoint","DevPro__enable_devpro_offers","DevPro__remove_eu_tax_intake_form","Profiles__enable_page_saving","Profiles__require_profile_eligibility_for_signin","DevPro__enable_google_payments","Profiles__enable_developer_profiles_callout","MiscFeatureFlags__enable_project_variables","Cloud__cache_serialized_dynamic_content","MiscFeatureFlags__enable_appearance_cookies","Cloud__enable_legacy_calculator_redirect","MiscFeatureFlags__fix_lower_breadcrumbs","Concierge__enable_pushui","Profiles__enable_playlist_community_acl","Search__enable_dynamic_content_confidential_banner","Profiles__enable_stripe_subscription_management","DevPro__enable_google_one_card","MiscFeatureFlags__emergency_css","MiscFeatureFlags__enable_explain_this_code","Profiles__enable_callout_notifications","Search__enable_ai_eligibility_checks","CloudShell__cloud_code_overflow_menu","Profiles__enable_join_program_group_endpoint","Cloud__enable_free_trial_server_call","MiscFeatureFlags__developers_footer_image","Search__enable_suggestions_from_borg","Profiles__enable_profile_collections"],null,null,"AIzaSyBLEMok-5suZ67qRPzx0qUtbnLmyT_kCVE","https://developerscontentserving-pa.clients6.google.com","AIzaSyCM4QpTRSqP5qI4Dvjt4OAScIN8sOUlO-k","https://developerscontentsearch-pa.clients6.google.com",1,4,null,"https://developerprofiles-pa.clients6.google.com",[17,"codelabs","Google Codelabs","codelabs.developers.google.com",null,"codelabs-dot-devsite-v2-prod.appspot.com",null,null,[null,1,null,null,null,null,null,null,null,null,null,[1],null,null,null,null,null,null,[1],null,null,null,null,[1],null,null,null,null,null,null,[1]],null,[33,null,null,null,null,null,"/images/lockup.svg",null,null,null,null,1,1,null,null,null,null,null,null,null,null,1,null,null,null,null,[]],[],null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,[6,1,14,15,20,22,23,29,32,36],null,[[],[1,1]],[[null,null,null,null,null,null,null,null,null,null,null,null,1]],null,4],null,"pk_live_5170syrHvgGVmSx9sBrnWtA5luvk9BwnVcvIi7HizpwauFG96WedXsuXh790rtij9AmGllqPtMLfhe2RSwD6Pn38V00uBCydV4m",1,1,"https://developerscontentinsights-pa.clients6.google.com","AIzaSyCg-ZUslalsEbXMfIo9ZP8qufZgo3LSBDU","AIzaSyDxT0vkxnY_KeINtA4LSePJO-4MAZPMRsE","https://developers.clients6.google.com",null,null,"AIzaSyBQom12tzI-rybN7Sf-KfeL4nwm-Rf7PmI\n",null,null,"https://developers.googleapis.com"]')
+  
+</script>
+<devsite-a11y-announce></devsite-a11y-announce>
+<script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const details = document.querySelectorAll('details.custom-expandable');
+                details.forEach(detail => {
+                    const summary = detail.querySelector('summary');
+                    const icon = summary.querySelector('.material-icons');
+                    
+                    // Remove default browser arrow
+                    summary.style.listStyle = 'none';
+                    summary.addEventListener('click', (e) => {
+                        if (detail.hasAttribute('open')) {
+                            icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            icon.style.transform = 'rotate(90deg)';
+                        }
+                    });
+                });
+            });
+        </script></body>
+</html>
