@@ -21,57 +21,8 @@ class AIVisionService:
         """
         Uses Gemini to architect a biome and Imagen 3 to paint the texture.
         """
-        try:
-            client = genai.Client(
-                vertexai=True,
-                project=GCPConfig.PROJECT_ID,
-                location=GCPConfig.LOCATION
-            )
-
-            # STEP 1: The Biome Architect (Gemini 2.5 Flash)
-            # We use telemetry (city name) to ground the AI's imagination.
-            architect_prompt = f"""
-            You are a Biome Architect. Your goal is to design a procedural texture for the city of {city_name}.
-            The pilot wants to transform the terrain into: '{user_prompt}'.
-            
-            1. Generate a technical prompt for Imagen 3. This prompt should describe a TOP-DOWN, 
-               high-resolution satellite-style texture that looks like a seamless procedural map. 
-               It should capture the 'vibe' of {user_prompt} while hinting at the layout of {city_name}.
-            
-            2. Provide a short, 1-sentence pilot advisory about entering this new biome.
-            """
-
-            logger.info(f"AI Vision: Architecting biome for {city_name}...")
-            gemini_response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=architect_prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=BiomeDesign,
-                    temperature=0.7
-                )
-            )
-            
-            design = BiomeDesign.model_validate_json(gemini_response.text)
-
-            # STEP 2: The Texture Painter (Imagen 3)
-            logger.info(f"AI Vision: Painting texture: '{design.imagen_prompt[:50]}...'")
-            imagen_response = client.models.generate_images(
-                model='imagen-3.0-generate-001',
-                prompt=design.imagen_prompt,
-                config=types.GenerateImagesConfig(
-                    number_of_images=1,
-                    output_mime_type="image/png"
-                )
-            )
-            
-            final_image_bytes = imagen_response.generated_images[0].image_bytes
-            image_b64 = base64.b64encode(final_image_bytes).decode('utf-8')
-
-            return {
-                "advisory": design.advisory,
-                "image_b64": image_b64
-            }
-        except Exception as e:
-            logger.error(f"AI Vision Error: {e}")
-            raise e
+        # TODO: [TICKET 2] Implement Procedural Biome Generation via Gemini & Imagen 3
+        return {
+            "advisory": "This is a placeholder advisory.",
+            "image_b64": "" # Base64 encoded string of the image
+        }
