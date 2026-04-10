@@ -30,6 +30,8 @@ Each service has a single responsibility and is isolated for maximum testability
 5.  **Service 4 (Audio):** Immersive Pilot voice synthesis (Text-to-Speech).
 6.  **Service 5 (State Sync):** Shared Persistent World persistence (Firestore).
 
+*(Note: To ensure we have enough time to focus on the core Generative AI and ADK features, **Service 1 (Vault)**, **Service 4 (Audio)**, and **Service 5 (State Sync)** have been pre-implemented for you in the starter code!)*
+
 ---
 
 ## The TDD Workflow (Red-Green-Refactor)

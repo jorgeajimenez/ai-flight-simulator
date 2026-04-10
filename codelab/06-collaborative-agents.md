@@ -127,3 +127,13 @@ class CopilotAgent:
 
 ### Step 4: Test and Verify
 Restart your Flask server. Fly to a new city, open your Comms Radio, and click **WHERE AM I?**. Watch your terminal logs. You will see the ADK autonomously decide to execute the `get_local_time` tool, read the result, and stream a completely unique, location-aware voice briefing back to your cockpit!
+
+---
+
+## 🏆 Mission Accomplished!
+
+You have successfully built an enterprise-grade **Service-Oriented Architecture** using the **Essential 6 Google Cloud Stack**. 
+
+By mastering **Visual Architecting**, **Function Calling**, and **Agentic Workflows**, you've proven that you can build complex, multimodal AI systems that are grounded in reality and autonomous in action. 
+
+Thank you for joining us at the GDG "Build with AI" workshop!
