@@ -23,7 +23,11 @@ graph TD
 
 ## Implementation: `AudioSynthesisService`
 
-**Action Marker 5.1:** Terminate the Flask server (CTRL+C). Open `services/audio_engine.py`, locate the `[CODELAB STEP 4]` marker, and paste the following neural TTS synthesis code.
+To keep us moving towards the final Agentic module, we have already fully implemented the `AudioSynthesisService` for you! 
+
+**Action Marker 5.1:** Open `services/audio_engine.py` and review the code below. 
+
+Notice how we configure the `texttospeech.AudioConfig` to return MP3 bytes directly, and how we encode the response to `base64`. This allows our `app.py` orchestrator to return the audio inside a JSON payload without ever needing to save a temporary MP3 file to disk!
 
 ```python
 import base64
@@ -59,4 +63,4 @@ class AudioSynthesisService:
         return base64.b64encode(response.audio_content).decode('utf-8')
 ```
 
-**Action Marker 5.2:** Restart the Flask server (`uv run app.py`).
+Your app is now fully wired for sound. Keep your server running and proceed to the final module!

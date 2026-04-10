@@ -23,22 +23,12 @@ graph LR
 Your task is to create a utility that leverages the Google Maps API to translate coordinates into city names.
 
 ### Step 1: Open `services/geospatial.py`
-Navigate to `services/geospatial.py`. You will see the `EarthEngineClient`, which the frontend uses for base mapping. We need to add a new class at the bottom.
+Navigate to `services/geospatial.py`. You will see the `ReverseGeocode` class with a `TODO: [TICKET 1]` marker.
 
 ### Step 2: Implement `ReverseGeocode`
-Add the following class to the bottom of the file. Notice how it securely fetches the Maps API key from the `VaultService` we configured earlier.
+Replace the `get_location_name` method with the following code. Notice how it securely fetches the Maps API key from the `VaultService` we configured earlier.
 
 ```python
-import requests
-from config import logger
-from services.vault import VaultService
-
-class ReverseGeocode:
-    """
-    Reverse Geocoding Utility using Google Maps API.
-    Converts lat/lon to human-readable city names.
-    """
-
     @staticmethod
     def get_location_name(lat: float, lon: float) -> str:
         """

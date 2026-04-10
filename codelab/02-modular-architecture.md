@@ -34,63 +34,19 @@ Each service has a single responsibility and is isolated for maximum testability
 
 ## The TDD Workflow (Red-Green-Refactor)
 
-In cloud engineering, TDD is paramount. Executing full integration tests against live generative AI endpoints for every code iteration introduces latency and unintended API consumption. 
+In cloud engineering, TDD is paramount. To ensure our backend services work without making expensive API calls during every test run, we use `pytest-mock` to simulate Google Cloud responses locally.
 
-To circumvent this, we use `pytest-mock` to simulate Google Cloud responses locally.
+To speed up the workshop, we have already implemented **Service 1 (Vault)** for you as a reference. Let's verify it works!
 
-**Action Marker 2.1:** Execute the test suite for the Vault Service. This execution will intentionally fail (the "Red" state) because the service is not yet implemented.
-
-```bash
-uv run pytest tests/test_vault.py
-```
-
-The terminal output will yield an `AssertionError`. To resolve this and transition to the "Green" state, you must implement the Vault Service.
-
-**Action Marker 2.2:** Open `services/vault.py` and paste the following implementation. This code integrates an in-memory cache to minimize redundant network calls, and an environment variable fallback, perfectly satisfying our tests.
-
-```python
-import os
-from google.cloud import secretmanager
-from config import GCPConfig
-
-class VaultService:
-    # Initialize an in-memory variable to cache retrieved secrets
-    _api_key_cache = None
-
-    @staticmethod
-    def get_maps_api_key() -> str:
-        cache_key = "GOOGLE_MAPS_API_KEY"
-
-        # Consult the cache to prevent redundant API latency
-        if VaultService._api_key_cache:
-            return VaultService._api_key_cache
-
-        try:
-            # Instantiate the official Google Cloud Secret Manager client
-            client = secretmanager.SecretManagerServiceClient()
-
-            # Construct the fully qualified resource name
-            name = f"projects/{GCPConfig.PROJECT_ID}/secrets/{cache_key}/versions/latest"
-
-            # Execute the secure retrieval request
-            response = client.access_secret_version(request={"name": name})
-            secret_payload = response.payload.data.decode("UTF-8")
-
-            # Persist the payload in the local cache
-            VaultService._api_key_cache = secret_payload
-            return secret_payload
-
-        except Exception as e:
-            print(f"Vault Security Exception: {e}")
-            # Fallback to environment variable as defined in our tests
-            return os.environ.get("GOOGLE_MAPS_API_KEY")
-```
-
-**Action Marker 2.3:** Re-execute the test suite. The terminal should now indicate `3 passed` (the "Green" state).
+**Action Marker 2.1:** Execute the test suite for the Vault Service. 
 
 ```bash
 uv run pytest tests/test_vault.py
 ```
+
+Because the `VaultService` is already implemented in `services/vault.py`, the terminal should indicate `3 passed` (the "Green" state). 
+
+Feel free to open `services/vault.py` to see how we integrated an in-memory cache to minimize redundant network calls, and an environment variable fallback, perfectly satisfying our tests.
 
 ## Directory Blueprint
 

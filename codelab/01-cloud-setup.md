@@ -9,11 +9,13 @@ Before building the flight simulator's brain, we need to ensure your environment
 
 ## Step 2: Clone & Synchronize
 
-Google Cloud Shell comes pre-configured with the tools you need, including the ultra-fast `uv` Python package manager!
+Google Cloud Shell comes pre-configured with most tools you need, but we will use the ultra-fast `uv` Python package manager to handle our dependencies smoothly.
 
-**Action Marker 1.1:** Open your Cloud Shell terminal, clone the project, and synchronize the locked dependencies.
+**Action Marker 1.1:** Open your Cloud Shell terminal, install `uv`, clone the project, and synchronize the dependencies.
 
 ```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
 git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
 cd ai-flight-simulator
 uv sync
