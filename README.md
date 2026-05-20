@@ -9,6 +9,12 @@ Welcome to the AI Flight Simulator repository! In this project, you will transfo
 ## 📖 Codelab Guide
 The complete, step-by-step instructions for this project are located in the **[`/codelab`](./codelab/index.md)** directory. 
 
+
+## 🎫 The Ticket-Driven AI Philosophy
+This repository is designed around a core philosophy: **AI Agents work best when given atomic, well-specified tickets.** 
+
+Rather than asking an LLM to "build a flight simulator," we deconstruct the architecture into specialized services and provide strict engineering contracts. You will find the exact specifications for the AI features in the `/tickets` directory. We encourage you to open these markdown files to see how we define clear constraints, expected return formats, and required tool bindings before writing any code.
+
 ## 🛠️ Tech Stack
 - **Backend:** Python 3.12, Flask
 - **Frontend:** CesiumJS (3D Geospatial Engine)
