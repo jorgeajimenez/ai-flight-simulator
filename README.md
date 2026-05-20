@@ -27,8 +27,8 @@ Ensure you have the following installed:
 ### 2. Setup
 ```bash
 # Clone the repository
-git clone https://github.com/jorgeajimenez/infinite-loop-simulator.git
-cd infinite-loop-simulator
+git clone https://github.com/jorgeajimenez/ai-flight-simulator.git
+cd ai-flight-simulator
 
 # Synchronize dependencies
 uv sync
@@ -43,6 +43,15 @@ chmod +x scripts/setup_gcp.sh
 uv run app.py
 ```
 Open your browser to `http://localhost:8080` to start flying!
+
+
+### Accessing the Completed Solution
+If you get stuck or want to review the completed backend architecture, the finalized code is preserved on the `solution` branch. You can check it out at any time:
+
+```bash
+git fetch origin
+git checkout solution
+```
 
 ## 🧪 Verification
 Each module in the codelab includes a programmatic verification step using `pytest`.
