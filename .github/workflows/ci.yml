@@ -2,9 +2,9 @@ name: CI Verification
 
 on:
   push:
-    branches: [ main, starter ]
+    branches: [ solution ]
   pull_request:
-    branches: [ main ]
+    branches: [ solution ]
 
 jobs:
   test:
