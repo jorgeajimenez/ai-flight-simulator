@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env file if it exists
 load_dotenv()
 
-# --- GDG INFINITE FLIGHT CONFIGURATION ---
+# --- INFINITE FLIGHT CONFIGURATION ---
 # This module centralizes all GCP and Application settings.
 
 # MAGIC FIX FOR LOCAL DEV: Auto-detect the service account key and Project ID

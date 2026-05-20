@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
-        <title>GDG Flight Simulator</title>
+        <title>AI Flight Simulator</title>
         <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
         <link
             href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css"
@@ -1628,9 +1628,9 @@
         <!-- Start Screen -->
         <div id="start-screen">
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; transform: scale(var(--ui-scale)); transform-origin: center;">
-            <div class="workshop-tag">BUILD WITH AI</div>
+            <div class="workshop-tag">FLIGHT SIMULATOR</div>
             <h1>INFINITE FLIGHT</h1>
-            <div class="subtitle">GOOGLE DEVELOPER GROUP // SUNNYVALE</div>
+            <div class="subtitle">AI POWERED // WEBGL ENGINE</div>
             <div class="event-date">APRIL 02, 2026</div>
             <div class="loading-text" id="loading-text">
                 LOADING 3D WORLD...
@@ -1816,8 +1816,8 @@
                     <div class="anomaly-grid"></div>
                     <div class="anomaly-continent"></div>
                     <!-- X = (lon - (-126)) / 60 * 100; Y = (50 - lat) / 35 * 100 -->
-                    <div class="map-pin" style="left: 6.6%; top: 36.1%;" onclick="startFlight('sunnyvale')" title="Sunnyvale, CA">
-                        <div class="pin-label">SUNNYVALE</div>
+                    <div class="map-pin" style="left: 6.6%; top: 36.1%;" onclick="startFlight('default_city')" title="Sunnyvale, CA">
+                        <div class="pin-label">DEFAULT_CITY</div>
                         <div class="pin-desc">Googleplex Corridor</div>
                     </div>
                     <div class="map-pin" style="left: 5.9%; top: 34.8%;" onclick="startFlight('sf')" title="San Francisco">
@@ -2028,7 +2028,7 @@
             updateUIScale();
 
             // ================================================================
-            // GDG FLIGHT SIMULATOR v3.0 - Full Physics + 3D Aircraft + GPWS
+            // AI FLIGHT SIMULATOR v3.0 - Full Physics + 3D Aircraft + GPWS
             // ================================================================
 
             const GOOGLE_API_KEY = "{{ google_maps_api_key }}";
@@ -2107,7 +2107,7 @@
 
             // ---- Locations ----
             const LOCATIONS = {
-                sunnyvale: {
+                default_city: {
                     lon: -122.02985,
                     lat: 37.37656,
                     alt: 300,
@@ -2279,7 +2279,7 @@
                     // Add Global Landmarks (POIs) for screenshots
                     const landmarks = [
                         {
-                            name: "DOWNTOWN SUNNYVALE",
+                            name: "DOWNTOWN DEFAULT_CITY",
                             lon: -122.03,
                             lat: 37.377,
                             alt: 80,
@@ -2392,7 +2392,7 @@
 
                 // Aircraft body using a model-like composite of primitives
                 aircraftEntity = viewer.entities.add({
-                    name: "GDG Aircraft",
+                    name: "Test Aircraft",
                     position: Cesium.Cartesian3.fromDegrees(
                         ac.lon,
                         ac.lat,
@@ -2417,7 +2417,7 @@
                             ).withAlpha(0.5),
                     },
                     label: {
-                        text: "GDG-1",
+                        text: "AI-1",
                         font: "bold 11px Orbitron, sans-serif",
                         fillColor: Cesium.Color.CYAN,
                         outlineColor: Cesium.Color.BLACK,
